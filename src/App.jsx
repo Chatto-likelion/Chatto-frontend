@@ -1,0 +1,28 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import LandingPage from "./pages/LandingPage";
+import PlayPage from "./pages/PlayPage";
+import PlayChemiPage from "./pages/PlayChemiPage";
+import BusinessPage from "./pages/BusinessPage";
+import BusinessContrPage from "./pages/BusinessContrPage";
+import MyPage from "./pages/MyPage";
+import CreditsPage from "./pages/CreditsPage";
+import ResultPage from "./pages/ResultPage";
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/play" element={<PlayPage />} />
+        <Route path="/play/chemi" element={<PlayChemiPage />} />
+        <Route path="/business" element={<BusinessPage />} />
+        <Route path="/business/contr" element={<BusinessContrPage />} />
+        <Route path="/mypage" element={<MyPage />} />
+        <Route path="/credits" element={<CreditsPage />} />
+        <Route path="/result/:analysisId" element={<ResultPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;
