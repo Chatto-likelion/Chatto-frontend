@@ -1,7 +1,96 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "LINE Seed Sans KR";
+  src: url("/fonts/woff2/LINESeedKR-Rg.woff2") format("woff2"),
+    url("/fonts/woff/LINESeedKR-Rg.woff") format("woff");
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --color-primary: #6937b9; /* bg-primary 처럼 사용 */
+  --color-primary-light: #eadcff;
+  --color-primary-dark: #462c71;
+
+  --color-secondary: #fff787;
+  --color-secondary-light: #fff8de;
+  --color-secondary-dark: #e4b546;
+
+  --color-error: #cd0000;
+
+  --color-gray-1: #fafafa;
+  --color-gray-2: #f5f5f5;
+  --color-gray-3: #f0f0f0;
+  --color-gray-4: #d9d9d9;
+  --color-gray-5: #bfbfbf;
+  --color-gray-6: #8c8c8c;
+  --color-gray-7: #595959;
+  --color-gray-8: #434343;
+  --color-gray-9: #262626;
+  --color-gray-10: #1f1f1f;
+  --color-gray-11: #141414;
+
+  --text-h1: 92px; /* text-h1 처럼 사용 */
+  --text-h1--line-height: 112px;
+  --text-h1--font-weight: 100;
+
+  --text-h2: 60px;
+  --text-h2--line-height: 72px;
+  --text-h2--font-weight: 300;
+
+  --text-h3: 48px;
+  --text-h3--line-height: 56px;
+  --text-h3--font-weight: 300;
+
+  --text-h4: 34px;
+  --text-h4--line-height: 40px;
+  --text-h4--font-weight: 300;
+
+  --text-h5: 30px;
+  --text-h5--line-height: 36px;
+  --text-h5--font-weight: 300;
+
+  --text-h6: 24px;
+  --text-h6--line-height: 24px;
+  --text-h6--font-weight: 300;
+
+  --text-h7: 20px;
+  --text-h7--line-height: 24px;
+  --text-h7--font-weight: 300;
+
+  /* 서브타이틀 / 바디 */
+  --text-st1: 16px;
+  --text-st1--line-height: 24px;
+  --text-st1--font-weight: 300;
+
+  --text-st2: 14px;
+  --text-st2--line-height: 24px;
+  --text-st2--font-weight: 300;
+
+  --text-body1: 16px;
+  --text-body1--line-height: 24px;
+  --text-body1--font-weight: 300;
+
+  --text-body2: 14px;
+  --text-body2--line-height: 19px;
+  --text-body2--font-weight: 600;
+
+  --text-button: 14px;
+  --text-button--line-height: 16px;
+  --text-button--font-weight: 300;
+
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+  --text-caption--font-weight: 300;
+
+  --text-overline: 10px;
+  --text-overline--line-height: 14px;
+  --text-overline--font-weight: 300;
+}
+
 html,
 body {
-  @apply bg-white text-gray-900;
-  font-family: "Pretendard", sans-serif;
+  @apply text-black;
+  font-family: "LINE Seed Sans KR", "Pretendard", sans-serif;
 }
