@@ -7,6 +7,8 @@ import BusinessContrPage from "./pages/BusinessContrPage";
 import MyPage from "./pages/MyPage";
 import CreditsPage from "./pages/CreditsPage";
 import ResultPage from "./pages/ResultPage";
+import SignInPage from "./pages/SignInPage";
+import SignUpPage from "./pages/SignUpPage";
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/credits" element={<CreditsPage />} />
         <Route path="/result/:analysisId" element={<ResultPage />} />
+        <Route path="/signin" element={<SignInPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
       </Routes>
     </BrowserRouter>
   );
