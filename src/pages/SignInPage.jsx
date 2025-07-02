@@ -3,11 +3,13 @@ import Input from "../components/Input.jsx";
 import Button from "../components/Button.jsx";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext.jsx";
+import { useNavigate } from "react-router-dom";
 
 export default function SignInPage() {
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -17,6 +19,10 @@ export default function SignInPage() {
     login(userData);
 
     console.log("로그인됨:", userData);
+  };
+
+  const handleSignUp = () => {
+    navigate("/signup");
   };
 
   return (
@@ -47,9 +53,9 @@ export default function SignInPage() {
 
           <div className="flex justify-between text-sm mt-2">
             처음이신가요?
-            <a href="#" className="text-purple-600">
+            <button onClick={handleSignUp} className="text-purple-600">
               Signup Now
-            </a>
+            </button>
             <a href="#" className="text-purple-600">
               비밀번호를 잊으셨나요?
             </a>
