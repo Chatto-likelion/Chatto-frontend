@@ -1,7 +1,10 @@
 import { Header, ChatList, FileUpload, BigServices } from "@/components";
+import { postChat } from "@/apis/api";
 import { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function PlayChemiPage() {
+  const { user } = useAuth();
   const [selectedChatId, setSelectedChatId] = useState(null);
 
   const handleChatSelect = (chatId) => {
@@ -17,7 +20,7 @@ export default function PlayChemiPage() {
       {/* 메인 레이아웃 */}
       <div className="flex flex-1">
         {/* 왼쪽 사이드 */}
-        <aside className="w-64 p-4 space-y-6 bg-primary-dark border-r border-primary">
+        <aside className="w-70 p-4 space-y-6 bg-primary-dark border-r border-primary">
           {/* 업로드된 채팅 목록 */}
           <section>
             <h2 className="mb-2 font-semibold">업로드된 채팅</h2>
@@ -29,7 +32,12 @@ export default function PlayChemiPage() {
 
           {/* 대화 파일 첨부 */}
           <section>
-            <FileUpload />
+            <FileUpload
+              onUpload={(file) => {
+                // postChat(user.id, file);
+                postChat(1, file);
+              }}
+            />
           </section>
         </aside>
 

@@ -71,15 +71,6 @@ export const postChat = async (userId, file) => {
   }
 };
 
-export const downloadChat = async () => {
-  const response = await instanceWithToken.get("/play/chat/");
-  if (response.status === 200) {
-    return response.data;
-  } else {
-    throw new Error("채팅 목록 조회 실패");
-  }
-};
-
 export const deleteChat = async (chatId) => {
   if (USE_MOCK) {
     console.log("📦 목업 채팅 삭제 요청...");
