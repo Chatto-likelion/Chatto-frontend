@@ -25,7 +25,7 @@ export default function BusinessPage() {
           textColor="text-primary-dark"
           border="border border-2 border-primary-dark"
           icon={ChattoBusiness}
-          navigateTo="/play/business"
+          navigateTo="/business/part"
         />
         <ServiceCard 
           title="업무 기여도 분석"
@@ -39,7 +39,7 @@ export default function BusinessPage() {
           textColor="text-primary-dark"
           border="border border-2 border-primary-dark"
           icon={ChattoBusiness}
-          navigateTo="/play/some"
+          navigateTo="/business/contr"
         />
         <ServiceCard 
           bgColor="bg-primary-dark"
@@ -48,7 +48,7 @@ export default function BusinessPage() {
           title="더 많은 분석"
           description="그 외 다양한 분석을 체험하세요"
           icon={SearchMore}
-          navigateTo="/play/more"
+          navigateTo="/business/more"
         />
       </div>
       </div>
