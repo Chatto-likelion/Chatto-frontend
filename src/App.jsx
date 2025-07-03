@@ -10,6 +10,7 @@ import CreditsPage from "./pages/CreditsPage";
 import ResultPage from "./pages/ResultPage";
 import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
+import ForgetPasswordPage from "./pages/ForgetPasswordPage";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="/result/:analysisId" element={<ResultPage />} />
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/forget" element={<ForgetPasswordPage />} />
       </Routes>
     </BrowserRouter>
   );

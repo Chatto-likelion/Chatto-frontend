@@ -7,7 +7,7 @@ export default function PlayPage() {
   return (
     <div className="min-h-screen bg-primary-dark">
       <Header />
-      <div className="w-full px-60 py-25">
+      <div className="w-full px-60 py-40">
       <div className="flex mb-7 gap-2 text-primary-light items-end">
         <div className="text-h6">Chatto Play</div>
         <div className="text-body2">케미, 관계, 심리 그 밖의 재밌는 분석까지</div>

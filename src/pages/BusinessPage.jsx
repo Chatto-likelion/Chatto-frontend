@@ -7,7 +7,7 @@ export default function BusinessPage() {
   return (
     <div className="min-h-screen bg-white">
       <Header />
-      <div className="w-full px-60 py-52">
+      <div className="w-full px-60 py-66">
       <div className="flex mb-7 gap-2 text-primary-dark items-end">
         <div className="text-h6">Chatto Business</div>
         <div className="text-body2">참여도, 업무 기여도 등 다양한 분석 지표 제공</div>
