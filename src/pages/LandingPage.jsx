@@ -7,7 +7,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white">
       <Header />
-      <main className="flex items-center justify-center gap-16 py-24">
+      <main className="flex items-center justify-center gap-16 py-40">
         <div className="flex flex-col items-center w-165">
           <div className="flex items-end gap-8 mb-6">
             <h1 className="text-h1 text-primary-dark">Chatto</h1>
