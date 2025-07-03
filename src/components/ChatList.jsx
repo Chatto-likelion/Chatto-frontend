@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getChatList, deleteChat } from "@/apis/api";
+import { useAuth } from "../contexts/AuthContext.jsx";
 import * as Icons from "@/assets/svg";
 
 export default function ChatList({
@@ -10,13 +11,14 @@ export default function ChatList({
   setSelectedChatId,
   onUploaded,
 }) {
+  const { user } = useAuth();
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const loadChats = () => {
     setLoading(true);
-    getChatList()
+    getChatList(user.id)
       .then((data) => {
         setChats(data);
         setError(null);

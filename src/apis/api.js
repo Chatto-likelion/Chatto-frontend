@@ -1,6 +1,6 @@
 import { instance, instanceWithToken } from "./axios";
 
-const USE_MOCK = true; // 🚀 서버 붙이면 false로 바꾸기
+const USE_MOCK = false; // 🚀 서버 붙이면 false로 바꾸기
 /**
  * ✅ 인증 관련
  */
