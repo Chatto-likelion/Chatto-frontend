@@ -56,7 +56,7 @@ export default function ChatList({
 
   if (loading) {
     return (
-      <div className="w-53.5 h-51.25 pt-2 pl-3.75 pr-1.75 pb-3 flex flex-col overflow-y-auto border border-secondary-light rounded-lg">
+      <div className="w-full h-51.25 pt-2 pl-3.75 pr-1.75 pb-3 flex flex-col overflow-y-auto border border-secondary-light rounded-lg">
         <div className="w-47.5 gap-3 flex flex-col justify-between items-center">
           <p className="w-full text-st1 text-white text-center">
             업로드된 채팅
