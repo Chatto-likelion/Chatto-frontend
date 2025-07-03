@@ -25,7 +25,7 @@ export default function ServiceCard({
       <div className="flex flex-col w-full items-center gap-6">
         <h5 className="text-h5 font-bold">{title}</h5>
         <img src={icon} alt="플레이 아이콘 항목" className="w-25 h-25" />
-        <h7 className="text-h7 font-bold">{description}</h7>
+        <div className="text-h7 font-bold">{description}</div>
       </div>
     </div>
   );
