@@ -106,3 +106,13 @@ body {
 .bold {
   font-family: "LINE Seed Sans KR Bold", "Pretendard", sans-serif;
 }
+
+/* Chrome, Safari, Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Firefox */
+.scrollbar-hide {
+  scrollbar-width: none;
+}

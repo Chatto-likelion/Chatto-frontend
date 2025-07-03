@@ -147,7 +147,7 @@ export default function PlayChemiPage() {
 
         {/* 가운데 */}
         <main
-          className={`flex-1 overflow-y-auto max-h-240 pt-28 ${
+          className={`flex-1 overflow-y-auto max-h-240 scrollbar-hide pt-28 ${
             analysisResult ? "w-163.25 pr-18" : "w-157 pr-57"
           } flex flex-col justify-start items-center`}
         >
@@ -262,11 +262,11 @@ export default function PlayChemiPage() {
           )}
 
           <div
-              className={`w-full  ${
-                analysisResult ? "h-42" : "mt-22 h-full"
-              } border-2 border-primary-light rounded-lg p-3 pb-5 bg-primary-dark`}
-            >
-              {analysisResult ? <SmallServices /> : <BigServices />}
+            className={`w-full  ${
+              analysisResult ? "h-42" : "mt-22 h-full"
+            } border-2 border-primary-light rounded-lg p-3 pb-5 bg-primary-dark`}
+          >
+            {analysisResult ? <SmallServices /> : <BigServices />}
           </div>
         </div>
       </div>
