@@ -29,7 +29,7 @@ export const signup = async (data) => {
     console.error("회원가입 에러:", error);
     throw error;
   }
-}
+};
 
 // 로그인
 export const login = async (data) => {
@@ -89,7 +89,7 @@ export const postChat = async (userId, file) => {
       setTimeout(() => {
         console.log("✅ 목업 업로드 완료");
         resolve({
-          chat_id_play_chem: 123, // 예시 ID
+          chat_id_play_chem: 125, // 예시 ID
         });
       }, 800); // 0.8초 지연
     });
@@ -157,12 +157,6 @@ export const getChatList = async (userId) => {
             title: "멋사 잡담방",
             people_num: 23,
             uploaded_at: "2025-07-01T12:34:56",
-          },
-          {
-            chat_id_play_chem: 124,
-            title: "양재동 패거리",
-            people_num: 7,
-            uploaded_at: "2025-07-02T09:20:00",
           },
           {
             chat_id_play_chem: 125,
