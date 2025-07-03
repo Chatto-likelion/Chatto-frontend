@@ -3,11 +3,14 @@ import { useNavigate } from "react-router-dom";
 export default function PageCard({
   title,
   boldTitlePart,
-  description,
+  firstDescription,
+  secondDescription,
   buttonText,
+  icon,
   bgColor = "bg-white",
   textColor = "text-black",
   border = "",
+  buttonBorder = "",
   navigateTo,
 }) {
   const navigate = useNavigate();
@@ -20,23 +23,29 @@ export default function PageCard({
 
   return (
     <div
-      className={`flex flex-col justify-between p-6 rounded-md w-64 h-48 ${bgColor} ${textColor} ${border}`}
+      className={`flex flex-col justify-center items-center rounded-xl w-108 h-80 px-6 py-7 ${bgColor} ${textColor} ${border}`}
     >
-      <div>
-        <h3 className="text-lg font-bold mb-2">
+      <div className="flex flex-col gap-5 w-full items-center">
+        <h3 className="text-h3 mb-2">
           {title}
           {boldTitlePart && (
-            <span className="font-extrabold"> {boldTitlePart}</span>
+            <span className="text-h3 font-bold"> {boldTitlePart}</span>
           )}
         </h3>
-        <p className="text-sm">{description}</p>
+        <div className="flex gap-6">
+          <img src={icon} alt="랜딩페이지 아이콘" className="h-34" />
+          <div className="flex flex-col items-center justify-center">
+            <p className="text-body1">{firstDescription}</p>
+            <p className="text-body1">{secondDescription}</p>
+          </div>
+        </div>
+        <button
+          onClick={handleClick}
+          className={`text-button px-3 py-1.5 rounded-lg bg-white text-primary-dark ${buttonBorder}`}
+        >
+          {buttonText}
+        </button>
       </div>
-      <button
-        onClick={handleClick}
-        className="text-sm px-4 py-1 mt-4 rounded bg-white text-primary-dark self-start"
-      >
-        {buttonText}
-      </button>
     </div>
   );
 }
