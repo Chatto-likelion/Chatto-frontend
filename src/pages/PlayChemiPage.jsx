@@ -1,15 +1,32 @@
 import { Header, ChatList, FileUpload, BigServices } from "@/components";
 import { postChat } from "@/apis/api";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function PlayChemiPage() {
   const { user } = useAuth();
   const [selectedChatId, setSelectedChatId] = useState(null);
+  const chatListReloadRef = useRef();
 
   const handleChatSelect = (chatId) => {
     setSelectedChatId((prevId) => (prevId === chatId ? null : chatId));
     console.log("선택된 채팅:", chatId === selectedChatId ? "해제됨" : chatId);
+  };
+
+  const handleFileUpload = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      await postChat(1, formData);
+      console.log("파일 업로드 성공");
+
+      if (chatListReloadRef.current) {
+        chatListReloadRef.current();
+      }
+    } catch (error) {
+      console.error("파일 업로드 실패:", error);
+    }
   };
 
   return (
@@ -22,23 +39,18 @@ export default function PlayChemiPage() {
         {/* 왼쪽 사이드 */}
         <aside className="w-70 p-4 space-y-6 bg-primary-dark border-r border-primary">
           {/* 업로드된 채팅 목록 */}
-          <section>
-            <h2 className="mb-2 font-semibold">업로드된 채팅</h2>
+          <div className="gap-5 flex flex-col items-center justify-center">
             <ChatList
               onSelect={handleChatSelect}
-              selectedChat={selectedChatId}
+              selectedChatId={selectedChatId}
+              setSelectedChatId={setSelectedChatId}
+              onUpload={chatListReloadRef}
             />
-          </section>
 
-          {/* 대화 파일 첨부 */}
-          <section>
-            <FileUpload
-              onUpload={(file) => {
-                // postChat(user.id, file);
-                postChat(1, file);
-              }}
-            />
-          </section>
+            {/* 대화 파일 첨부 */}
+
+            <FileUpload onUpload={handleFileUpload} />
+          </div>
         </aside>
 
         {/* 가운데 메인 */}
