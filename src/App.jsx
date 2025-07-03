@@ -2,9 +2,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import PlayPage from "./pages/PlayPage";
 import PlayChemiPage from "./pages/PlayChemiPage";
+import PlayMyPage from "./pages/PlayMyPage";
 import BusinessPage from "./pages/BusinessPage";
 import BusinessContrPage from "./pages/BusinessContrPage";
-import MyPage from "./pages/MyPage";
+import BusinessMyPage from "./pages/BusinessMyPage";
 import CreditsPage from "./pages/CreditsPage";
 import ResultPage from "./pages/ResultPage";
 import SignInPage from "./pages/SignInPage";
@@ -17,9 +18,10 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/play" element={<PlayPage />} />
         <Route path="/play/chemi" element={<PlayChemiPage />} />
+        <Route path="/play/mypage" element={<PlayMyPage />} />
         <Route path="/business" element={<BusinessPage />} />
         <Route path="/business/contr" element={<BusinessContrPage />} />
-        <Route path="/mypage" element={<MyPage />} />
+        <Route path="/business/mypage" element={<BusinessMyPage />} />
         <Route path="/credits" element={<CreditsPage />} />
         <Route path="/result/:analysisId" element={<ResultPage />} />
         <Route path="/signin" element={<SignInPage />} />

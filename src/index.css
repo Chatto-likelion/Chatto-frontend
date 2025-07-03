@@ -8,6 +8,14 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "LINE Seed Sans KR Bold";
+  src: url("/fonts/woff2/LINESeedKR-Bd.woff2") format("woff2"),
+    url("/fonts/woff/LINESeedKR-Bd.woff") format("woff");
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --color-primary: #6937b9; /* bg-primary 처럼 사용 */
   --color-primary-light: #eadcff;
@@ -93,4 +101,8 @@ html,
 body {
   @apply text-black;
   font-family: "LINE Seed Sans KR", "Pretendard", sans-serif;
+}
+
+.bold {
+  font-family: "LINE Seed Sans KR Bold", "Pretendard", sans-serif;
 }
