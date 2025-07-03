@@ -2,6 +2,7 @@ import { Header, ChatList, FileUpload, BigServices } from "@/components";
 import { postChat } from "@/apis/api";
 import { useState, useRef } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import * as Icons from "@/assets/svg/index.js";
 
 export default function PlayChemiPage() {
   const { user } = useAuth();
@@ -30,16 +31,20 @@ export default function PlayChemiPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-primary-dark text-white">
+    <div className="flex flex-col justify-start items-center min-h-screen bg-primary-dark text-white">
       {/* 상단 헤더 */}
       <Header />
 
       {/* 메인 레이아웃 */}
-      <div className="pt-17 flex flex-1">
+      <div className="w-300 pt-23.5 flex flex-col justify-center items-center">
+        <div className="w-full mb-16 flex justify-start items-end gap-2 text-primary-light">
+          <p className="text-h6">Chatto Play</p>
+          <p className="text-body2">케미측정</p>
+        </div>
         {/* 왼쪽 사이드 */}
-        <aside className="w-70 p-4 space-y-6 bg-primary-dark border-r border-primary">
+        <div className="w-full flex justify-between items-end gap-2">
           {/* 업로드된 채팅 목록 */}
-          <div className="gap-5 flex flex-col items-center justify-center">
+          <div className="gap-5 pt-22 mr-60.5 flex flex-col items-center justify-center">
             <ChatList
               onSelect={handleChatSelect}
               selectedChatId={selectedChatId}
@@ -51,16 +56,13 @@ export default function PlayChemiPage() {
 
             <FileUpload onUpload={handleFileUpload} />
           </div>
-        </aside>
 
-        {/* 가운데 메인 */}
-        <main className="flex-1 p-8 flex flex-col items-center text-center">
-          <div className="max-w-lg space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-2">
-                우리의 케미는 얼마나 잘 맞을까?
-              </h2>
-              <p className="text-sm text-grayscale-2">
+          {/* 가운데 메인 */}
+          <main className="w-100 mr-57 flex flex-col justify-start items-center">
+            <Icons.ChemiIconFull className="mb-4" />
+            <div className="w-full flex flex-col items-center text-body2 text-center mb-21">
+              <p className="">우리의 케미는 얼마나 잘 맞을까?</p>
+              <p className="t">
                 주고받은 대화를 토대로 대화 참여자 간의 소통 궁합을
                 확인해보세요.
                 <br />말 속에 숨은 케미 지수를 한눈에 보여드립니다!
@@ -68,49 +70,66 @@ export default function PlayChemiPage() {
             </div>
 
             {/* 세부 정보 폼 */}
-            <div className="w-full p-4 bg-grayscale-10 rounded-lg space-y-2">
-              <h3 className="font-semibold mb-2">세부 정보 (Optional)</h3>
-              <div className="grid grid-cols-2 gap-2 text-left text-sm">
-                <label>
-                  분석 대상
-                  <select className="w-full mt-1 p-1 rounded bg-grayscale-9">
-                    <option>23명</option>
-                    <option>10명</option>
-                  </select>
-                </label>
-                <label>
-                  참여자 관계
-                  <select className="w-full mt-1 p-1 rounded bg-grayscale-9">
-                    <option>동아리 부원</option>
-                    <option>회사 동료</option>
-                  </select>
-                </label>
-                <label>
-                  대화 상황
-                  <select className="w-full mt-1 p-1 rounded bg-grayscale-9">
-                    <option>일상대화</option>
-                    <option>업무대화</option>
-                  </select>
-                </label>
-                <label>
-                  분석 기간
-                  <select className="w-full mt-1 p-1 rounded bg-grayscale-9">
-                    <option>처음부터</option>
-                    <option>최근 1개월</option>
-                  </select>
-                </label>
+            <div className="w-96 py-6.5 pl-11 pr-10 flex flex-col items-center border-2 border-primary-light rounded-lg">
+              <div className="mb-8 flex flex-col gap-1">
+                <div className="pl-1.5 gap-1 flex justify-center items-end">
+                  <span className="bold text-h6 text-white">세부 정보</span>{" "}
+                  <span className="text-caption text-gray-5">(Optional)</span>
+                </div>
+                <p className="text-caption text-white">
+                  더 자세한 분석을 위해 추가 정보를 설정합니다.
+                </p>
               </div>
-              <button className="mt-4 px-4 py-2 bg-secondary text-black rounded">
-                분석 시작
-              </button>
+              <div className="w-76 flex flex-col gap-3">
+                <div className="w-full gap-26 flex justify-end items-center">
+                  <p className="text-st1">분석대상 ⓘ</p>
+                  <div className="w-30.75 pr-3.25 flex justify-end items-center">
+                    <select className="text-end">
+                      <option>23명</option>
+                      <option>10명</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="w-full gap-26 flex justify-end items-center">
+                  <p className="text-st1">참여자 관계</p>
+                  <div className="w-30.75 pr-3.25 flex justify-end items-center">
+                    <select className="text-end">
+                      <option>동아리 부원</option>
+                      <option>회사 동료</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="w-full gap-26 flex justify-end items-center">
+                  <p className="text-st1">대화 상황</p>
+                  <div className="w-30.75 pr-3.25 flex justify-end items-center">
+                    <select className="text-end">
+                      <option>일상대화</option>
+                      <option>업무대화</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="w-full gap-26 flex justify-end items-center">
+                  <p className="text-st1">분석 기간</p>
+                  <div className="w-30.75 flex justify-end items-center">
+                    <select className="text-end">
+                      <option>처음부터</option>
+                      <option>최근 1개월</option>
+                    </select>
+                    <p className="w-3.25 text-st2 text-primary-light">~</p>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </main>
+            <button className="mt-4 px-4 py-2 bg-secondary text-black rounded">
+              분석 시작
+            </button>
+          </main>
 
-        {/* 오른쪽 사이드 */}
-        <aside className="w-64 p-4 bg-primary-dark border-l border-primary">
-          <BigServices />
-        </aside>
+          {/* 오른쪽 사이드 */}
+          <div className="w-29 h-140 border-2 border-primary-light p-4 bg-primary-dark">
+            <BigServices />
+          </div>
+        </div>
       </div>
     </div>
   );
