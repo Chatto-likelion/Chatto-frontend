@@ -1,7 +1,6 @@
-// src/components/UploadedChatList.jsx
-
 import { useState, useEffect } from "react";
 import { getChatList, deleteChat } from "@/apis/api";
+import useCurrentMode from "@/hooks/useCurrentMode";
 import * as Icons from "@/assets/svg";
 
 export default function ChatList({
@@ -13,6 +12,7 @@ export default function ChatList({
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const mode = useCurrentMode();
 
   const loadChats = () => {
     setLoading(true);
@@ -101,26 +101,40 @@ export default function ChatList({
                   <div className="w-full gap-0.75 flex justify-between items-center">
                     <button
                       onClick={() => onSelect?.(chat.chat_id_play_chem)}
-                      className={`w-45 h-7.25 text-body2 flex justify-between items-center px-3 py-2 rounded hover:bg-gray-5  ${
+                      className={`w-45 h-7.25 text-body2 flex justify-between items-center px-3 py-2 rounded hover:bg-gray-5
+                      ${
                         isSelected
-                          ? "bg-secondary-light text-primary-dark"
+                          ? mode === "business"
+                            ? "bg-primary-light text-primary-dark"
+                            : "bg-secondary-light text-primary-dark"
+                          : mode === "business"
+                          ? "border border-primary-dark text-primary opacity-80"
                           : "border border-secondary text-secondary-light opacity-80"
                       }`}
                     >
                       <div className="flex items-center gap-0.75">
                         <span>{chat.title}</span>
                         {isSelected && (
-                          <Icons.ArrowDown className="w-2 h-2 text-primary-dark" />
+                          <Icons.ArrowDown
+                            className={`w-2 h-2 ${
+                              mode === "business"
+                                ? "text-business-selected"
+                                : "text-primary-dark"
+                            }`}
+                          />
                         )}
                       </div>
                       <div className="flex items-center gap-0.5">
                         <Icons.Person
-                          className={`w-5.25 h-5.25 p-0.75
-                        ${
-                          isSelected
-                            ? "text-primary-dark"
-                            : "text-secondary-light"
-                        }`}
+                          className={`w-5.25 h-5.25 p-0.75 ${
+                            isSelected
+                              ? mode === "business"
+                                ? "text-business-selected"
+                                : "text-primary-dark"
+                              : mode === "business"
+                              ? "text-business"
+                              : "text-secondary-light"
+                          }`}
                         />
                         <span>{chat.people_num}</span>
                       </div>
@@ -131,8 +145,14 @@ export default function ChatList({
                     />
                   </div>
                   <div
-                    className={`pr-3 w-full text-secondary-dark text-overline text-right ${
-                      isSelected ? "opacity-100 mb-3.5" : "opacity-60"
+                    className={`pr-3 w-full text-overline text-right ${
+                      isSelected
+                        ? mode === "business"
+                          ? "text-business-date opacity-100 mb-3.5"
+                          : "text-secondary-dark opacity-100 mb-3.5"
+                        : mode === "business"
+                        ? "text-business-date opacity-60"
+                        : "text-secondary-dark opacity-60"
                     }`}
                   >
                     {isSelected ? (
