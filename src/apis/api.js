@@ -53,12 +53,15 @@ export const uploadFile = async (formData) => {
 };
 
 export const getFiles = async () => {
-  const response = await instanceWithToken.get("/files");
-  if (response.status === 200) {
-    return response.data;
-  } else {
-    console.log("파일 목록 조회 에러:", response);
-  }
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve([
+        { id: 1, title: "멋사 잡담방", participant_count: 23 },
+        { id: 2, title: "양재동 패거리", participant_count: 7 },
+        { id: 3, title: "준영이", participant_count: 2 },
+      ]);
+    }, 500);
+  });
 };
 
 export const deleteFile = async (fileId) => {
