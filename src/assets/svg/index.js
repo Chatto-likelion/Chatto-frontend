@@ -5,5 +5,8 @@ import Chatto from "./chatto.svg?react";
 import ArrowDown from "./ArrowDown.svg?react";
 import Person from "./Person.svg?react";
 import ChemiIconFull from "./ChemiIconFull.svg?react";
+import EyeOpened from "./eyeOpened.svg";
+import EyeClosed from "./eyeClosed.svg";
 
-export { X, FileUpload, SearchMore, Chatto, ArrowDown, Person, ChemiIconFull };
+export { X, FileUpload, SearchMore, Chatto, ArrowDown, Person, ChemiIconFull, EyeClosed, EyeOpened };
+
