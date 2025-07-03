@@ -80,79 +80,81 @@ export default function ChatList({
   }
 
   return (
-    <div className="w-53.5 pt-2 pl-3.75 pr-1.75 pb-3 flex flex-col overflow-y-auto border border-secondary-light rounded-lg">
+    <div className="w-full pt-2 pl-3.75 pr-1.75 pb-3 flex flex-col items-center overflow-y-auto border border-secondary-light rounded-lg">
       <div className="w-47.5 gap-3 flex flex-col justify-between items-center">
         <p className="w-full text-st1 text-white text-center">업로드된 채팅</p>
         <div className="w-full gap-0.5 flex flex-col items-center">
-          {chats.map((chat) => {
-            const isSelected = selectedChatId === chat.chat_id_play_chem;
-            const uploadedDate = new Date(chat.uploaded_at);
-            const now = new Date();
-            const diffTime = now - uploadedDate;
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+          {[...chats]
+            .sort((a, b) => new Date(b.uploaded_at) - new Date(a.uploaded_at))
+            .map((chat) => {
+              const isSelected = selectedChatId === chat.chat_id_play_chem;
+              const uploadedDate = new Date(chat.uploaded_at);
+              const now = new Date();
+              const diffTime = now - uploadedDate;
+              const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-            return (
-              <div
-                key={chat.chat_id_play_chem}
-                className="w-47.5 flex flex-col justify-center items-center"
-              >
-                <div className="w-full gap-0.75 flex justify-between items-center">
-                  <button
-                    onClick={() => onSelect?.(chat.chat_id_play_chem)}
-                    className={`w-45 h-7.25 text-body2 flex justify-between items-center px-3 py-2 rounded hover:bg-gray-5  ${
-                      isSelected
-                        ? "bg-secondary-light text-primary-dark"
-                        : "border border-secondary text-secondary-light opacity-80"
-                    }`}
-                  >
-                    <div className="flex items-center gap-0.75">
-                      <span>{chat.title}</span>
-                      {isSelected && (
-                        <Icons.ArrowDown className="w-2 h-2 text-primary-dark" />
-                      )}
-                    </div>
-                    <div className="flex items-center gap-0.5">
-                      <Icons.Person
-                        className={`w-5.25 h-5.25 p-0.75
+              return (
+                <div
+                  key={chat.chat_id_play_chem}
+                  className="w-47.5 flex flex-col justify-center items-center"
+                >
+                  <div className="w-full gap-0.75 flex justify-between items-center">
+                    <button
+                      onClick={() => onSelect?.(chat.chat_id_play_chem)}
+                      className={`w-45 h-7.25 text-body2 flex justify-between items-center px-3 py-2 rounded hover:bg-gray-5  ${
+                        isSelected
+                          ? "bg-secondary-light text-primary-dark"
+                          : "border border-secondary text-secondary-light opacity-80"
+                      }`}
+                    >
+                      <div className="flex items-center gap-0.75">
+                        <span>{chat.title}</span>
+                        {isSelected && (
+                          <Icons.ArrowDown className="w-2 h-2 text-primary-dark" />
+                        )}
+                      </div>
+                      <div className="flex items-center gap-0.5">
+                        <Icons.Person
+                          className={`w-5.25 h-5.25 p-0.75
                         ${
                           isSelected
                             ? "text-primary-dark"
                             : "text-secondary-light"
                         }`}
-                      />
-                      <span>{chat.people_num}</span>
-                    </div>
-                  </button>
-                  <Icons.X
-                    className="w-2 h-2 text-primary-light opacity-10 hover:opacity-100 cursor-pointer"
-                    onClick={() => handleDelete(chat.chat_id_play_chem)}
-                  />
+                        />
+                        <span>{chat.people_num}</span>
+                      </div>
+                    </button>
+                    <Icons.X
+                      className="w-2 h-2 text-primary-light opacity-10 hover:opacity-100 cursor-pointer"
+                      onClick={() => handleDelete(chat.chat_id_play_chem)}
+                    />
+                  </div>
+                  <div
+                    className={`pr-3 w-full text-secondary-dark text-overline text-right ${
+                      isSelected ? "opacity-100 mb-3.5" : "opacity-60"
+                    }`}
+                  >
+                    {isSelected ? (
+                      <>
+                        업로드 날짜:{" "}
+                        {uploadedDate.toLocaleDateString("ko-KR", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        })}
+                      </>
+                    ) : (
+                      <>
+                        {diffDays === 0
+                          ? "오늘 업로드"
+                          : `${diffDays}일 전 업로드`}
+                      </>
+                    )}
+                  </div>
                 </div>
-                <div
-                  className={`pr-3 w-full text-secondary-dark text-overline text-right ${
-                    isSelected ? "opacity-100 mb-3.5" : "opacity-60"
-                  }`}
-                >
-                  {isSelected ? (
-                    <>
-                      업로드 날짜:{" "}
-                      {uploadedDate.toLocaleDateString("ko-KR", {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                      })}
-                    </>
-                  ) : (
-                    <>
-                      {diffDays === 0
-                        ? "오늘 업로드"
-                        : `${diffDays}일 전 업로드`}
-                    </>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
         </div>
       </div>
     </div>
