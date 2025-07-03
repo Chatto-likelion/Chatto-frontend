@@ -121,19 +121,22 @@ export const getChatList = async (userId) => {
       setTimeout(() => {
         resolve([
           {
+            chat_id_play_chem: 123,
             title: "멋사 잡담방",
             people_num: 23,
-            uploaded_at: "2024-07-01T12:34:56",
+            uploaded_at: "2025-07-01T12:34:56",
           },
           {
+            chat_id_play_chem: 124,
             title: "양재동 패거리",
             people_num: 7,
-            uploaded_at: "2024-07-02T09:20:00",
+            uploaded_at: "2025-07-02T09:20:00",
           },
           {
+            chat_id_play_chem: 125,
             title: "준영이",
             people_num: 2,
-            uploaded_at: "2024-07-03T15:45:12",
+            uploaded_at: "2025-07-03T15:45:12",
           },
         ]);
       }, 500);

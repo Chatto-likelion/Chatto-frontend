@@ -1,18 +1,19 @@
 // src/components/UploadedChatList.jsx
 
 import { useState, useEffect } from "react";
-import { getFiles } from "@/apis/api";
+import { getChatList } from "@/apis/api";
+import { Button } from "@/components";
 
-export default function ChatList({ onSelect }) {
-  const [files, setFiles] = useState([]);
+export default function ChatList({ onSelect, selectedChat }) {
+  const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     setLoading(true);
-    getFiles()
+    getChatList()
       .then((data) => {
-        setFiles(data);
+        setChats(data);
       })
       .catch((err) => {
         console.error(err);
@@ -35,7 +36,7 @@ export default function ChatList({ onSelect }) {
     );
   }
 
-  if (files.length === 0) {
+  if (chats.length === 0) {
     return (
       <div className="p-4 text-gray-400 text-sm">업로드된 채팅이 없습니다.</div>
     );
@@ -43,18 +44,47 @@ export default function ChatList({ onSelect }) {
 
   return (
     <div className="space-y-2">
-      {files.map((file) => (
-        <button
-          key={file.id}
-          onClick={() => onSelect?.(file)}
-          className="w-full flex justify-between items-center px-3 py-2 rounded bg-grayscale-9 hover:bg-grayscale-8 text-white"
-        >
-          <span className="truncate">{file.title}</span>
-          <span className="text-sm text-grayscale-4">
-            {file.participant_count}명
-          </span>
-        </button>
-      ))}
+      {chats.map((chat) => {
+        const isSelected = selectedChat === chat.chat_id_play_chem;
+        const uploadedDate = new Date(chat.uploaded_at);
+        const now = new Date();
+        const diffTime = now - uploadedDate;
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+        return (
+          <div key={chat.chat_id_play_chem} className="w-full">
+            <button
+              onClick={() => onSelect?.(chat.chat_id_play_chem)}
+              className={`w-full flex justify-between items-center px-3 py-2 rounded hover:bg-grayscale-8 text-black ${
+                isSelected ? "bg-primary" : "bg-gray-2"
+              }`}
+            >
+              <span className="truncate">{chat.title}</span>
+              <span className="text-sm text-grayscale-4">
+                {chat.people_num}명
+              </span>
+            </button>
+            <div className="w-full text-secondary-dark text-overline text-right">
+              {isSelected ? (
+                <>
+                  업로드 날짜:{" "}
+                  {uploadedDate.toLocaleDateString("ko-KR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  })}
+                </>
+              ) : (
+                <>
+                  {diffDays === 0
+                    ? "오늘 업로드됨"
+                    : `${diffDays}일 전 업로드됨`}
+                </>
+              )}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

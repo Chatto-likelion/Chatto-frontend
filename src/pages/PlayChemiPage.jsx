@@ -1,13 +1,12 @@
 import { Header, ChatList, FileUpload, BigServices } from "@/components";
-
 import { useState } from "react";
 
 export default function PlayChemiPage() {
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedChatId, setSelectedChatId] = useState(null);
 
-  const handleFileSelect = (file) => {
-    setSelectedFile(file);
-    console.log("선택된 파일:", file);
+  const handleChatSelect = (chatId) => {
+    setSelectedChatId((prevId) => (prevId === chatId ? null : chatId));
+    console.log("선택된 채팅:", chatId === selectedChatId ? "해제됨" : chatId);
   };
 
   return (
@@ -22,7 +21,10 @@ export default function PlayChemiPage() {
           {/* 업로드된 채팅 목록 */}
           <section>
             <h2 className="mb-2 font-semibold">업로드된 채팅</h2>
-            <ChatList onSelect={handleFileSelect} />
+            <ChatList
+              onSelect={handleChatSelect}
+              selectedChat={selectedChatId}
+            />
           </section>
 
           {/* 대화 파일 첨부 */}
