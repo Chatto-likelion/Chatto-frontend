@@ -5,14 +5,14 @@ import ServiceCard from "../components/ServiceCard";
 
 export default function PlayPage() {
   return (
-    <div className="min-h-screen bg-primary-dark">
+    <div className="w-full flex justify-center min-h-screen bg-primary-dark">
       <Header />
-      <div className="w-full px-60 py-40">
+      <div className="w-full max-w-235.5 mx-4 py-40">
       <div className="flex mb-7 gap-2 text-primary-light items-end">
         <div className="text-h6">Chatto Play</div>
         <div className="text-body2">케미, 관계, 심리 그 밖의 재밌는 분석까지</div>
       </div>
-      <div className="grid grid-cols-3 gap-12">
+      <div className="grid grid-cols-3 gap-10.5">
         <ServiceCard 
           title="케미 측정"
           description="우리 얼마나 잘맞을까?"
