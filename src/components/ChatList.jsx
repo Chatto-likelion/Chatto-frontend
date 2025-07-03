@@ -56,7 +56,16 @@ export default function ChatList({
 
   if (loading) {
     return (
-      <div className="p-4 text-gray-300 text-sm">채팅 목록 불러오는 중...</div>
+      <div className="w-53.5 h-51.25 pt-2 pl-3.75 pr-1.75 pb-3 flex flex-col overflow-y-auto border border-secondary-light rounded-lg">
+        <div className="w-47.5 gap-3 flex flex-col justify-between items-center">
+          <p className="w-full text-st1 text-white text-center">
+            업로드된 채팅
+          </p>
+          <div className="p-4 text-gray-300 text-sm">
+            채팅 목록 불러오는 중...
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -102,7 +111,17 @@ export default function ChatList({
                         <Icons.ArrowDown className="w-2 h-2 text-primary-dark" />
                       )}
                     </div>
-                    <span>{chat.people_num}명</span>
+                    <div className="flex items-center gap-0.5">
+                      <Icons.Person
+                        className={`w-5.25 h-5.25 p-0.75
+                        ${
+                          isSelected
+                            ? "text-primary-dark"
+                            : "text-secondary-light"
+                        }`}
+                      />
+                      <span>{chat.people_num}</span>
+                    </div>
                   </button>
                   <Icons.X
                     className="w-2 h-2 text-primary-light opacity-10 hover:opacity-100 cursor-pointer"

@@ -3,5 +3,6 @@ import FileUpload from "./FileUpload.svg?react";
 import SearchMore from "./searchMore.svg";
 import Chatto from "./chatto.svg";
 import ArrowDown from "./ArrowDown.svg?react";
+import Person from "./Person.svg?react";
 
-export { X, FileUpload, SearchMore, Chatto, ArrowDown };
+export { X, FileUpload, SearchMore, Chatto, ArrowDown, Person };
