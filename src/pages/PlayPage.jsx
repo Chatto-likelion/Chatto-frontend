@@ -1,7 +1,14 @@
-import { Chemistry, Lovers, MBTI, Something, Statistics } from "../assets/png/PlayIcon";
+import {
+  Chemistry,
+  Lovers,
+  MBTI,
+  Something,
+  Statistics,
+} from "../assets/png/PlayIcon";
 import { SearchMore } from "../assets/svg";
 import Header from "../components/Header";
 import ServiceCard from "../components/ServiceCard";
+import * as Icons from "../assets/svg/index.js";
 
 export default function PlayPage() {
   return (
@@ -54,6 +61,7 @@ export default function PlayPage() {
         />
       </div>
       </div>
+      <Icons.Chatto className="w-18.75 h-29.75 text-primary-light fixed bottom-5 right-12" />
     </div>
   );
 }
