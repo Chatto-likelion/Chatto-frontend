@@ -160,10 +160,10 @@ export const getChatList = async (userId) => {
 
 export const postAnalyze = async (chatId, payload) => {
   if (USE_MOCK) {
-    console.log("📦 목업 분석 요청...", payload);
+    console.log("📦 [MOCK] 분석 요청:", { chatId, payload });
     return new Promise((resolve) => {
       setTimeout(() => {
-        console.log("✅ 목업 분석 완료");
+        console.log("✅ [MOCK] 분석 완료");
         resolve({
           result_id_play_chem: 999, // 예시 ID
         });
@@ -288,9 +288,9 @@ export const getAnalysisDetail = async (resultId) => {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({
-          content: "이것은 예시 분석 결과 내용입니다. 케미 지수: 78점.",
+          content: "이것은 예시 분석 결과 내용입니다. 화이팅!",
         });
-      }, 500);
+      }, 1000);
     });
   }
 

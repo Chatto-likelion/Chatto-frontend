@@ -18,6 +18,14 @@ export default function Header() {
     navigate("/");
   };
 
+  const handlePlayPage = () => {
+    navigate("/play");
+  };
+
+  const handleBusinessPage = () => {
+    navigate("/business");
+  };
+
   const handlePlayMyPage = () => {
     navigate("/play/mypage");
   };
@@ -46,7 +54,7 @@ export default function Header() {
         <button onClick={handleLanding} className="text-h4 text-primary-dark">
           Chatto
         </button>
-        {mode && (
+        {!mode && (
           <span className="text-st2 text-primary-dark">
             당신의 어떤 대화라도 분석해드릴게요
           </span>
@@ -95,9 +103,12 @@ export default function Header() {
           300C
         </button>
         {mode && (
-          <span className="bold text-h7 text-primary-dark">
+          <button
+            onClick={mode === "play" ? handleBusinessPage : handlePlayPage}
+            className="bold text-h7 text-primary-dark"
+          >
             {mode === "play" ? "Business" : "Play"}
-          </span>
+          </button>
         )}
         {user ? (
           <button onClick={logout} className="text-h7">

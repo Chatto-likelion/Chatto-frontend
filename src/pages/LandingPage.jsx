@@ -1,6 +1,6 @@
 import PageCard from "../components/PageCard";
 import Header from "../components/Header";
-import { Chatto } from "../assets/svg";
+import * as Icons from "@/assets/svg/index.js";
 import { ChattoBusiness, ChattoPlay } from "../assets/png/LandingIcon";
 
 export default function LandingPage() {
@@ -11,7 +11,7 @@ export default function LandingPage() {
         <div className="flex flex-col items-center w-165">
           <div className="flex items-end gap-8 mb-6">
             <h1 className="text-h1 text-primary-dark">Chatto</h1>
-            <img src={Chatto} alt="챗토" className="w-25 h-40" />
+            <Icons.Chatto className="w-25 h-40 text-primary-dark" />
           </div>
           <p className="text-h5 text-primary-dark font-bold">
             당신의 어떤 대화라도 분석해드릴게요
@@ -23,8 +23,8 @@ export default function LandingPage() {
             boldTitlePart="Play"
             description={
               <>
-                케미, 관계, 심리<br />
-                그 밖의 재밌는 분석까지
+                케미, 관계, 심리
+                <br />그 밖의 재밌는 분석까지
               </>
             }
             buttonText="지금 시작하기"
