@@ -23,10 +23,10 @@ export default function PlayChemiPage() {
         <aside className="w-70 p-4 space-y-6 bg-primary-dark border-r border-primary">
           {/* 업로드된 채팅 목록 */}
           <section>
-            <h2 className="mb-2 font-semibold">업로드된 채팅</h2>
             <ChatList
               onSelect={handleChatSelect}
-              selectedChat={selectedChatId}
+              selectedChatId={selectedChatId}
+              setSelectedChatId={setSelectedChatId}
             />
           </section>
 
