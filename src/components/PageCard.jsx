@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 export default function PageCard({
   title,
   boldTitlePart,
-  firstDescription,
-  secondDescription,
+  description,
   buttonText,
   icon,
   bgColor = "bg-white",
@@ -35,8 +34,7 @@ export default function PageCard({
         <div className="flex gap-6">
           <img src={icon} alt="랜딩페이지 아이콘" className="h-34" />
           <div className="flex flex-col items-center justify-center">
-            <p className="text-body1">{firstDescription}</p>
-            <p className="text-body1">{secondDescription}</p>
+            <p className="text-body1 text-center">{description}</p>
           </div>
         </div>
         <button
