@@ -18,7 +18,7 @@ export default function PlayChemiPage() {
       <Header />
 
       {/* 메인 레이아웃 */}
-      <div className="flex flex-1">
+      <div className="pt-17 flex flex-1">
         {/* 왼쪽 사이드 */}
         <aside className="w-70 p-4 space-y-6 bg-primary-dark border-r border-primary">
           {/* 업로드된 채팅 목록 */}

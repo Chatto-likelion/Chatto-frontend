@@ -1,9 +1,14 @@
 import { useAuth } from "../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import useCurrentMode from "@/hooks/useCurrentMode";
+import { useState } from "react";
 
 export default function Header() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const mode = useCurrentMode();
+  const { pathname } = useLocation();
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const handleSignIn = () => {
     navigate("/signin");
@@ -13,8 +18,12 @@ export default function Header() {
     navigate("/");
   };
 
-  const handleMyPage = () => {
-    navigate("/mypage");
+  const handlePlayMyPage = () => {
+    navigate("/play/mypage");
+  };
+
+  const handleBusinessMyPage = () => {
+    navigate("/business/mypage");
   };
 
   const handleCreditPage = () => {
@@ -22,26 +31,72 @@ export default function Header() {
   };
 
   return (
-    <header className="flex justify-between items-center h-10 px-8 bg-[#eadcff]">
-      <div className="flex items-center space-x-2">
-        <button
-          onClick={handleLanding}
-          className="text-[20px] font-bold text-[#000000]"
-        >
+    <header className="fixed top-0 left-0 w-full h-[68px] pt-5 pb-2 px-12 flex justify-between items-end shrink-0 bg-primary-light">
+      <div className="flex items-end gap-2">
+        <button onClick={handleLanding} className="text-h4 text-primary-dark">
           Chatto
         </button>
-        <span className="text-xs text-primarydark">
-          당신의 어떤 대화라도 분석해드릴게요
-        </span>
+        {mode && (
+          <span className="text-st2 text-primary-dark">
+            당신의 어떤 대화라도 분석해드릴게요
+          </span>
+        )}
       </div>
 
-      <nav className="flex items-center space-x-2 text-xs text-black">
-        <button onClick={handleMyPage}>My page</button>
-        <button onClick={handleCreditPage}>300C</button>
+      <nav className="pb-0.5 flex items-start gap-5 text-gray-7">
+        <div
+          className="relative"
+          onMouseEnter={() => setShowDropdown(true)}
+          onMouseLeave={() => setShowDropdown(false)}
+        >
+          <button
+            onClick={
+              mode === "play"
+                ? handlePlayMyPage
+                : mode === "business"
+                ? handleBusinessMyPage
+                : () => {}
+            }
+            className={`text-h7 ${
+              pathname.includes("mypage") ? "text-primary" : ""
+            }`}
+          >
+            My page
+          </button>
+
+          {showDropdown && mode === null && (
+            <div className="absolute top-full mt-0 left-[-45px] w-40 flex bg-white border border-grayscale-4 rounded shadow-lg z-10">
+              <button
+                onClick={handlePlayMyPage}
+                className="w-full px-3 py-2 text-center text-sm hover:bg-gray-2"
+              >
+                Play
+              </button>
+              <button
+                onClick={handleBusinessMyPage}
+                className="w-full px-3 py-2 text-center text-sm hover:bg-gray-2"
+              >
+                Business
+              </button>
+            </div>
+          )}
+        </div>
+        <button onClick={handleCreditPage} className="text-h7">
+          300C
+        </button>
+        {mode && (
+          <span className="bold text-h7 text-primary-dark">
+            {mode === "play" ? "Business" : "Play"}
+          </span>
+        )}
         {user ? (
-          <button onClick={logout}>Sign out</button>
+          <button onClick={logout} className="text-h7">
+            Sign out
+          </button>
         ) : (
-          <button onClick={handleSignIn}>Sign in</button>
+          <button onClick={handleSignIn} className="text-h7">
+            Sign in
+          </button>
         )}
       </nav>
     </header>
