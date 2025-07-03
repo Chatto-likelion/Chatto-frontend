@@ -88,8 +88,9 @@ export default function ChatList({
         <div className="w-full gap-0.5 flex flex-col items-center">
           {[...chats]
             .sort((a, b) => new Date(b.uploaded_at) - new Date(a.uploaded_at))
+            .slice(0, 3)
             .map((chat) => {
-              const isSelected = selectedChatId === chat.chat_id_play_chem;
+              const isSelected = selectedChatId === chat.id;
               const uploadedDate = new Date(chat.uploaded_at);
               const now = new Date();
               const diffTime = now - uploadedDate;
@@ -97,12 +98,12 @@ export default function ChatList({
 
               return (
                 <div
-                  key={chat.chat_id_play_chem}
+                  key={chat.id}
                   className="w-47.5 flex flex-col justify-center items-center"
                 >
                   <div className="w-full gap-0.75 flex justify-between items-center">
                     <button
-                      onClick={() => onSelect?.(chat.chat_id_play_chem)}
+                      onClick={() => onSelect?.(chat.id)}
                       className={`w-45 h-7.25 text-body2 flex justify-between items-center px-3 py-2 rounded hover:bg-gray-5  ${
                         isSelected
                           ? "bg-secondary-light text-primary-dark"
@@ -110,7 +111,7 @@ export default function ChatList({
                       }`}
                     >
                       <div className="flex items-center gap-0.75">
-                        <span>{chat.title}</span>
+                        <span>{chat.title.slice(0, 12)}</span>
                         {isSelected && (
                           <Icons.ArrowDown className="w-2 h-2 text-primary-dark" />
                         )}
@@ -129,7 +130,7 @@ export default function ChatList({
                     </button>
                     <Icons.X
                       className="w-2 h-2 text-primary-light opacity-10 hover:opacity-100 cursor-pointer"
-                      onClick={() => handleDelete(chat.chat_id_play_chem)}
+                      onClick={() => handleDelete(chat.id)}
                     />
                   </div>
                   <div
