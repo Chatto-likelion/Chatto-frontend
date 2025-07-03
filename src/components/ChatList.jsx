@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { getChatList } from "@/apis/api";
 import { Button } from "@/components";
+import * as Icons from "@/assets/svg";
 
 export default function ChatList({ onSelect, selectedChat }) {
   const [chats, setChats] = useState([]);
@@ -52,36 +53,43 @@ export default function ChatList({ onSelect, selectedChat }) {
         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
         return (
-          <div key={chat.chat_id_play_chem} className="w-full">
-            <button
-              onClick={() => onSelect?.(chat.chat_id_play_chem)}
-              className={`w-full flex justify-between items-center px-3 py-2 rounded hover:bg-grayscale-8 text-black ${
-                isSelected ? "bg-primary" : "bg-gray-2"
-              }`}
-            >
-              <span className="truncate">{chat.title}</span>
-              <span className="text-sm text-grayscale-4">
-                {chat.people_num}명
-              </span>
-            </button>
-            <div className="w-full text-secondary-dark text-overline text-right">
-              {isSelected ? (
-                <>
-                  업로드 날짜:{" "}
-                  {uploadedDate.toLocaleDateString("ko-KR", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                  })}
-                </>
-              ) : (
-                <>
-                  {diffDays === 0
-                    ? "오늘 업로드됨"
-                    : `${diffDays}일 전 업로드됨`}
-                </>
-              )}
+          <div
+            key={chat.chat_id_play_chem}
+            className="w-full flex justify-between items-center gap-1"
+          >
+            <div className="w-50 flex flex-col justify-center items-end">
+              <button
+                onClick={() => onSelect?.(chat.chat_id_play_chem)}
+                className={`w-full flex justify-between items-center px-3 py-2 rounded hover:bg-grayscale-8 text-black ${
+                  isSelected ? "bg-primary" : "bg-gray-2"
+                }`}
+              >
+                <span className="truncate">{chat.title}</span>
+                <span className="text-sm text-grayscale-4">
+                  {chat.people_num}명
+                </span>
+              </button>
+              <div
+                className={`w-full text-secondary-dark text-overline text-right
+              ${isSelected ? "opacity-100" : "opacity-60"}`}
+              >
+                {isSelected ? (
+                  <>
+                    업로드 날짜:{" "}
+                    {uploadedDate.toLocaleDateString("ko-KR", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                    })}
+                  </>
+                ) : (
+                  <>
+                    {diffDays === 0 ? "오늘 업로드" : `${diffDays}일 전 업로드`}
+                  </>
+                )}
+              </div>
             </div>
+            <Icons.X className="w-6 h-6 pb-3 text-primary-light opacity-10 hover:opacity-100" />
           </div>
         );
       })}
