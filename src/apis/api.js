@@ -7,12 +7,27 @@ const USE_MOCK = true; // 🚀 서버 붙이면 false로 바꾸기
 
 // 로그인
 export const login = async (data) => {
-  const response = await instance.post("/login", data);
-  if (response.status === 200) {
-    console.log("로그인 성공");
-    window.location.href = "/";
-  } else {
-    console.log("로그인 에러:", response);
+  try {
+    const response = await instance.post("/account/login/", {
+      username: data.username,
+      password: data.password,
+    });
+
+    if (response.status === 200) {
+      console.log("로그인 성공", response.data);
+      return response.data;
+    }
+  } catch (error) {
+    if (error.response) {
+      if (error.response.status === 400) {
+        throw new Error("아이디 또는 비밀번호가 올바르지 않습니다.");
+      }
+      if (error.response.status === 404) {
+        throw new Error("사용자를 찾을 수 없습니다.");
+      }
+    }
+    console.error("로그인 에러: ", error);
+    throw error;
   }
 };
 

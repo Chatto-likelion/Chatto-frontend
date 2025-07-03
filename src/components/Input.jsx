@@ -1,11 +1,14 @@
-export default function Input({ type = "text", placeholder, value, onChange }) {
+export default function Input({ type = "text", placeholder, value, onChange, suffix = null }) {
   return (
-    <input
-      type={type}
-      placeholder={placeholder}
-      value={value}
-      onChange={onChange}
-      className="w-[600px] h-8 border-b border-[#8C8C8C] text-[14px] focus:outline-none focus:border-[#6937b9]"
-    />
+    <div className="flex w-150 border-b border-gray-6 focus-within:border-primary-dark">
+      <input
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        className="w-150 h-8 text-body1 focus:outline-none"
+      />
+      {suffix && <div className="flex-shrink-0 px-4">{suffix}</div>}
+    </div>
   );
 }
