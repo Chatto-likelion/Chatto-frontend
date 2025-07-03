@@ -15,7 +15,7 @@ export default function FileUpload({ onUpload }) {
   return (
     <div
       {...getRootProps()}
-      className={`w-53.5 px-4.25 pt-5.25 pb-8.25 border border-secondary-light rounded-lg text-white text-center cursor-pointer transition ${
+      className={`w-full px-4.25 pt-5.25 pb-8.25 border border-secondary-light rounded-lg text-white text-center cursor-pointer transition ${
         isDragActive ? "bg-primary-dark/40" : "bg-primary-dark"
       }`}
     >

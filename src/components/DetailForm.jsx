@@ -22,7 +22,7 @@ export default function DetailForm({
         <p className="">분석대상 ⓘ</p>
         <div className={`${w} pr-3.25 flex justify-end items-center`}>
           <select
-            className="text-end"
+            className={`${text} text-end`}
             value={peopleNum}
             onChange={(e) => setPeopleNum(e.target.value)}
           >
@@ -35,7 +35,7 @@ export default function DetailForm({
         <p className="">참여자 관계</p>
         <div className={`${w} pr-3.25 flex justify-end items-center`}>
           <select
-            className="text-end"
+            className={`${text} text-end`}
             value={relation}
             onChange={(e) => setRelation(e.target.value)}
           >
@@ -48,7 +48,7 @@ export default function DetailForm({
         <p className="">대화 상황</p>
         <div className={`${w} pr-3.25 flex justify-end items-center`}>
           <select
-            className="text-end"
+            className={`${text} text-end`}
             value={situation}
             onChange={(e) => setSituation(e.target.value)}
           >
@@ -61,7 +61,7 @@ export default function DetailForm({
         <p className="">분석 기간</p>
         <div className={`${w} flex justify-end items-center`}>
           <select
-            className="text-end"
+            className={`${text} text-end`}
             value={startPeriod}
             onChange={(e) => setStartPeriod(e.target.value)}
           >
@@ -74,7 +74,7 @@ export default function DetailForm({
       <div className={`w-full ${gap} flex justify-end items-center`}>
         <div className={`${w} pr-3.25 flex justify-end items-center`}>
           <select
-            className="text-end"
+            className={`${text} text-end`}
             value={endPeriod}
             onChange={(e) => setEndPeriod(e.target.value)}
           >

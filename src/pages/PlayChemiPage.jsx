@@ -103,9 +103,13 @@ export default function PlayChemiPage() {
           <p className="text-body2">케미측정</p>
         </div>
 
-        <div className="w-full flex max-h-120 justify-between items-start gap-2">
+        <div className="w-full flex max-h-120 justify-between items-start">
           {/* 왼쪽 */}
-          <div className="gap-5 pt-22 mr-60.5 flex flex-col items-center justify-center">
+          <div
+            className={`gap-5 pt-22 ${
+              analysisResult ? "w-61.5 mr-34.5" : "w-53.5 mr-60.5"
+            } flex flex-col items-center justify-center`}
+          >
             <ChatList
               onSelect={handleChatSelect}
               selectedChatId={selectedChatId}
@@ -119,7 +123,7 @@ export default function PlayChemiPage() {
           {/* 가운데 */}
           <main
             className={` overflow-y-auto max-h-200 ${
-              analysisResult ? "w-139.75 pr-39.75" : "w-157 pr-57"
+              analysisResult ? "w-163.25 pr-18" : "w-157 pr-57"
             } flex flex-col justify-start items-center`}
           >
             {!loading && !analysisResult && (
@@ -179,7 +183,7 @@ export default function PlayChemiPage() {
             {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
             {analysisResult && (
               <div className="mt-22 w-full flex flex-col items-center gap-6">
-                <div className="w-full flex flex-col gap-4 p-6 border border-secondary rounded-lg bg-primary-dark text-left">
+                <div className="w-full flex flex-col gap-4 p-6 text-left">
                   <div className="flex justify-between">
                     <div className="flex flex-col">
                       <span className="text-st1 text-white">케미 점수</span>
@@ -196,7 +200,7 @@ export default function PlayChemiPage() {
                   </div>
                 </div>
 
-                <div className="w-96 h-200 p-4 bg-grayscale-10 border border-secondary rounded-lg text-body2 text-white whitespace-pre-line">
+                <div className="w-full h-200 p-4 bg-grayscale-10 border border-secondary rounded-lg text-body2 text-white whitespace-pre-line">
                   {analysisResult.content}
                 </div>
               </div>
