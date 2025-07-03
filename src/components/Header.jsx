@@ -40,28 +40,34 @@ export default function Header() {
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full h-[70px] pt-5 pb-2 px-12 flex justify-between items-end shrink-0 bg-primary-light
+      className={`fixed top-0 left-0 w-full h-[70px] pt-5 pb-2 px-12 flex justify-between items-end shrink-0 
         ${
           mode === "play"
-            ? "border-b-2 border-primary"
+            ? "border-b-2 border-primary bg-primary-light"
             : mode === "business"
-            ? "border-b-2 border-primary-light"
-            : ""
+            ? "border-b-2 border-primary-light bg-primary-dark"
+            : "bg-primary-light"
         }
       }`}
     >
-      <div className="flex items-end gap-2">
-        <button onClick={handleLanding} className="text-h4 text-primary-dark">
+      <div
+        className={`flex items-end gap-2  ${
+          mode === "business" ? "text-primary-light" : "text-primary-dark"
+        }`}
+      >
+        <button onClick={handleLanding} className="text-h4">
           Chatto
         </button>
         {!mode && (
-          <span className="text-st2 text-primary-dark">
-            당신의 어떤 대화라도 분석해드릴게요
-          </span>
+          <span className="text-st2">당신의 어떤 대화라도 분석해드릴게요</span>
         )}
       </div>
 
-      <nav className="pb-0.5 flex items-start gap-5 text-gray-7">
+      <nav
+        className={`pb-0.5 flex items-start gap-5 ${
+          mode === "business" ? "text-gray-3" : "text-gray-7"
+        }`}
+      >
         <div
           className="relative"
           onMouseEnter={() => setShowDropdown(true)}
@@ -102,12 +108,20 @@ export default function Header() {
         <button onClick={handleCreditPage} className="text-h7">
           300C
         </button>
-        {mode && (
+        {mode === "play" && (
           <button
-            onClick={mode === "play" ? handleBusinessPage : handlePlayPage}
+            onClick={handleBusinessPage}
             className="bold text-h7 text-primary-dark"
           >
-            {mode === "play" ? "Business" : "Play"}
+            Business
+          </button>
+        )}
+        {mode === "business" && (
+          <button
+            onClick={handlePlayPage}
+            className="bold text-h7 text-primary-light"
+          >
+            Play
           </button>
         )}
         {user ? (

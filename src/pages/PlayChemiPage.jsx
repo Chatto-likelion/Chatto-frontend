@@ -103,7 +103,7 @@ export default function PlayChemiPage() {
           <p className="text-body2">케미측정</p>
         </div>
 
-        <div className="w-full flex max-h-120 justify-between items-start">
+        <div className="w-full flex max-h-120 min-h-screen justify-between items-start">
           {/* 왼쪽 */}
           <div
             className={`gap-5 pt-22 ${
