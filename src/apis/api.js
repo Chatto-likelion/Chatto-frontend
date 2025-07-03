@@ -5,6 +5,32 @@ const USE_MOCK = true; // 🚀 서버 붙이면 false로 바꾸기
  * ✅ 인증 관련
  */
 
+// 회원가입
+export const signup = async (data) => {
+  try {
+    const response = await instance.post("/account/signup/", {
+      username: data.username,
+      phone: data.phone,
+      email: data.email,
+      verf_num: data.verf_num,
+      password: data.password,
+      password_confirm: data.password_confirm,
+    });
+
+    if (response.status === 201) {
+      return response.data;
+    }
+  } catch (error) {
+    if (error.response) {
+      if (error.response.status === 400) {
+        throw new Error("입력값이 올바르지 않습니다.");
+      }
+    }
+    console.error("회원가입 에러:", error);
+    throw error;
+  }
+}
+
 // 로그인
 export const login = async (data) => {
   try {
