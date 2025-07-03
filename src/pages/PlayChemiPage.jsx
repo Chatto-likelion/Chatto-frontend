@@ -10,6 +10,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import * as Icons from "@/assets/svg/index.js";
+import SmallServices from "../components/SmallServices";
 
 export default function PlayChemiPage() {
   const { user } = useAuth();
@@ -240,10 +241,10 @@ export default function PlayChemiPage() {
 
             <div
               className={`w-full  ${
-                analysisResult ? "h-30" : "mt-22 h-120"
-              } border-2 border-primary-light rounded-lg p-4 bg-primary-dark`}
+                analysisResult ? "h-42" : "mt-22 h-full"
+              } border-2 border-primary-light rounded-lg p-3 pb-5 bg-primary-dark`}
             >
-              <BigServices />
+              {analysisResult ? <SmallServices /> : <BigServices />}
             </div>
           </div>
         </div>
