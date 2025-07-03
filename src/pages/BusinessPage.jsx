@@ -1,3 +1,57 @@
+import { ChattoBusiness } from "../assets/png/LandingIcon";
+import { SearchMore } from "../assets/svg";
+import Header from "../components/Header";
+import ServiceCard from "../components/ServiceCard";
+
 export default function BusinessPage() {
-  return <div>Business Page</div>;
+  return (
+    <div className="min-h-screen bg-white">
+      <Header />
+      <div className="w-full px-60 py-52">
+      <div className="flex mb-7 gap-2 text-primary-dark items-end">
+        <div className="text-h6">Chatto Business</div>
+        <div className="text-body2">참여도, 업무 기여도 등 다양한 분석 지표 제공</div>
+      </div>
+      <div className="grid grid-cols-3 gap-12">
+        <ServiceCard 
+          title="대화 참여도 분석"
+          description={
+            <>
+              구성원의 대화 참여율, <br />
+              응답률을 분석합니다.
+            </>
+          }
+          bgColor="bg-white"
+          textColor="text-primary-dark"
+          border="border border-2 border-primary-dark"
+          icon={ChattoBusiness}
+          navigateTo="/business/part"
+        />
+        <ServiceCard 
+          title="업무 기여도 분석"
+          description={
+            <>
+              메신저 내용을 바탕으로 <br />
+              업무 기여도를 분석합니다.
+            </>
+          }
+          bgColor="bg-white"
+          textColor="text-primary-dark"
+          border="border border-2 border-primary-dark"
+          icon={ChattoBusiness}
+          navigateTo="/business/contr"
+        />
+        <ServiceCard 
+          bgColor="bg-primary-dark"
+          textColor="text-gray-2"
+          border="border border-2 border-gray-2"
+          title="더 많은 분석"
+          description="그 외 다양한 분석을 체험하세요"
+          icon={SearchMore}
+          navigateTo="/business/more"
+        />
+      </div>
+      </div>
+    </div>
+  );
 }

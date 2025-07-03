@@ -21,8 +21,12 @@ export default function LandingPage() {
           <PageCard
             title="Chatto"
             boldTitlePart="Play"
-            firstDescription="케미, 관계, 심리"
-            secondDescription="그 밖의 재밌는 분석까지"
+            description={
+              <>
+                케미, 관계, 심리<br />
+                그 밖의 재밌는 분석까지
+              </>
+            }
             buttonText="지금 시작하기"
             bgColor="bg-primary-dark"
             textColor="text-white"
@@ -32,8 +36,12 @@ export default function LandingPage() {
           <PageCard
             title="Chatto"
             boldTitlePart="Business"
-            firstDescription="참여도, 업무 기여도 등"
-            secondDescription="다양한 분석 지표 제공"
+            description={
+              <>
+                참여도, 업무 기여도 등<br />
+                다양한 분석 지표 제공
+              </>
+            }
             buttonText="지금 시작하기"
             border="border border-2 border-primary-dark"
             textColor="text-primary-dark"
