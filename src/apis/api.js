@@ -1,6 +1,6 @@
 import { instance, instanceWithToken } from "./axios";
 
-const USE_MOCK = true; // 🚀 서버 붙이면 false로 바꾸기
+const USE_MOCK = false; // 🚀 서버 붙이면 false로 바꾸기
 /**
  * ✅ 인증 관련
  */
@@ -176,9 +176,7 @@ export const getChatList = async (userId) => {
   }
 
   try {
-    const response = await instanceWithToken.get(`/play/chats/${userId}/`, {
-      // params: { user_id: userId },
-    });
+    const response = await instanceWithToken.get(`/play/chats/${userId}/`);
 
     if (response.status === 200) {
       return response.data; // 배열
