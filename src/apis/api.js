@@ -70,7 +70,7 @@ export const logout = async () => {
 
 // 현재 로그인 사용자 정보 조회
 export const getMe = async () => {
-  const response = await instanceWithToken.get("/me");
+  const response = await instance.get("/me");
   if (response.status === 200) {
     return response.data;
   } else {
@@ -99,11 +99,11 @@ export const postChat = async (userId, file) => {
   formData.append("user_id", userId);
   formData.append("file", file);
 
-  const response = await instanceWithToken.post("/play/chats/", formData, {
+  const response = await instance.post("/play/chats/", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
 
-  if (response.status === 200) {
+  if (response.status === 201) {
     console.log("파일 업로드 성공:", response.data);
     return response.data; // { chat_id_play_chem: integer }
   } else {
@@ -124,7 +124,7 @@ export const deleteChat = async (chatId) => {
   }
 
   try {
-    const response = await instanceWithToken.delete(`/play/chats/${chatId}/delete`);
+    const response = await instance.delete(`/play/chats/${chatId}/delete/`);
 
     if (response.status === 204) {
       console.log("채팅 삭제 성공");
@@ -170,7 +170,7 @@ export const getChatList = async (userId) => {
   }
 
   try {
-    const response = await instanceWithToken.get(`/play/chats/${userId}/`);
+    const response = await instance.get(`/play/chats/${userId}/`);
 
     if (response.status === 200) {
       return response.data; // 배열
@@ -205,12 +205,12 @@ export const postAnalyze = async (chatId, payload) => {
   }
 
   try {
-    const response = await instanceWithToken.post(
+    const response = await instance.post(
       `/play/chats/${chatId}/analyze/`,
       payload
     );
 
-    if (response.status === 200) {
+    if (response.status === 201) {
       console.log("분석 성공:", response.data);
       return response.data; // { result_id_play_chem }
     } else {
@@ -242,9 +242,7 @@ export const saveAnalysis = async (resultId) => {
   }
 
   try {
-    const response = await instanceWithToken.post(
-      `/play/analysis/${resultId}/save/`
-    );
+    const response = await instance.post(`/play/analysis/${resultId}/save/`);
 
     if (response.status === 204) {
       console.log("결과 저장 성공");
@@ -293,7 +291,7 @@ export const getAnalysisList = async (userId) => {
   }
 
   try {
-    const response = await instanceWithToken.get(`/play/analysis/${userId}`, {
+    const response = await instance.get(`/play/analysis/${userId}`, {
       // params: { user_id: userId },
     });
 
@@ -328,7 +326,7 @@ export const getAnalysisDetail = async (resultId) => {
   }
 
   try {
-    const response = await instanceWithToken.get(`/play/analysis/${resultId}/detail`);
+    const response = await instance.get(`/play/analysis/${resultId}/detail/`);
 
     if (response.status === 200) {
       return response.data; // { content }
@@ -361,9 +359,7 @@ export const deleteAnalysis = async (resultId) => {
   }
 
   try {
-    const response = await instanceWithToken.delete(
-      `/play/analysis/${resultId}/detail`
-    );
+    const response = await instance.delete(`/play/analysis/${resultId}/detail`);
 
     if (response.status === 204) {
       console.log("분석 결과 삭제 성공");
@@ -385,13 +381,10 @@ export const deleteAnalysis = async (resultId) => {
   }
 };
 
-
-
-
 /**
  * ✅ 파일 업로드 및 관리
  */
-
+// 파일 업로드
 export const postChat_Bus = async (userId, file) => {
   if (USE_MOCK) {
     console.log("📦 목업 파일 업로드 중...");
@@ -399,9 +392,9 @@ export const postChat_Bus = async (userId, file) => {
       setTimeout(() => {
         console.log("✅ 목업 업로드 완료");
         resolve({
-          chat_id_play_chem: 123, // 예시 ID
+          chat_id_play_chem: 123,
         });
-      }, 800); // 0.8초 지연
+      }, 800);
     });
   }
 
@@ -409,19 +402,19 @@ export const postChat_Bus = async (userId, file) => {
   formData.append("user_id", userId);
   formData.append("file", file);
 
-  const response = await instanceWithToken.post("/business/chat/", formData, {
+  const response = await instance.post("/business/chat/", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
 
-  if (response.status === 200) {
+  if (response.status === 201) {
     console.log("파일 업로드 성공:", response.data);
-    return response.data; // { chat_id_play_chem: integer }
+    return response.data;
   } else {
-    console.log("파일 업로드 에러:", response);
     throw new Error("파일 업로드 실패");
   }
 };
 
+// 채팅 삭제
 export const deleteChat_Bus = async (chatId) => {
   if (USE_MOCK) {
     console.log("📦 목업 채팅 삭제 요청...");
@@ -433,30 +426,16 @@ export const deleteChat_Bus = async (chatId) => {
     });
   }
 
-  try {
-    const response = await instanceWithToken.delete(`/business/chat/${chatId}/delete`);
+  const response = await instance.delete(`/business/chat/${chatId}/delete/`);
 
-    if (response.status === 204) {
-      console.log("채팅 삭제 성공");
-      return;
-    } else {
-      console.error("알 수 없는 응답:", response);
-      throw new Error("알 수 없는 응답 상태");
-    }
-  } catch (error) {
-    if (error.response) {
-      if (error.response.status === 400) {
-        throw new Error("잘못된 요청입니다. (400)");
-      }
-      if (error.response.status === 404) {
-        throw new Error("파일을 찾을 수 없습니다. (404)");
-      }
-    }
-    console.error("삭제 에러:", error);
-    throw error;
+  if (response.status === 204) {
+    console.log("채팅 삭제 성공");
+  } else {
+    throw new Error("삭제 실패");
   }
 };
 
+// 채팅 목록 조회
 export const getChatList_Bus = async (userId) => {
   if (USE_MOCK) {
     return new Promise((resolve) => {
@@ -474,41 +453,21 @@ export const getChatList_Bus = async (userId) => {
             people_num: 7,
             uploaded_at: "2025-07-02T09:20:00",
           },
-          {
-            chat_id_play_chem: 125,
-            title: "준영이",
-            people_num: 2,
-            uploaded_at: "2025-07-03T15:45:12",
-          },
         ]);
       }, 500);
     });
   }
 
-  try {
-    const response = await instanceWithToken.get(`/business/chat/${userId}`, {
-      // params: { user_id: userId },
-    });
+  const response = await instance.get(`/business/chat/${userId}/`);
 
-    if (response.status === 200) {
-      return response.data; // 배열
-    } else {
-      throw new Error("알 수 없는 응답 상태");
-    }
-  } catch (error) {
-    if (error.response) {
-      if (error.response.status === 400) {
-        throw new Error("잘못된 요청입니다. (400)");
-      }
-      if (error.response.status === 404) {
-        throw new Error("파일을 찾을 수 없습니다. (404)");
-      }
-    }
-    console.error("목록 조회 에러:", error);
-    throw error;
+  if (response.status === 200) {
+    return response.data;
+  } else {
+    throw new Error("목록 조회 실패");
   }
 };
 
+// 분석 요청
 export const postAnalyze_Bus = async (chatId, payload) => {
   if (USE_MOCK) {
     console.log("📦 목업 분석 요청...", payload);
@@ -516,38 +475,26 @@ export const postAnalyze_Bus = async (chatId, payload) => {
       setTimeout(() => {
         console.log("✅ 목업 분석 완료");
         resolve({
-          result_id_play_chem: 999, // 예시 ID
+          result_id_play_chem: 999,
         });
       }, 1000);
     });
   }
 
-  try {
-    const response = await instanceWithToken.post(
-      `/business/chat/${chatId}/analyze/`,
-      payload
-    );
+  const response = await instance.post(
+    `/business/chat/${chatId}/analyze/`,
+    payload
+  );
 
-    if (response.status === 200) {
-      console.log("분석 성공:", response.data);
-      return response.data; // { result_id_play_chem }
-    } else {
-      throw new Error("알 수 없는 응답 상태");
-    }
-  } catch (error) {
-    if (error.response) {
-      if (error.response.status === 400) {
-        throw new Error("잘못된 요청입니다. (400)");
-      }
-      if (error.response.status === 404) {
-        throw new Error("채팅을 찾을 수 없습니다. (404)");
-      }
-    }
-    console.error("분석 요청 에러:", error);
-    throw error;
+  if (response.status === 201) {
+    console.log("분석 성공:", response.data);
+    return response.data;
+  } else {
+    throw new Error("분석 실패");
   }
 };
 
+// 분석 결과 저장
 export const saveAnalysis_Bus = async (resultId) => {
   if (USE_MOCK) {
     console.log("📦 목업 결과 저장 요청...");
@@ -559,35 +506,16 @@ export const saveAnalysis_Bus = async (resultId) => {
     });
   }
 
-  try {
-    const response = await instanceWithToken.post(
-      `/business/analysis/${resultId}/save/`
-    );
+  const response = await instance.post(`/business/analysis/${resultId}/save/`);
 
-    if (response.status === 204) {
-      console.log("결과 저장 성공");
-      return;
-    } else {
-      throw new Error("알 수 없는 응답 상태");
-    }
-  } catch (error) {
-    if (error.response) {
-      if (error.response.status === 400) {
-        throw new Error("잘못된 요청입니다. (400)");
-      }
-      if (error.response.status === 404) {
-        throw new Error("분석 결과를 찾을 수 없습니다. (404)");
-      }
-    }
-    console.error("결과 저장 에러:", error);
-    throw error;
+  if (response.status === 204) {
+    console.log("결과 저장 성공");
+  } else {
+    throw new Error("저장 실패");
   }
 };
 
-/**
- * ✅ 분석 결과
- */
-
+// 분석 목록 조회
 export const getAnalysisList_Bus = async (userId) => {
   if (USE_MOCK) {
     return new Promise((resolve) => {
@@ -595,78 +523,46 @@ export const getAnalysisList_Bus = async (userId) => {
         resolve([
           {
             analysis_date: "2024-07-01T12:00:00",
-            title: "멋사 잡담방 케미 분석",
+            title: "업무 대화 분석",
             analysis_type: "케미측정",
-            analysis_result: "케미지수 78점",
-          },
-          {
-            analysis_date: "2024-07-02T15:30:00",
-            title: "양재동 패거리 케미 분석",
-            analysis_type: "케미측정",
-            analysis_result: "케미지수 82점",
+            analysis_result: "케미지수 80점",
           },
         ]);
       }, 500);
     });
   }
 
-  try {
-    const response = await instanceWithToken.get(`/business/analysis/${userId}/}`, {
-      // params: { user_id: userId },
-    });
+  const response = await instance.get(`/business/analysis/${userId}/`);
 
-    if (response.status === 200) {
-      return response.data;
-    } else {
-      throw new Error("알 수 없는 응답 상태");
-    }
-  } catch (error) {
-    if (error.response) {
-      if (error.response.status === 400) {
-        throw new Error("잘못된 요청입니다. (400)");
-      }
-      if (error.response.status === 404) {
-        throw new Error("결과를 찾을 수 없습니다. (404)");
-      }
-    }
-    console.error("분석 목록 조회 에러:", error);
-    throw error;
+  if (response.status === 200) {
+    return response.data;
+  } else {
+    throw new Error("분석 목록 조회 실패");
   }
 };
 
+// 분석 상세 조회
 export const getAnalysisDetail_Bus = async (resultId) => {
   if (USE_MOCK) {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({
-          content: "이것은 예시 분석 결과 내용입니다. 케미 지수: 78점.",
+          content: "이것은 예시 업무 분석 결과입니다.",
         });
       }, 500);
     });
   }
 
-  try {
-    const response = await instanceWithToken.get(`/business/analysis/${resultId}/detail/`);
+  const response = await instance.get(`/business/analysis/${resultId}/detail/`);
 
-    if (response.status === 200) {
-      return response.data; // { content }
-    } else {
-      throw new Error("알 수 없는 응답 상태");
-    }
-  } catch (error) {
-    if (error.response) {
-      if (error.response.status === 400) {
-        throw new Error("잘못된 요청입니다. (400)");
-      }
-      if (error.response.status === 404) {
-        throw new Error("분석 결과를 찾을 수 없습니다. (404)");
-      }
-    }
-    console.error("상세 결과 조회 에러:", error);
-    throw error;
+  if (response.status === 200) {
+    return response.data;
+  } else {
+    throw new Error("상세 조회 실패");
   }
 };
 
+// 분석 결과 삭제
 export const deleteAnalysis_Bus = async (resultId) => {
   if (USE_MOCK) {
     console.log("📦 목업 분석 결과 삭제 요청...");
@@ -678,54 +574,14 @@ export const deleteAnalysis_Bus = async (resultId) => {
     });
   }
 
-  try {
-    const response = await instanceWithToken.delete(
-      `/business/analysis/${resultId}/detail/`
-    );
+  const response = await instance.delete(
+    `/business/analysis/${resultId}/detail/`
+  );
 
-    if (response.status === 204) {
-      console.log("분석 결과 삭제 성공");
-      return;
-    } else {
-      throw new Error("알 수 없는 응답 상태");
-    }
-  } catch (error) {
-    if (error.response) {
-      if (error.response.status === 400) {
-        throw new Error("잘못된 요청입니다. (400)");
-      }
-      if (error.response.status === 404) {
-        throw new Error("분석 결과를 찾을 수 없습니다. (404)");
-      }
-    }
-    console.error("분석 결과 삭제 에러:", error);
-    throw error;
-  }
-};
-
-
-
-
-/**
- * ✅ 크레딧 관리
- */
-
-export const getCredits = async () => {
-  const response = await instanceWithToken.get("/credits");
-  if (response.status === 200) {
-    return response.data;
+  if (response.status === 204) {
+    console.log("분석 결과 삭제 성공");
   } else {
-    console.log("크레딧 조회 에러:", response);
-  }
-};
-
-export const chargeCredits = async (data) => {
-  const response = await instanceWithToken.post("/credits/charge", data);
-  if (response.status === 200) {
-    console.log("크레딧 충전 성공");
-    return response.data;
-  } else {
-    console.log("크레딧 충전 에러:", response);
+    throw new Error("삭제 실패");
   }
 };
 
@@ -734,7 +590,7 @@ export const chargeCredits = async (data) => {
  */
 
 export const updateMe = async (data) => {
-  const response = await instanceWithToken.put("/me", data);
+  const response = await instance.put("/me", data);
   if (response.status === 200) {
     console.log("사용자 정보 수정 성공");
     return response.data;

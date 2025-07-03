@@ -65,13 +65,13 @@ export default function PlayChemiPage() {
       people_num: parseInt(peopleNum),
       rel: relation,
       situation,
-      startPeriod,
-      endPeriod,
+      analysis_start: startPeriod,
+      analysis_end: endPeriod,
     };
 
     try {
       const analyzeResponse = await postAnalyze(selectedChatId, payload);
-      const resultId = analyzeResponse.result_id_play_chem;
+      const resultId = analyzeResponse.result_id;
 
       const detailResponse = await getAnalysisDetail(resultId);
       setAnalysisResult(detailResponse);
@@ -223,8 +223,108 @@ export default function PlayChemiPage() {
                 </div>
               </div>
 
-              <div className="w-full h-200 mb-20 p-4 bg-grayscale-10 border border-secondary rounded-lg text-body2 text-white whitespace-pre-line">
+              <div className="w-full h-350 mb-20 p-4 gap-5 flex flex-col justify-start items-start border border-secondary rounded-lg text-body2 text-white whitespace-pre-line">
                 {analysisResult.content}
+                {/* 대화 톤 */}
+                <div>
+                  <p className="text-h6 font-bold mb-1">대화 톤</p>
+                  <p>긍정적 표현 비중: 63%</p>
+                  <p>농담/유머 빈도: 18%</p>
+                  <p>비판적 의견: 7%</p>
+                </div>
+
+                {/* 예시 대화 */}
+                <div>
+                  <p className="text-h6 font-bold mb-1">예시 대화</p>
+                  <p>A: 야ㅋㅋㅋ 이거 너 또 까먹었지</p>
+                  <p>B: 인정ㅋㅋㅋ 이번엔 진짜 메모했다🤣</p>
+                  <p>C: 이 방 진짜 텐션 최고네</p>
+                  <p className="mt-2">
+                    분석: 농담과 자기인정형 유머가 관계 안정에 기여했습니다.
+                  </p>
+                </div>
+
+                {/* 응답 패턴 */}
+                <div>
+                  <p className="text-h6 font-bold mb-1">응답 패턴</p>
+                  <p>평균 응답 시간: 1시간 5분</p>
+                  <p>즉각 응답 비율: 52%</p>
+                  <p>‘읽씹’발생률: 8%</p>
+                  <p className="mt-2">
+                    분석: 대부분 활발히 답변했습니다. 약간의 일씹이 있는 것
+                    같기도...?
+                  </p>
+                </div>
+
+                {/* 대화 주제 비율 */}
+                <div>
+                  <p className="text-h6 font-bold mb-1">대화 주제 비율</p>
+                  <p>업무/과제: 42%</p>
+                  <p>잡담/이벤트: 26%</p>
+                  <p>격려/감정 표현: 18%</p>
+                  <p>미디어 공유: 14%</p>
+                </div>
+
+                {/* 감정 온도계 */}
+                <div>
+                  <p className="text-h6 font-bold mb-1">감정 온도계</p>
+                  <p>평균 감정 온도: 따뜻함</p>
+                  <p>긍정 언급: ‘좋아요’, ‘고마워요’, ‘ㅋㅋㅋ’</p>
+                  <p>부정 언급: ‘힘들자’, ‘귀찮다’</p>
+                  <p className="mt-2">
+                    분석: 부정적 표현도 자연스러운 공감 대화로 이어져 긴장감이
+                    낮습니다.
+                  </p>
+                </div>
+
+                {/* 관계 친밀도 및 그룹 특성 */}
+                <div>
+                  <p className="text-h6 font-bold mb-1">
+                    관계 친밀도 및 그룹 특성
+                  </p>
+                  <p className="font-semibold mt-2">친밀도 레벨: 높음</p>
+                  <p className="text-body2 mb-2">
+                    서로의 근황과 작은 성취까지 챙기는 서포트 그룹형 소통
+                  </p>
+
+                  <p className="font-semibold mt-2">네트워크 밀도: 74%</p>
+                  <p className="text-body2 mb-2">
+                    다수의 멤버가 서로 연결되어 활발히 대화에 참여
+                  </p>
+
+                  <p className="font-semibold mt-2">주요 역할 유형</p>
+                  <p className="text-body2">
+                    리더/조율자: 3명
+                    <br />
+                    활동가/분위기메이커: 5명
+                    <br />
+                    관망자: 7명
+                    <br />
+                    응원러: 8명
+                  </p>
+                </div>
+
+                {/* AI 추천 */}
+                <div>
+                  <p className="text-h6 font-bold mb-1 mt-4 border-t border-primary-light pt-2">
+                    AI 추천
+                  </p>
+                  <p className="text-body2">
+                    이 방은 서로를 격려하고 빠르게 협력하는 강점이 있습니다.
+                    앞으로 대화 주제를 조금 더 다양화하고, ‘관망자’들의 참여를
+                    유도하면 관계가 더욱 풍부해질 것입니다.
+                  </p>
+                </div>
+
+                {/* Tip */}
+                <div>
+                  <p className="text-h6 font-bold text-yellow-400 mt-4">Tip</p>
+                  <p className="text-yellow-400">
+                    가벼운 이벤트(사진 공유, 주제 토론)를 시도해보세요
+                    <br />
+                    ‘읽씹’ 비율이 높은 참여자와 개별 대화도 권장합니다.
+                  </p>
+                </div>
               </div>
             </div>
           )}
