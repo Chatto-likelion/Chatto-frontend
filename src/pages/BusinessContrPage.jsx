@@ -128,21 +128,21 @@ export default function BusinessContrPage() {
               <button
                 onClick={handleAnalyze}
                 disabled={loading}
-                className="w-16 h-8.5 hover:bg-secondary-light hover:text-primary-dark cursor-pointer px-0.25 py-2 text-button text-secondary-light border border-secondary-light rounded-lg"
+                className="w-16 h-8.5 hover:bg-primary hover:text-white cursor-pointer px-0.25 py-2 text-button text-primary border border-primary rounded-lg"
               >
                 결과 공유
               </button>
               <button
                 onClick={handleAnalyze}
                 disabled={loading}
-                className="w-16 h-8.5 hover:bg-secondary-light hover:text-primary-dark cursor-pointer px-0.25 py-2 text-button text-secondary-light border border-secondary-light rounded-lg"
+                className="w-16 h-8.5 hover:bg-primary hover:text-white cursor-pointer px-0.25 py-2 text-button text-primary border border-primary rounded-lg"
               >
                 결과 저장
               </button>
               <button
                 onClick={handleAnalyze}
                 disabled={loading}
-                className="w-16 h-8.5 hover:bg-secondary-light hover:text-primary-dark cursor-pointer px-0.25 py-2 text-button text-secondary-light border border-secondary-light rounded-lg"
+                className="w-16 h-8.5 hover:bg-primary hover:text-white cursor-pointer px-0.25 py-2 text-button text-primary border border-primary rounded-lg"
               >
                 퀴즈 생성
               </button>
@@ -208,7 +208,7 @@ export default function BusinessContrPage() {
 
           {/* 결과 출력 */}
           {loading && (
-            <p className="mt-44 text-sm text-secondary">분석 중입니다...</p>
+            <p className="mt-44 text-sm text-primary-dark">분석 중입니다...</p>
           )}
           {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
           {analysisResult && (
