@@ -43,8 +43,8 @@ export default function PlayChemiPage() {
       }
 
       // 업로드한 채팅을 선택
-      if (result?.chat_id_play_chem) {
-        setSelectedChatId(result.chat_id_play_chem);
+      if (result?.chat_id) {
+        setSelectedChatId(result.chat_id);
       }
     } catch (error) {
       console.error("파일 업로드 실패:", error);

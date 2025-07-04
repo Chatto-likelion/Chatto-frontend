@@ -480,7 +480,6 @@ export const postAnalyze_Bus = async (chatId, payload) => {
       }, 1000);
     });
   }
-
   const response = await instance.post(
     `/business/chat/${chatId}/analyze/`,
     payload

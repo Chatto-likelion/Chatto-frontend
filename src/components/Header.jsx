@@ -45,7 +45,7 @@ export default function Header() {
           mode === "play"
             ? "border-b-2 border-primary bg-primary-light"
             : mode === "business"
-            ? "border-b-2 border-primary-light bg-primary-dark"
+            ? "border-b-2 border-primary bg-primary-dark"
             : "bg-primary-light"
         }
       }`}
