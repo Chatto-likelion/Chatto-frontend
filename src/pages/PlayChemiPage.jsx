@@ -92,14 +92,14 @@ export default function PlayChemiPage() {
   return (
     <div className="flex flex-col justify-start items-center h-screen bg-primary-dark text-white">
       <Header />
-      <div className="flex-1 w-300 mt-17.5  overflow-hidden flex justify-between items-start">
+      <div className="flex-1 w-300 mt-17.5 overflow-hidden flex justify-between items-start">
         {/* 왼쪽 */}
         <div
           className={`gap-5 pt-6 ${
             analysisResult ? "w-61.5 mr-34.5" : "w-53.5 mr-60.5"
           } flex flex-col items-center justify-center`}
         >
-          <div className="w-full mb-23 flex justify-start items-end gap-2 text-primary-light">
+          <div className="w-full mb-32 flex justify-start items-end gap-2 text-primary-light">
             <p
               className="text-h6 cursor-pointer"
               onClick={() => {
@@ -334,10 +334,10 @@ export default function PlayChemiPage() {
         <div
           className={`${
             analysisResult ? "w-47.25" : "w-29"
-          } flex flex-col items-center justify-start gap-4`}
+          } mt-50 flex flex-col items-center justify-start gap-4`}
         >
           {analysisResult && (
-            <div className="w-full mt-40 py-4 px-1 flex flex-col justify-center items-center border-2 border-primary-light rounded-lg  bg-primary-dark">
+            <div className="w-full py-4 px-1 flex flex-col justify-center items-center border-2 border-primary-light rounded-lg  bg-primary-dark">
               <DetailForm
                 isAnalysis={true}
                 peopleNum={peopleNum}
@@ -363,7 +363,7 @@ export default function PlayChemiPage() {
 
           <div
             className={`w-full  ${
-              analysisResult ? "h-42" : "mt-22 h-full"
+              analysisResult ? "h-42" : " h-full"
             } border-2 border-primary-light rounded-lg p-3 pb-5 bg-primary-dark`}
           >
             {analysisResult ? <SmallServices /> : <BigServices />}

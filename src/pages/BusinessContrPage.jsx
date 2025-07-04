@@ -2,8 +2,9 @@ import {
   Header,
   ChatList_Bus,
   FileUpload_Bus,
-  BigServices,
-  DetailForm,
+  BigServices_Bus,
+  DetailForm_Bus,
+  SmallServices_Bus,
 } from "@/components";
 import {
   postChat_Bus,
@@ -14,7 +15,6 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import * as Icons from "@/assets/svg/index.js";
-import SmallServices from "../components/SmallServices";
 
 export default function BusinessContrPage() {
   const { user } = useAuth();
@@ -99,7 +99,7 @@ export default function BusinessContrPage() {
       <div className="relative flex-1 w-300 mt-17.5 overflow-hidden flex justify-between items-start">
         {/* 왼쪽 */}
         <div
-          className={`gap-5 pt-41 ${
+          className={`gap-5 pt-50 ${
             analysisResult ? "w-61.5 mr-34.5" : "w-53.5 mr-60.5"
           } flex flex-col items-center justify-center`}
         >
@@ -181,7 +181,7 @@ export default function BusinessContrPage() {
                     더 자세한 분석을 위해 추가 정보를 설정합니다.
                   </p>
                 </div>
-                <DetailForm
+                <DetailForm_Bus
                   isAnalysis={false}
                   peopleNum={peopleNum}
                   setPeopleNum={setPeopleNum}
@@ -341,11 +341,11 @@ export default function BusinessContrPage() {
         <div
           className={`${
             analysisResult ? "w-47.25" : "w-29"
-          } flex flex-col items-center justify-start gap-4`}
+          } mt-50 flex flex-col items-center justify-start gap-4`}
         >
           {analysisResult && (
-            <div className="w-full mt-40 py-4 px-1 flex flex-col justify-center items-center border-2 border-primary-light rounded-lg  bg-primary-dark">
-              <DetailForm
+            <div className="w-full py-4 px-1 flex flex-col justify-center items-center border-2 border-primary rounded-lg  bg-white">
+              <DetailForm_Bus
                 isAnalysis={true}
                 peopleNum={peopleNum}
                 setPeopleNum={setPeopleNum}
@@ -361,7 +361,7 @@ export default function BusinessContrPage() {
               <button
                 onClick={handleAnalyze}
                 disabled={loading}
-                className="mt-6 w-19.75 h-8.5 hover:bg-secondary-light hover:text-primary-dark px-3 py-2 text-button text-secondary-light border border-secondary-light rounded-lg"
+                className="mt-6 w-19.75 h-8.5 hover:bg-primary hover:text-white px-3 py-2 text-button text-primary border border-primary rounded-lg"
               >
                 다시 분석
               </button>
@@ -370,10 +370,10 @@ export default function BusinessContrPage() {
 
           <div
             className={`w-full  ${
-              analysisResult ? "h-42" : "mt-22 h-full"
-            } border-2 border-primary-light rounded-lg p-3 pb-5 bg-primary-dark`}
+              analysisResult ? "h-42" : " h-full"
+            } border-2 border-primary rounded-lg p-3 pb-5 bg-white`}
           >
-            {analysisResult ? <SmallServices /> : <BigServices />}
+            {analysisResult ? <SmallServices_Bus /> : <BigServices_Bus />}
           </div>
         </div>
       </div>
