@@ -59,7 +59,7 @@ export const login = async (data) => {
 
 // 로그아웃
 export const logout = async () => {
-  const response = await instance.post("/logout");
+  const response = await instance.post("/account/logout/");
   if (response.status === 200) {
     console.log("로그아웃 성공");
     window.location.href = "/";
@@ -70,7 +70,7 @@ export const logout = async () => {
 
 // 현재 로그인 사용자 정보 조회
 export const getMe = async () => {
-  const response = await instance.get("/me");
+  const response = await instanceWithToken.get("/account/profile/");
   if (response.status === 200) {
     return response.data;
   } else {
@@ -99,16 +99,29 @@ export const postChat = async (userId, file) => {
   formData.append("user_id", userId);
   formData.append("file", file);
 
-  const response = await instance.post("/play/chats/", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  try {
+    const response = await instanceWithToken.post("/play/chat/", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
 
-  if (response.status === 201) {
-    console.log("파일 업로드 성공:", response.data);
-    return response.data; // { chat_id_play_chem: integer }
-  } else {
-    console.log("파일 업로드 에러:", response);
-    throw new Error("파일 업로드 실패");
+    if (response.status === 201) {
+      console.log("파일 업로드 성공:", response.data);
+      return response.data; // { chat_id_play_chem: integer }
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
+    }
+  } catch (error) {
+    if (error.response) {
+      const status = error.response.status;
+      if (status === 400) {
+        throw new Error("파일 또는 입력값이 잘못되었습니다. (400)");
+      }
+      if (status === 401) {
+        throw new Error("로그인이 필요합니다. (401)");
+      }
+    }
+    console.error("파일 업로드 에러:", error);
+    throw new Error("파일 업로드 중 오류가 발생했습니다.");
   }
 };
 
@@ -124,30 +137,37 @@ export const deleteChat = async (chatId) => {
   }
 
   try {
-    const response = await instance.delete(`/play/chats/${chatId}/delete/`);
+    const response = await instanceWithToken.delete(
+      `/play/chat/${chatId}/delete/`
+    );
 
     if (response.status === 204) {
       console.log("채팅 삭제 성공");
       return;
     } else {
-      console.error("알 수 없는 응답:", response);
-      throw new Error("알 수 없는 응답 상태");
+      throw new Error("알 수 없는 응답 상태입니다.");
     }
   } catch (error) {
     if (error.response) {
-      if (error.response.status === 400) {
-        throw new Error("잘못된 요청입니다. (400)");
+      const status = error.response.status;
+
+      if (status === 401) {
+        throw new Error("로그인이 필요합니다. (401)");
       }
-      if (error.response.status === 404) {
-        throw new Error("파일을 찾을 수 없습니다. (404)");
+      if (status === 403) {
+        throw new Error("해당 채팅을 삭제할 권한이 없습니다. (403)");
+      }
+      if (status === 404) {
+        throw new Error("채팅 파일을 찾을 수 없습니다. (404)");
       }
     }
-    console.error("삭제 에러:", error);
-    throw error;
+
+    console.error("채팅 삭제 에러:", error);
+    throw new Error("채팅 삭제 중 문제가 발생했습니다.");
   }
 };
 
-export const getChatList = async (userId) => {
+export const getChatList = async () => {
   if (USE_MOCK) {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -170,24 +190,20 @@ export const getChatList = async (userId) => {
   }
 
   try {
-    const response = await instance.get(`/play/chats/${userId}/`);
+    const response = await instanceWithToken.get(`/play/chat/`);
 
     if (response.status === 200) {
-      return response.data; // 배열
+      return response.data;
     } else {
-      throw new Error("알 수 없는 응답 상태");
+      throw new Error("알 수 없는 응답 상태입니다.");
     }
   } catch (error) {
-    if (error.response) {
-      if (error.response.status === 400) {
-        throw new Error("잘못된 요청입니다. (400)");
-      }
-      if (error.response.status === 404) {
-        throw new Error("파일을 찾을 수 없습니다. (404)");
-      }
+    if (error.response?.status === 401) {
+      throw new Error("로그인이 필요합니다. (401)");
     }
-    console.error("목록 조회 에러:", error);
-    throw error;
+
+    console.error("채팅 목록 조회 에러:", error);
+    throw new Error("채팅 목록을 불러오는 데 실패했습니다.");
   }
 };
 
@@ -205,28 +221,37 @@ export const postAnalyze = async (chatId, payload) => {
   }
 
   try {
-    const response = await instance.post(
-      `/play/chats/${chatId}/analyze/`,
+    const response = await instanceWithToken.post(
+      `/play/chat/${chatId}/analyze/`,
       payload
     );
 
     if (response.status === 201) {
       console.log("분석 성공:", response.data);
-      return response.data; // { result_id_play_chem }
+      return response.data; // { result_id: number }
     } else {
-      throw new Error("알 수 없는 응답 상태");
+      throw new Error("알 수 없는 응답 상태입니다.");
     }
   } catch (error) {
     if (error.response) {
-      if (error.response.status === 400) {
-        throw new Error("잘못된 요청입니다. (400)");
+      const status = error.response.status;
+
+      if (status === 400) {
+        throw new Error("입력값이 잘못되었습니다. (400)");
       }
-      if (error.response.status === 404) {
-        throw new Error("채팅을 찾을 수 없습니다. (404)");
+      if (status === 401) {
+        throw new Error("로그인이 필요합니다. (401)");
+      }
+      if (status === 403) {
+        throw new Error("분석 요청 권한이 없습니다. (403)");
+      }
+      if (status === 404) {
+        throw new Error("해당 채팅을 찾을 수 없습니다. (404)");
       }
     }
+
     console.error("분석 요청 에러:", error);
-    throw error;
+    throw new Error("채팅 분석 요청 중 문제가 발생했습니다.");
   }
 };
 
@@ -268,7 +293,7 @@ export const saveAnalysis = async (resultId) => {
  * ✅ 분석 결과
  */
 
-export const getAnalysisList = async (userId) => {
+export const getAnalysisList = async () => {
   if (USE_MOCK) {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -291,26 +316,14 @@ export const getAnalysisList = async (userId) => {
   }
 
   try {
-    const response = await instance.get(`/play/analysis/${userId}`, {
-      // params: { user_id: userId },
-    });
-
-    if (response.status === 200) {
-      return response.data;
-    } else {
-      throw new Error("알 수 없는 응답 상태");
-    }
+    const response = await instanceWithToken.get(`/play/analysis/`);
+    return response.data;
   } catch (error) {
-    if (error.response) {
-      if (error.response.status === 400) {
-        throw new Error("잘못된 요청입니다. (400)");
-      }
-      if (error.response.status === 404) {
-        throw new Error("결과를 찾을 수 없습니다. (404)");
-      }
+    if (error.response?.status === 401) {
+      throw new Error("로그인이 필요합니다. (401)");
     }
     console.error("분석 목록 조회 에러:", error);
-    throw error;
+    throw new Error("분석 목록을 불러오는 데 실패했습니다.");
   }
 };
 
@@ -326,24 +339,26 @@ export const getAnalysisDetail = async (resultId) => {
   }
 
   try {
-    const response = await instance.get(`/play/analysis/${resultId}/detail/`);
-
-    if (response.status === 200) {
-      return response.data; // { content }
-    } else {
-      throw new Error("알 수 없는 응답 상태");
-    }
+    const response = await instanceWithToken.get(
+      `/play/analysis/${resultId}/detail/`
+    );
+    return response.data; // { content }
   } catch (error) {
     if (error.response) {
-      if (error.response.status === 400) {
-        throw new Error("잘못된 요청입니다. (400)");
+      const status = error.response.status;
+
+      if (status === 401) {
+        throw new Error("로그인이 필요합니다. (401)");
       }
-      if (error.response.status === 404) {
+      if (status === 403) {
+        throw new Error("접근 권한이 없습니다. (403)");
+      }
+      if (status === 404) {
         throw new Error("분석 결과를 찾을 수 없습니다. (404)");
       }
     }
     console.error("상세 결과 조회 에러:", error);
-    throw error;
+    throw new Error("분석 결과를 불러오는 데 실패했습니다.");
   }
 };
 
@@ -359,7 +374,9 @@ export const deleteAnalysis = async (resultId) => {
   }
 
   try {
-    const response = await instance.delete(`/play/analysis/${resultId}/detail`);
+    const response = await instanceWithToken.delete(
+      `/play/analysis/${resultId}/detail/`
+    );
 
     if (response.status === 204) {
       console.log("분석 결과 삭제 성공");
@@ -369,15 +386,21 @@ export const deleteAnalysis = async (resultId) => {
     }
   } catch (error) {
     if (error.response) {
-      if (error.response.status === 400) {
-        throw new Error("잘못된 요청입니다. (400)");
+      const status = error.response.status;
+
+      if (status === 401) {
+        throw new Error("로그인이 필요합니다. (401)");
       }
-      if (error.response.status === 404) {
+      if (status === 403) {
+        throw new Error("해당 결과를 삭제할 권한이 없습니다. (403)");
+      }
+      if (status === 404) {
         throw new Error("분석 결과를 찾을 수 없습니다. (404)");
       }
     }
+
     console.error("분석 결과 삭제 에러:", error);
-    throw error;
+    throw new Error("분석 결과 삭제 중 오류가 발생했습니다.");
   }
 };
 
