@@ -10,6 +10,16 @@ export default function Header() {
   const { pathname } = useLocation();
   const [showDropdown, setShowDropdown] = useState(false);
 
+  const { login } = useAuth();
+  const handleTempSignIn = () => {
+    const dummyUser = {
+      id: 1,
+      name: "임시 사용자",
+      email: "temp@example.com",
+    };
+    login(dummyUser);
+  };
+
   const handleSignIn = () => {
     navigate("/signin");
   };
@@ -73,41 +83,55 @@ export default function Header() {
           onMouseEnter={() => setShowDropdown(true)}
           onMouseLeave={() => setShowDropdown(false)}
         >
-          <button
-            onClick={
-              mode === "play"
-                ? handlePlayMyPage
-                : mode === "business"
-                ? handleBusinessMyPage
-                : () => {}
-            }
-            className={`text-h7 ${
-              pathname.includes("mypage") ? "text-primary" : ""
-            }`}
-          >
-            My page
-          </button>
+          {/* My page 버튼 */}
+          <div className="flex items-center">
+            {user && (
+              <button
+                onClick={
+                  mode === "play"
+                    ? handlePlayMyPage
+                    : mode === "business"
+                    ? handleBusinessMyPage
+                    : () => {}
+                }
+                className={`text-h7 ${
+                  pathname.includes("mypage") ? "text-primary" : ""
+                }`}
+              >
+                My page
+              </button>
+            )}
+          </div>
 
           {showDropdown && mode === null && (
-            <div className="absolute top-full mt-0 left-[-45px] w-40 flex bg-white border border-grayscale-4 rounded shadow-lg z-10">
-              <button
-                onClick={handlePlayMyPage}
-                className="w-full px-3 py-2 text-center text-sm hover:bg-gray-2"
-              >
-                Play
-              </button>
-              <button
-                onClick={handleBusinessMyPage}
-                className="w-full px-3 py-2 text-center text-sm hover:bg-gray-2"
-              >
-                Business
-              </button>
-            </div>
+            <>
+              {/* 드롭다운 안 닫히게 */}
+              <div className="absolute top-full left-[30px] h-3 w-12 z-10" />
+              <div className="absolute top-[calc(100%+12px)] left-[30px] w-25 h-12.5 pl-2.5 pr-1.5 py-1.5 flex flex-col gap-0.5 bg-secondary-light rounded-sm shadow-lg z-10">
+                {/* 삼각형 */}
+                <div className="absolute -top-2.5 left-4 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[10px] border-b-secondary-light" />
+                <button
+                  onClick={handlePlayMyPage}
+                  className="w-full px-1.5 pb-0.5 border-b border-b-primary-light border-dashed text-start text-overline rounded-sm hover:bg-gray-2"
+                >
+                  FOR PLAY
+                </button>
+                <button
+                  onClick={handleBusinessMyPage}
+                  className="w-full px-1.5 pb-0.5 border-b border-b-primary-light border-dashed text-start text-overline rounded-sm hover:bg-gray-2"
+                >
+                  FOR BUSINESS
+                </button>
+              </div>
+            </>
           )}
         </div>
-        <button onClick={handleCreditPage} className="text-h7">
-          300C
-        </button>
+
+        {user && (
+          <button onClick={handleCreditPage} className="text-h7">
+            300C
+          </button>
+        )}
         {mode === "play" && (
           <button
             onClick={handleBusinessPage}
@@ -125,11 +149,14 @@ export default function Header() {
           </button>
         )}
         {user ? (
-          <button onClick={logout} className="text-h7">
+          <button onClick={logout} className="w-20 text-start text-h7">
             Sign out
           </button>
         ) : (
-          <button onClick={handleSignIn} className="text-h7">
+          <button
+            onClick={handleTempSignIn}
+            className="w-20 text-start text-h7"
+          >
             Sign in
           </button>
         )}
