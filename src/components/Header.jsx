@@ -145,7 +145,11 @@ export default function Header() {
             Sign out
           </button>
         ) : (
-          <button onClick={handleSignIn} className="w-20 text-start text-h7">
+          <button
+            // onClick={handleTempSignIn}
+            onClick={handleSignIn}
+            className="w-20 text-start text-h7"
+          >
             Sign in
           </button>
         )}
