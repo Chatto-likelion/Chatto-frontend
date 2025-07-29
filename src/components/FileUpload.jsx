@@ -1,5 +1,6 @@
 import { useDropzone } from "react-dropzone";
 import * as Icons from "@/assets/svg";
+import useCurrentMode from "@/hooks/useCurrentMode";
 
 export default function FileUpload({ onUpload }) {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -12,12 +13,35 @@ export default function FileUpload({ onUpload }) {
     },
   });
 
+  const mode = useCurrentMode();
+  const isPlay = mode === "play";
+
+  // 조건에 따라 색상 분기
+  const wrapperBorder = isPlay ? "border-secondary-light" : "border-primary";
+  const wrapperText = isPlay ? "text-white" : "text-gray-7";
+  const wrapperBg = isDragActive
+    ? isPlay
+      ? "bg-primary-dark/40"
+      : "bg-gray-1"
+    : isPlay
+    ? "bg-primary-dark"
+    : "bg-white";
+
+  const iconColor = isPlay ? "text-secondary" : "text-primary";
+  const buttonBorder = isPlay ? "border-secondary-light" : "border-primary";
+  const buttonText = isPlay ? "text-secondary-light" : "text-primary";
+  const buttonHoverBg = isPlay
+    ? "hover:bg-secondary-light"
+    : "hover:bg-primary";
+  const buttonHoverText = isPlay
+    ? "hover:text-primary-dark"
+    : "hover:text-white";
+  const infoTextColor = isPlay ? "text-gray-4" : "text-gray-7";
+
   return (
     <div
       {...getRootProps()}
-      className={`w-full px-4.25 pt-5.25 pb-8.25 border border-secondary-light rounded-lg text-white text-center cursor-pointer transition ${
-        isDragActive ? "bg-primary-dark/40" : "bg-primary-dark"
-      }`}
+      className={`w-full px-4.25 pt-5.25 pb-8.25 border ${wrapperBorder} ${wrapperText} text-center cursor-pointer transition ${wrapperBg} rounded-lg`}
     >
       <input {...getInputProps()} />
       <div className="text-st1 mb-2">대화 파일 첨부</div>
@@ -28,7 +52,7 @@ export default function FileUpload({ onUpload }) {
       </p>
 
       <div className="flex flex-col justify-center items-center mb-4">
-        <Icons.FileUpload className="w-20 h-16.5 my-3 text-secondary" />
+        <Icons.FileUpload className={`w-20 h-16.5 my-3 ${iconColor}`} />
         <p className="text-caption">
           {isDragActive
             ? "여기에 파일을 놓아주세요..."
@@ -38,13 +62,17 @@ export default function FileUpload({ onUpload }) {
 
       <button
         type="button"
-        className="w-26.5 h-7.5 mb-2.5 border border-secondary-light text-caption text-secondary-light px-4 py-1 rounded-lg hover:bg-secondary-light hover:text-primary-dark transition"
+        className={`w-26.5 h-7.5 mb-2.5 border ${buttonBorder} ${buttonText} text-caption px-4 py-1 rounded-lg transition ${buttonHoverBg} ${buttonHoverText}`}
       >
         파일 찾아보기
       </button>
 
-      <p className="text-overline text-gray-4">업로드된 파일은 분석 이외의</p>
-      <p className="text-overline text-gray-4">목적으로 수집되지 않습니다.</p>
+      <p className={`text-overline ${infoTextColor}`}>
+        업로드된 파일은 분석 이외의
+      </p>
+      <p className={`text-overline ${infoTextColor}`}>
+        목적으로 수집되지 않습니다.
+      </p>
     </div>
   );
 }

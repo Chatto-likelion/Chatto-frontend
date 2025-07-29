@@ -7,11 +7,14 @@ import {
   NavSome,
   NavStat,
 } from "../assets/svg";
+import useCurrentMode from "@/hooks/useCurrentMode";
 
-export default function SmallServicesPlay() {
+export default function SmallServices() {
   const navigate = useNavigate();
+  const mode = useCurrentMode();
+  const isPlay = mode === "play";
 
-  const icons = [
+  const playIcons = [
     { Component: NavChemi, path: "/play/chemi" },
     { Component: NavSome, path: "/play/some" },
     { Component: NavMBTI, path: "/play/MBTI" },
@@ -20,10 +23,19 @@ export default function SmallServicesPlay() {
     { Component: NavMore, path: "/play/more" },
   ];
 
+  const businessIcons = [
+    { Component: NavChemi, path: "/business/contr" },
+    { Component: NavSome, path: "/business/contr" },
+    { Component: NavMore, path: "/business/more" },
+  ];
+
+  const icons = isPlay ? playIcons : businessIcons;
+  const title = isPlay ? "Chatto Play" : "Chatto Business";
+
   return (
     <div className="w-full flex justify-center">
       <div className="w-37.5 flex flex-col items-center gap-5">
-        <div className="text-body1">Chatto Play</div>
+        <div className="text-body1">{title}</div>
         <div className="grid grid-cols-3 w-full items-center gap-4">
           {icons.map(({ Component, path }, index) => (
             <Component
