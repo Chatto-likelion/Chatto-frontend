@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import * as Icons from "@/assets/svg/index.js";
 import SmallServices from "../components/SmallServices";
+import DirectionGraph from "@/components/DirectionGraph";
 
 export default function PlayChemiPage() {
   const { user } = useAuth();
@@ -88,6 +89,15 @@ export default function PlayChemiPage() {
     setAnalysisResult(null);
     setError(null);
   }, [selectedChatId]);
+
+  const names = ["수빈", "민지", "자윤", "준서", "은지"];
+  const matrix = [
+    [0, 35, 10, 25, 14],
+    [36, 0, 11, 24, 8],
+    [24, 17, 0, 7, 10],
+    [27, 18, 23, 0, 31],
+    [16, 14, 9, 22, 0],
+  ];
 
   return (
     <div className="flex flex-col justify-start items-center h-screen bg-primary-dark text-white">
@@ -226,6 +236,9 @@ export default function PlayChemiPage() {
               <div className="w-full h-350 mb-20 p-4 gap-5 flex flex-col justify-start items-start border border-secondary rounded-lg text-body2 text-white whitespace-pre-line">
                 {analysisResult.content}
                 {/* 대화 톤 */}
+                <div className="w-full">
+                  <DirectionGraph names={names} matrix={matrix} />
+                </div>
                 <div>
                   <p className="text-h6 font-bold mb-1">대화 톤</p>
                   <p>긍정적 표현 비중: 63%</p>
