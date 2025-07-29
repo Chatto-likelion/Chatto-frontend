@@ -1,10 +1,10 @@
 import {
   Header,
-  ChatList_Bus,
-  FileUpload_Bus,
-  BigServices_Bus,
-  DetailForm_Bus,
-  SmallServices_Bus,
+  ChatList,
+  FileUpload,
+  BigServices,
+  DetailForm,
+  SmallServices,
 } from "@/components";
 import {
   postChat_Bus,
@@ -96,7 +96,7 @@ export default function BusinessContrPage() {
   return (
     <div className="flex flex-col justify-start items-center h-screen bg-white text-primary-dark">
       <Header />
-      <div className="relative flex-1 w-300 mt-17.5 overflow-hidden flex justify-between items-start">
+      <div className="relative flex-1 w-308.25 mt-17.5 overflow-hidden flex justify-between items-start">
         {/* 왼쪽 */}
         <div
           className={`gap-5 pt-50 ${
@@ -110,19 +110,20 @@ export default function BusinessContrPage() {
                 navigate("/business");
               }}
             >
-              <p className="">Chatto</p>
-              <p className="bold"> Business</p>
+              <p className="">
+                Chatto <span className="bold">Business</span>
+              </p>
             </div>
             <p className="text-body2">업무 기여도 분석</p>
           </div>
-          <ChatList_Bus
+          <ChatList
             onSelect={handleChatSelect}
             selectedChatId={selectedChatId}
             setSelectedChatId={setSelectedChatId}
             onUploaded={chatListReloadRef}
           />
 
-          <FileUpload_Bus onUpload={handleFileUpload} />
+          <FileUpload onUpload={handleFileUpload} />
           {analysisResult && (
             <div className="w-full flex justify-between items-center">
               <button
@@ -153,13 +154,13 @@ export default function BusinessContrPage() {
         {/* 가운데 */}
         <main
           className={`flex-1 overflow-y-auto max-h-240 scrollbar-hide pt-28 ${
-            analysisResult ? "w-163.25 pr-18" : "w-157 pr-57"
+            analysisResult ? "w-163.25 pr-18" : "w-100 pr-57"
           } flex flex-col justify-start items-center`}
         >
           {!loading && !analysisResult && (
             <>
-              <Icons.ContrIconFull className="mb-4" />
-              <div className="w-full flex flex-col items-center text-gray-8 text-body2 text-center mb-21">
+              <Icons.ContrIconFull className="mb-5" />
+              <div className="w-full flex flex-col items-center text-gray-8 text-body2 text-center mb-18">
                 <p>팀원의 업무 기여도가 얼마나 높을까요?</p>
                 <p>
                   주고받은 대화 데이터를 기반으로,
@@ -181,7 +182,7 @@ export default function BusinessContrPage() {
                     더 자세한 분석을 위해 추가 정보를 설정합니다.
                   </p>
                 </div>
-                <DetailForm_Bus
+                <DetailForm
                   isAnalysis={false}
                   peopleNum={peopleNum}
                   setPeopleNum={setPeopleNum}
@@ -340,12 +341,12 @@ export default function BusinessContrPage() {
         {/* 오른쪽 */}
         <div
           className={`${
-            analysisResult ? "w-47.25" : "w-29"
+            analysisResult ? "w-46.75" : "w-37.25"
           } mt-50 flex flex-col items-center justify-start gap-4`}
         >
           {analysisResult && (
             <div className="w-full py-4 px-1 flex flex-col justify-center items-center border-2 border-primary rounded-lg  bg-white">
-              <DetailForm_Bus
+              <DetailForm
                 isAnalysis={true}
                 peopleNum={peopleNum}
                 setPeopleNum={setPeopleNum}
@@ -370,10 +371,10 @@ export default function BusinessContrPage() {
 
           <div
             className={`w-full  ${
-              analysisResult ? "h-42" : " h-full"
+              analysisResult ? "h-30" : " h-full"
             } border-2 border-primary rounded-lg p-3 pb-5 bg-white`}
           >
-            {analysisResult ? <SmallServices_Bus /> : <BigServices_Bus />}
+            {analysisResult ? <SmallServices /> : <BigServices />}
           </div>
         </div>
       </div>

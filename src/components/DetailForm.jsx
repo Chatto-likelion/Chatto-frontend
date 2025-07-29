@@ -1,3 +1,5 @@
+import useCurrentMode from "@/hooks/useCurrentMode";
+
 export default function DetailForm({
   isAnalysis,
   peopleNum,
@@ -11,10 +13,13 @@ export default function DetailForm({
   endPeriod,
   setEndPeriod,
 }) {
-  const ww = isAnalysis ? "" : "w-76"; // 기본 너비
-  const w = isAnalysis ? "w-20" : "w-30.75";
-  const gap = isAnalysis ? "gap-5" : "gap-26";
-  const text = isAnalysis ? "text-body2" : "text-st1";
+  const mode = useCurrentMode();
+  const isPlay = mode === "play";
+
+  const ww = isAnalysis ? "" : "w-76"; // 전체 너비
+  const w = isAnalysis ? "w-20" : "w-30.75"; // select 박스 너비
+  const gap = isAnalysis ? "gap-5" : "gap-26"; // 레이블과 select 간격
+  const text = isAnalysis ? "text-body2" : "text-st1"; // 텍스트 크기
 
   return (
     <div className={`${ww} ${text} flex flex-col gap-3`}>
