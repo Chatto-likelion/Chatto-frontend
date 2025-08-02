@@ -45,12 +45,21 @@ export default function SignUpPage() {
       return;
     }
 
+    console.log({
+      username: name,
+      phone,
+      email,
+      verf_num: parseInt(verificationCode, 10),
+      password,
+      password_confirm: confirmPassword,
+    });
+
     try {
       const res = await signup({
         username: name,
         phone,
         email,
-        vef_num: parseInt(verificationCode, 10),
+        verf_num: parseInt(verificationCode, 10),
         password,
         password_confirm: confirmPassword,
       });

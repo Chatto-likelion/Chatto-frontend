@@ -83,18 +83,6 @@ export const getMe = async () => {
  */
 
 export const postChat = async (userId, file) => {
-  if (USE_MOCK) {
-    console.log("📦 목업 파일 업로드 중...");
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log("✅ 목업 업로드 완료");
-        resolve({
-          chat_id_play_chem: 125, // 예시 ID
-        });
-      }, 800); // 0.8초 지연
-    });
-  }
-
   const formData = new FormData();
   formData.append("user_id", userId);
   formData.append("file", file);

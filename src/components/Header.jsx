@@ -11,14 +11,6 @@ export default function Header() {
   const [showDropdown, setShowDropdown] = useState(false);
 
   const { login } = useAuth();
-  const handleTempSignIn = () => {
-    const dummyUser = {
-      id: 1,
-      name: "임시 사용자",
-      email: "temp@example.com",
-    };
-    login(dummyUser);
-  };
 
   const handleSignIn = () => {
     navigate("/signin");
@@ -153,10 +145,7 @@ export default function Header() {
             Sign out
           </button>
         ) : (
-          <button
-            onClick={handleTempSignIn}
-            className="w-20 text-start text-h7"
-          >
+          <button onClick={handleSignIn} className="w-20 text-start text-h7">
             Sign in
           </button>
         )}

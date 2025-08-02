@@ -28,6 +28,7 @@ export default function ChatList({
     const fetchFn = isPlay ? getChatList : getChatList_Bus;
     fetchFn(user.id)
       .then((data) => {
+        console.log("📌 API에서 받은 원본 chats 데이터:", data); // 원본 데이터 구조 확인
         setChats(data);
         setError(null);
       })
@@ -91,13 +92,16 @@ export default function ChatList({
     return <div className="p-4 text-red-500 text-sm">{error}</div>;
   }
 
-  if (chats.length === 0) {
+  if (!Array.isArray(chats) || chats.length === 0) {
+    console.log("⚠ chats가 배열이 아니거나 비어있음:", chats);
     return (
       <div className={`p-4 ${loadingTextColor} text-sm`}>
         업로드된 채팅이 없습니다.
       </div>
     );
   }
+
+  console.log("📌 렌더링 직전 chats 상태:", chats);
 
   return (
     <div
@@ -111,7 +115,9 @@ export default function ChatList({
           {[...chats]
             .sort((a, b) => new Date(b.uploaded_at) - new Date(a.uploaded_at))
             .slice(0, 3)
-            .map((chat) => {
+            .map((chat, idx) => {
+              console.log(`📌 chat[${idx}] 데이터:`, chat); // 개별 채팅 데이터 확인
+
               const isSelected = selectedChatId === chat.id;
               const uploadedDate = new Date(chat.uploaded_at);
               const now = new Date();
@@ -141,7 +147,7 @@ export default function ChatList({
                     >
                       <div className="flex items-center gap-0.75">
                         <span className={isPlay ? "" : "text-gray-7"}>
-                          {chat.title.slice(0, 12)}
+                          {chat.title?.slice(0, 12) || "제목 없음"}
                         </span>
                         {isSelected && (
                           <Icons.ArrowDown className="w-2 h-2 text-primary-dark" />

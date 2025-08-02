@@ -34,7 +34,11 @@ export default function PlayChemiPage() {
   };
 
   const handleFileUpload = async (file) => {
+    console.log("handleFileUpload 실행됨!", file);
     try {
+      console.log("보낼 파일:", file);
+      console.log("postChat 요청 시작 - userId:", user?.id || 1);
+
       const result = await postChat(user?.id || 1, file);
       console.log("파일 업로드 성공:", result);
 
