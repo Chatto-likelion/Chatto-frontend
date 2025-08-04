@@ -40,7 +40,6 @@ export const login = async (data) => {
     });
 
     if (response.status === 200) {
-      console.log("로그인 성공", response.data);
       return response.data;
     }
   } catch (error) {
@@ -61,7 +60,6 @@ export const login = async (data) => {
 export const logout = async () => {
   const response = await instance.post("/account/logout/");
   if (response.status === 200) {
-    console.log("로그아웃 성공");
     window.location.href = "/";
   } else {
     console.log("로그아웃 에러:", response);
@@ -243,40 +241,6 @@ export const postAnalyze = async (chatId, payload) => {
   }
 };
 
-export const saveAnalysis = async (resultId) => {
-  if (USE_MOCK) {
-    console.log("📦 목업 결과 저장 요청...");
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log("✅ 목업 결과 저장 완료");
-        resolve();
-      }, 500);
-    });
-  }
-
-  try {
-    const response = await instance.post(`/play/analysis/${resultId}/save/`);
-
-    if (response.status === 204) {
-      console.log("결과 저장 성공");
-      return;
-    } else {
-      throw new Error("알 수 없는 응답 상태");
-    }
-  } catch (error) {
-    if (error.response) {
-      if (error.response.status === 400) {
-        throw new Error("잘못된 요청입니다. (400)");
-      }
-      if (error.response.status === 404) {
-        throw new Error("분석 결과를 찾을 수 없습니다. (404)");
-      }
-    }
-    console.error("결과 저장 에러:", error);
-    throw error;
-  }
-};
-
 /**
  * ✅ 분석 결과
  */
@@ -305,7 +269,11 @@ export const getAnalysisList = async () => {
 
   try {
     const response = await instanceWithToken.get(`/play/analysis/`);
-    return response.data;
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
+    }
   } catch (error) {
     if (error.response?.status === 401) {
       throw new Error("로그인이 필요합니다. (401)");

@@ -8,14 +8,9 @@ axios.defaults.withCredentials = true;
 axios.defaults.headers.post["Content-Type"] = "application/json";
 axios.defaults.headers.common["X-CSRFToken"] = getCookie("csrftoken");
 
-export const instance = axios.create({
-  baseURL: "http://127.0.0.1:8000/api",
-  withCredentials: true,
-});
+export const instance = axios.create();
 
-export const instanceWithToken = axios.create({
-  baseURL,
-});
+export const instanceWithToken = axios.create();
 console.log("VITE_API_URL:", import.meta.env.VITE_API_URL);
 console.log("instanceWithToken baseURL:", baseURL);
 

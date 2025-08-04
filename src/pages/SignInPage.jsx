@@ -30,7 +30,6 @@ export default function SignInPage() {
         point: res.point,
         phone: res.phone,
       });
-      console.log("로그인됨:", res);
       navigate("/");
     } catch (error) {
       alert(error.message);
@@ -41,25 +40,25 @@ export default function SignInPage() {
     navigate("/signup");
   };
 
-  const PasswordToggle = React.memo(
-    ({ isShow, onToggle }) => {
-      return (
-        <button type="button" onClick={onToggle} className="align-middle">
-          {isShow ? <img src={EyeOpened}/> : <img src={EyeClosed}/>}
-        </button>
-      )
-    }
-  )
+  const PasswordToggle = React.memo(({ isShow, onToggle }) => {
+    return (
+      <button type="button" onClick={onToggle} className="align-middle">
+        {isShow ? <img src={EyeOpened} /> : <img src={EyeClosed} />}
+      </button>
+    );
+  });
 
   const handlePasswordToggle = () => {
     setShowPassword((prev) => !prev);
-  }
+  };
 
   return (
     <div>
       <Header />
       <main className="flex flex-col items-center justify-center px-4 my-56 w-full">
-        <h1 className="text-h2 w-full max-w-150 flex justify-center pb-7.5 border-b-2 border-b-primary">Sign in</h1>
+        <h1 className="text-h2 w-full max-w-150 flex justify-center pb-7.5 border-b-2 border-b-primary">
+          Sign in
+        </h1>
 
         <form
           onSubmit={handleSubmit}
@@ -92,7 +91,11 @@ export default function SignInPage() {
 
           <div className="flex text-body2 mt-2 gap-2">
             처음이신가요?
-            <button type="button" onClick={handleSignUp} className="text-primary cursor-pointer hover:text-primary-dark">
+            <button
+              type="button"
+              onClick={handleSignUp}
+              className="text-primary cursor-pointer hover:text-primary-dark"
+            >
               Sign up Now
             </button>
           </div>
