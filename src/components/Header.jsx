@@ -10,8 +10,6 @@ export default function Header() {
   const { pathname } = useLocation();
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const { login } = useAuth();
-
   const handleSignIn = () => {
     navigate("/signin");
   };

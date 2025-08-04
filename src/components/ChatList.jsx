@@ -118,7 +118,7 @@ export default function ChatList({
             .map((chat, idx) => {
               console.log(`📌 chat[${idx}] 데이터:`, chat); // 개별 채팅 데이터 확인
 
-              const isSelected = selectedChatId === chat.id;
+              const isSelected = selectedChatId === chat.chat_id;
               const uploadedDate = new Date(chat.uploaded_at);
               const now = new Date();
               const diffDays = Math.floor(
@@ -127,12 +127,12 @@ export default function ChatList({
 
               return (
                 <div
-                  key={chat.id}
+                  key={chat.chat_id}
                   className="w-47.5 flex flex-col justify-center items-center"
                 >
                   <div className="w-full gap-0.75 flex justify-between items-center">
                     <button
-                      onClick={() => onSelect?.(chat.id)}
+                      onClick={() => onSelect?.(chat.chat_id)}
                       className={`w-45 h-7.25 text-body2 flex justify-between items-center px-3 py-2 rounded hover:bg-${
                         isPlay ? "gray-5" : "gray-2"
                       } ${
@@ -170,7 +170,7 @@ export default function ChatList({
                       className={`w-2 h-2 ${
                         isPlay ? "text-primary-light" : "text-primary"
                       } opacity-10 hover:opacity-100 cursor-pointer`}
-                      onClick={() => handleDelete(chat.id)}
+                      onClick={() => handleDelete(chat.chat_id)}
                     />
                   </div>
                   <div
