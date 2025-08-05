@@ -40,7 +40,7 @@ export default function Header() {
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full h-[70px] pt-5 pb-2 px-12 flex justify-between items-end shrink-0 
+      className={`fixed top-0 left-0 w-full h-[72px] pt-5 pb-2 px-12 flex justify-between items-end shrink-0 
         ${
           mode === "play"
             ? "border-b-2 border-primary bg-primary-light"

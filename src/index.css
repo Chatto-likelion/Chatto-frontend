@@ -118,22 +118,19 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-  width: 8px; /* 스크롤바 폭 */
+  width: 4px; /* 폭 */
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent; /* 트랙 배경 투명하게 */
+  background: transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(100, 100, 100, 0.3); /* 스크롤바 색상 */
+  background-color: #fff787;
   border-radius: 4px;
-  border: 2px solid transparent; /* 안쪽에 여백 주기용 */
+  border: 1px solid transparent;
   background-clip: content-box;
-}
 
-/* Firefox 대응 */
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(100, 100, 100, 0.3) transparent;
+  min-height: 10px; /* 너무 짧아지지 않게 최소 길이 설정 */
+  max-height: 30px; /* 스크롤 thumb 길이 제한 */
 }
