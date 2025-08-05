@@ -116,3 +116,21 @@ body {
 .scrollbar-hide {
   scrollbar-width: none;
 }
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px; /* 폭 */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #fff787;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background-clip: content-box;
+
+  min-height: 10px; /* 너무 짧아지지 않게 최소 길이 설정 */
+  max-height: 30px; /* 스크롤 thumb 길이 제한 */
+}

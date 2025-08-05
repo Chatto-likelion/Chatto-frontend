@@ -1,36 +1,21 @@
-import {
-  Header,
-  ChatList,
-  FileUpload,
-  BigServices,
-  DetailForm,
-} from "@/components";
-import { postChat, postAnalyze, getAnalysisDetail } from "@/apis/api";
+import { Header, ChatList, FileUpload } from "@/components";
+import { postChat, getAnalysisList, getAnalysisList_Bus } from "@/apis/api";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import * as Icons from "@/assets/svg/index.js";
-import SmallServices from "../components/SmallServices";
 
 export default function PlayMyPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [selectedChatId, setSelectedChatId] = useState(null);
   const chatListReloadRef = useRef();
-
-  const [peopleNum, setPeopleNum] = useState("23명");
-  const [relation, setRelation] = useState("동아리 부원");
-  const [situation, setSituation] = useState("일상대화");
-  const [startPeriod, setStartPeriod] = useState("처음부터");
-  const [endPeriod, setEndPeriod] = useState("끝까지");
-
-  const [analysisResult, setAnalysisResult] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [analyses, setAnalyses] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const handleChatSelect = (chatId) => {
     setSelectedChatId((prevId) => (prevId === chatId ? null : chatId));
-    console.log("선택된 채팅:", chatId === selectedChatId ? "해제됨" : chatId);
   };
 
   const handleFileUpload = async (file) => {
@@ -55,49 +40,31 @@ export default function PlayMyPage() {
     }
   };
 
-  const handleAnalyze = async () => {
-    if (!selectedChatId) {
-      alert("먼저 채팅을 선택하세요.");
-      return;
-    }
-
+  const loadAnalyses = () => {
     setLoading(true);
-    setError(null);
-    setAnalysisResult(null);
-
-    const payload = {
-      people_num: parseInt(peopleNum),
-      rel: relation,
-      situation,
-      analysis_start: startPeriod,
-      analysis_end: endPeriod,
-    };
-
-    try {
-      const analyzeResponse = await postAnalyze(selectedChatId, payload);
-      const resultId = analyzeResponse.result_id;
-      const detailResponse = await getAnalysisDetail(resultId);
-      setAnalysisResult(detailResponse);
-    } catch (err) {
-      console.error(err);
-      setError(err.message || "분석에 실패했습니다.");
-    } finally {
-      setLoading(false);
-    }
+    getAnalysisList(user.id)
+      .then((data) => {
+        console.log("📌 API에서 받은 원본 analysis 데이터:", data); // 원본 데이터 구조 확인
+        setAnalyses(data);
+        setError(null);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("분석 목록을 불러오는데 실패했습니다.");
+      })
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
-    // 선택된 채팅이 바뀌면 결과 초기화
-    setAnalysisResult(null);
-    setError(null);
-  }, [selectedChatId]);
+    loadAnalyses();
+  }, []);
 
   return (
     <div className="flex flex-col justify-start items-start h-screen bg-primary-dark text-white">
       <Header />
-      <div className="flex-1 pl-32.25 mt-12.75 overflow-hidden flex justify-between items-start">
+      <div className="flex-1 pl-25.5 mt-18 overflow-hidden flex justify-between items-start">
         {/* 왼쪽 */}
-        <div className="gap-5 pt-42.5 w-53.5 mr-15 flex flex-col items-center justify-center">
+        <div className="gap-5 pt-47 w-55.5 mr-12.75 flex flex-col items-center justify-center">
           <ChatList
             onSelect={handleChatSelect}
             selectedChatId={selectedChatId}
@@ -107,8 +74,8 @@ export default function PlayMyPage() {
           <FileUpload onUpload={handleFileUpload} />
         </div>
 
-        <main className="flex-1 max-h-240 pt-41.5 w-268.75 pr-18 flex flex-col justify-start items-center">
-          <div className="w-full h-55.25 mb-11 pl-6.5 pr-7 rounded-lg border border-primary-light flex flex-col justify-start items-start gap-0.25">
+        <main className="flex-1 pt-36 w-269.25 flex flex-col justify-start items-center">
+          <div className="w-full h-55.75 mb-11 pl-6.5 pr-7 rounded-lg border border-primary-light flex flex-col justify-start items-start gap-0.25">
             <div className="mt-11 w-75 flex justify-between items-start gap-8">
               <div className="w-21 flex flex-col gap-1">
                 <div className="w-21 h-21 rounded-full bg-gray-4"></div>
@@ -126,7 +93,7 @@ export default function PlayMyPage() {
                       onClick={() => {
                         navigate("/CreditsPage");
                       }}
-                      className="w-7.5 h-4.5 border border-secondary-dark rounded-sm text-gray-3 hover:bg-primary-light hover:text-primary-dark cursor-pointer"
+                      className="w-8 h-5 border border-secondary-dark rounded-sm text-gray-3 hover:bg-primary-light hover:text-primary-dark cursor-pointer"
                     >
                       <p className="text-caption">충전</p>
                     </button>
@@ -146,13 +113,67 @@ export default function PlayMyPage() {
               <p className="text-caption cursor-pointer">정보수정</p>
             </div>
           </div>
-          <div className="w-full mb-24 flex justify-center items-center">
+          <div className="w-full mb-5.75 flex justify-center items-center">
             <p className="text-h6">분석 결과</p>
           </div>
-          <div className="w-full overflow-y-auto"></div>
+          <div className="w-full pr-1.5 border-r-2 border-white">
+            <div className="w-full h-105 grid grid-cols-3 gap-6 overflow-y-auto custom-scrollbar">
+              {[...analyses]
+                .sort(
+                  (a, b) =>
+                    new Date(b.analysis_date) - new Date(a.analysis_date)
+                )
+                .map((item) => (
+                  <div
+                    key={item.result_id}
+                    className="w-82.5 h-63 px-2.75 pt-4 pb-3 text-gray-3 relative flex flex-col justify-between items-center rounded-lg border border-primary-light"
+                  >
+                    <div className="w-full flex flex-col justify-start items-center">
+                      <div className="w-full pr-3 flex justify-between items-center mb-2">
+                        <p className="text-h7">{item.analysis_type}</p>
+                        <Icons.X
+                          onClick={() => {}}
+                          className="w-2 h-2 text-primary-light cursor-pointer"
+                        />
+                      </div>
+                      <div className="w-full mb-3 pr-3 text-right text-body2  text-secondary-dark">
+                        {item.analysis_date}
+                      </div>
+
+                      <div className="w-75 h-8.5 px-3 py-2 rounded flex justify-between items-center mb-3 text-body1 border border-secondary">
+                        <span>{item.chat}</span>
+                        <div className="flex items-center gap-0.5">
+                          <Icons.Person className="w-5.25 h-5.25 p-0.75 text-gray-2" />
+                          <span>{item.chat}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="w-74.5 px-2 flex flex-col justify-between items-center gap-0.5">
+                      <div className="w-full h-6 flex justify-start items-center gap-6.5 text-start">
+                        <p className="w-30">분석 기간</p>
+                        <p className="text-body2">25.04.14 ~ 25.04.14</p>
+                      </div>
+                      <div className="w-full h-6 flex justify-start items-center gap-6.5 text-start">
+                        <p className="w-30">분석 기간</p>
+                        <p className="text-body2">25.04.14</p>
+                      </div>
+                    </div>
+
+                    <div className="w-full flex justify-start items-center gap-4 ">
+                      <button className="ml-13 w-17.5 h-6.5 px-1.5 py-0.75 border border-secondary text-secondary text-button rounded hover:bg-primary-light hover:text-primary-dark cursor-pointer">
+                        분석 보기
+                      </button>
+                      <button className="w-17.5 h-6.5 px-1.5 py-0.75 border border-secondary text-secondary text-button rounded hover:bg-primary-light hover:text-primary-dark cursor-pointer">
+                        퀴즈 보기
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
         </main>
       </div>
-      <Icons.Chatto className="w-18.75 h-29.75 text-primary-light fixed bottom-5 right-12" />
     </div>
   );
 }
