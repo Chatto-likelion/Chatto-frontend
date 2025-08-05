@@ -126,7 +126,7 @@ export default function BusinessMyPage() {
                 .map((item) => (
                   <div
                     key={item.result_id}
-                    className="w-82.5 h-63 px-2.75 pt-4 pb-3 text-gray-7 relative flex flex-col justify-between items-center rounded-lg border border-primary-dark"
+                    className="w-82.5 h-63 px-2.75 pt-4 pb-3 text-gray-7 relative flex flex-col justify-between items-center rounded-lg border border-primary-dark hover:bg-primary/10"
                   >
                     <div className="w-full flex flex-col justify-start items-center">
                       <div className="w-full pr-3 flex justify-between items-center mb-2">
