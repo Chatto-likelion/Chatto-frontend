@@ -1,5 +1,5 @@
 import { Header, ChatList, FileUpload } from "@/components";
-import { postChat, getAnalysisList, getAnalysisList_Bus } from "@/apis/api";
+import { postChat, getAnalysisList } from "@/apis/api";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";

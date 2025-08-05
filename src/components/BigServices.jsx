@@ -12,7 +12,7 @@ const playServices = [
 
 const businessServices = [
   { title: "업무 참여도 분석", icon: NavSome, route: "/business/contr" },
-  { title: "소통 구조 분석", icon: NavMBTI, route: "/business/contr" },
+  { title: "소통 구조 분석", icon: NavMBTI, route: "/business/commu" },
   { title: "더 많은 분석", icon: NavLover, route: "/business/more" },
 ];
 

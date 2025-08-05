@@ -381,7 +381,7 @@ export const postChat_Bus = async (userId, file) => {
   formData.append("user_id", userId);
   formData.append("file", file);
 
-  const response = await instance.post("/business/chat/", formData, {
+  const response = await instanceWithToken.post("/business/chat/", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
 
@@ -405,7 +405,9 @@ export const deleteChat_Bus = async (chatId) => {
     });
   }
 
-  const response = await instance.delete(`/business/chat/${chatId}/delete/`);
+  const response = await instanceWithToken.delete(
+    `/business/chat/${chatId}/delete/`
+  );
 
   if (response.status === 204) {
     console.log("채팅 삭제 성공");
@@ -415,7 +417,7 @@ export const deleteChat_Bus = async (chatId) => {
 };
 
 // 채팅 목록 조회
-export const getChatList_Bus = async (userId) => {
+export const getChatList_Bus = async () => {
   if (USE_MOCK) {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -437,7 +439,7 @@ export const getChatList_Bus = async (userId) => {
     });
   }
 
-  const response = await instance.get(`/business/chat/${userId}/`);
+  const response = await instanceWithToken.get(`/business/chat/`);
 
   if (response.status === 200) {
     return response.data;
@@ -459,7 +461,7 @@ export const postAnalyze_Bus = async (chatId, payload) => {
       }, 1000);
     });
   }
-  const response = await instance.post(
+  const response = await instanceWithToken.post(
     `/business/chat/${chatId}/analyze/`,
     payload
   );
@@ -484,7 +486,9 @@ export const saveAnalysis_Bus = async (resultId) => {
     });
   }
 
-  const response = await instance.post(`/business/analysis/${resultId}/save/`);
+  const response = await instanceWithToken.post(
+    `/business/analysis/${resultId}/save/`
+  );
 
   if (response.status === 204) {
     console.log("결과 저장 성공");
@@ -494,7 +498,7 @@ export const saveAnalysis_Bus = async (resultId) => {
 };
 
 // 분석 목록 조회
-export const getAnalysisList_Bus = async (userId) => {
+export const getAnalysisList_Bus = async () => {
   if (USE_MOCK) {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -510,7 +514,7 @@ export const getAnalysisList_Bus = async (userId) => {
     });
   }
 
-  const response = await instance.get(`/business/analysis/${userId}/`);
+  const response = await instanceWithToken.get(`/business/analysis/`);
 
   if (response.status === 200) {
     return response.data;
@@ -531,7 +535,9 @@ export const getAnalysisDetail_Bus = async (resultId) => {
     });
   }
 
-  const response = await instance.get(`/business/analysis/${resultId}/detail/`);
+  const response = await instanceWithToken.get(
+    `/business/analysis/${resultId}/detail/`
+  );
 
   if (response.status === 200) {
     return response.data;
@@ -552,7 +558,7 @@ export const deleteAnalysis_Bus = async (resultId) => {
     });
   }
 
-  const response = await instance.delete(
+  const response = await instanceWithToken.delete(
     `/business/analysis/${resultId}/detail/`
   );
 
@@ -568,7 +574,7 @@ export const deleteAnalysis_Bus = async (resultId) => {
  */
 
 export const updateMe = async (data) => {
-  const response = await instance.put("/me", data);
+  const response = await instanceWithToken.put("/me", data);
   if (response.status === 200) {
     console.log("사용자 정보 수정 성공");
     return response.data;
