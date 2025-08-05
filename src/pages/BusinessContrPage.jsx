@@ -55,6 +55,18 @@ export default function BusinessContrPage() {
     }
   };
 
+  const convertPeriodToDate = (label, type) => {
+    const now = new Date();
+    switch (label) {
+      case "처음부터":
+        return new Date(now.getFullYear() - 1, 0, 1).toISOString(); // 1년 전 기준
+      default:
+        return type === "end"
+          ? now.toISOString()
+          : new Date(now.getFullYear() - 1, 0, 1).toISOString();
+    }
+  };
+
   const handleAnalyze = async () => {
     if (!selectedChatId) {
       alert("먼저 채팅을 선택하세요.");
@@ -69,13 +81,13 @@ export default function BusinessContrPage() {
       people_num: parseInt(peopleNum),
       rel: relation,
       situation,
-      analysis_start: startPeriod,
-      analysis_end: endPeriod,
+      analysis_start: convertPeriodToDate(startPeriod, "start"),
+      analysis_end: convertPeriodToDate(endPeriod, "end"),
     };
 
     try {
       const analyzeResponse = await postAnalyze_Bus(selectedChatId, payload);
-      const resultId = analyzeResponse.result_id_bus_contrib;
+      const resultId = analyzeResponse.result_id;
 
       const detailResponse = await getAnalysisDetail_Bus(resultId);
       setAnalysisResult(detailResponse);

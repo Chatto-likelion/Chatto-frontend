@@ -85,7 +85,11 @@ export default function Header() {
                     : () => {}
                 }
                 className={`text-h7 ${
-                  pathname.includes("mypage") ? "text-primary" : ""
+                  pathname.includes("mypage")
+                    ? mode === "business"
+                      ? "text-primary-light"
+                      : "text-primary"
+                    : ""
                 }`}
               >
                 My page
