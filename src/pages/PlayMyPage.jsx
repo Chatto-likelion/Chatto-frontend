@@ -1,17 +1,29 @@
-import { Header, ChatList, FileUpload } from "@/components";
-import { postChat, getAnalysisList } from "@/apis/api";
-import { useState, useRef, useEffect } from "react";
+import {
+  Header,
+  ChatList,
+  FileUpload,
+  DetailForm,
+  BigServices,
+} from "@/components";
+import { postChat, postAnalyze } from "@/apis/api";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import * as Icons from "@/assets/svg/index.js";
 
-export default function PlayMyPage() {
+export default function PlayChemiPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [selectedChatId, setSelectedChatId] = useState(null);
   const chatListReloadRef = useRef();
-  const [analyses, setAnalyses] = useState([]);
-  const [loading, setLoading] = useState(true);
+
+  const [peopleNum, setPeopleNum] = useState("23명");
+  const [relation, setRelation] = useState("동아리 부원");
+  const [situation, setSituation] = useState("일상대화");
+  const [startPeriod, setStartPeriod] = useState("처음부터");
+  const [endPeriod, setEndPeriod] = useState("끝까지");
+
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const handleChatSelect = (chatId) => {
@@ -19,19 +31,11 @@ export default function PlayMyPage() {
   };
 
   const handleFileUpload = async (file) => {
-    console.log("handleFileUpload 실행됨!", file);
     try {
-      console.log("보낼 파일:", file);
-      console.log("postChat 요청 시작 - userId:", user?.id || 1);
-
       const result = await postChat(user?.id || 1, file);
-      console.log("파일 업로드 성공:", result);
-
       if (chatListReloadRef.current) {
         chatListReloadRef.current();
       }
-
-      // 업로드한 채팅을 선택
       if (result?.chat_id) {
         setSelectedChatId(result.chat_id);
       }
@@ -40,140 +44,133 @@ export default function PlayMyPage() {
     }
   };
 
-  const loadAnalyses = () => {
-    setLoading(true);
-    getAnalysisList(user.id)
-      .then((data) => {
-        console.log("📌 API에서 받은 원본 analysis 데이터:", data); // 원본 데이터 구조 확인
-        setAnalyses(data);
-        setError(null);
-      })
-      .catch((err) => {
-        console.error(err);
-        setError("분석 목록을 불러오는데 실패했습니다.");
-      })
-      .finally(() => setLoading(false));
+  const convertPeriodToDate = (label, type) => {
+    const now = new Date();
+    switch (label) {
+      case "처음부터":
+        return new Date(now.getFullYear() - 1, 0, 1).toISOString();
+      default:
+        return type === "end"
+          ? now.toISOString()
+          : new Date(now.getFullYear() - 1, 0, 1).toISOString();
+    }
   };
 
-  useEffect(() => {
-    loadAnalyses();
-  }, []);
+  const handleAnalyze = async () => {
+    if (!selectedChatId) {
+      alert("먼저 채팅을 선택하세요.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const payload = {
+      people_num: parseInt(peopleNum),
+      rel: relation,
+      situation,
+      analysis_start: convertPeriodToDate(startPeriod, "start"),
+      analysis_end: convertPeriodToDate(endPeriod, "end"),
+    };
+
+    try {
+      const analyzeResponse = await postAnalyze(selectedChatId, payload);
+      const resultId = analyzeResponse.result_id;
+      // 결과 페이지로 이동
+      navigate(`/play/chemi/${resultId}`);
+    } catch (err) {
+      setError(err.message || "분석에 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="flex flex-col justify-start items-start h-screen bg-primary-dark text-white">
+    <div className="flex flex-col justify-start items-center h-screen bg-primary-dark text-white">
       <Header />
-      <div className="flex-1 pl-25.5 mt-18 overflow-hidden flex justify-between items-start">
+      <div className="flex-1 w-300 mt-17.5 overflow-hidden flex justify-between items-start">
         {/* 왼쪽 */}
-        <div className="gap-5 pt-47 w-55.5 mr-12.75 flex flex-col items-center justify-center">
+        <div className="gap-5 pt-6 w-53.5 mr-60.5 flex flex-col items-center justify-center">
+          <div className="w-full mb-32 flex justify-start items-end gap-2 text-primary-light">
+            <p
+              className="text-h6 cursor-pointer"
+              onClick={() => navigate("/play")}
+            >
+              Chatto Play
+            </p>
+            <p className="text-body2">케미측정</p>
+          </div>
           <ChatList
             onSelect={handleChatSelect}
             selectedChatId={selectedChatId}
             setSelectedChatId={setSelectedChatId}
             onUploaded={chatListReloadRef}
           />
+
           <FileUpload onUpload={handleFileUpload} />
+
+          {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
         </div>
 
-        <main className="flex-1 pt-36 w-269.25 flex flex-col justify-start items-center">
-          <div className="w-full h-55.75 mb-11 pl-6.5 pr-7 rounded-lg border border-primary-light flex flex-col justify-start items-start gap-0.25">
-            <div className="mt-11 w-75 flex justify-between items-start gap-8">
-              <div className="w-21 flex flex-col gap-1">
-                <div className="w-21 h-21 rounded-full bg-gray-4"></div>
-                <p className="w-21 text-center text-overline text-gray-5 cursor-pointer">
-                  프로필 변경
+        {/* 가운데 */}
+        <main className="flex-1 overflow-y-auto max-h-240 scrollbar-hide pt-28 w-157 pr-57 flex flex-col justify-start items-center">
+          {!loading && (
+            <>
+              <Icons.ChemiIconFull className="mb-4" />
+              <div className="w-full flex flex-col items-center text-body2 text-center mb-21">
+                <p>우리의 케미는 얼마나 잘 맞을까?</p>
+                <p>
+                  주고받은 대화를 토대로 대화 참여자 간의 소통 궁합을
+                  확인해보세요.
+                  <br /> 말 속에 숨은 케미 지수를 한눈에 보여드립니다!
                 </p>
               </div>
-              <div className="pt-3 w-46 flex flex-col gap-5.5">
-                <p className="w-full text-h6 text-start">{user.username}</p>
-                <div className="w-full flex flex-col justify-center items-start gap-0.5">
-                  <div className="w-full gap-1.5 flex justify-start items-center">
-                    <p className="text-body1 text-secondary">크레딧</p>
-                    <p className="text-body1 mr-1.5">{user.point}C</p>
-                    <button
-                      onClick={() => {
-                        navigate("/CreditsPage");
-                      }}
-                      className="w-8 h-5 border border-secondary-dark rounded-sm text-gray-3 hover:bg-primary-light hover:text-primary-dark cursor-pointer"
-                    >
-                      <p className="text-caption">충전</p>
-                    </button>
+
+              {/* 세부 정보 폼 */}
+              <div className="w-96 py-6.5 pl-11 pr-10 flex flex-col items-center border-2 border-primary-light rounded-lg">
+                <div className="mb-8 flex flex-col gap-1">
+                  <div className="pl-1.5 gap-1 flex justify-center items-end">
+                    <span className="bold text-h6 text-white">세부 정보</span>
+                    <span className="text-caption text-gray-5">(Optional)</span>
                   </div>
-                  <div className="w-full gap-1.5 flex justify-start items-center">
-                    <p className="text-body1 text-secondary">연락처</p>
-                    <p className="text-body1">{user.phone}</p>
-                  </div>
-                  <div className="w-full gap-1.5 flex justify-start items-center">
-                    <p className="text-body1 text-secondary">이메일</p>
-                    <p className="text-body1">{user.email}</p>
-                  </div>
+                  <p className="text-caption text-white">
+                    더 자세한 분석을 위해 추가 정보를 설정합니다.
+                  </p>
                 </div>
+                <DetailForm
+                  isAnalysis={false}
+                  peopleNum={peopleNum}
+                  setPeopleNum={setPeopleNum}
+                  relation={relation}
+                  setRelation={setRelation}
+                  situation={situation}
+                  setSituation={setSituation}
+                  startPeriod={startPeriod}
+                  setStartPeriod={setStartPeriod}
+                  endPeriod={endPeriod}
+                  setEndPeriod={setEndPeriod}
+                />
               </div>
-            </div>
-            <div className="w-full h-6 flex justify-end items-center">
-              <p className="text-caption cursor-pointer">정보수정</p>
-            </div>
-          </div>
-          <div className="w-full mb-5.75 flex justify-center items-center">
-            <p className="text-h6">분석 결과</p>
-          </div>
-          <div className="w-full pr-1.5 border-r-2 border-white">
-            <div className="w-full h-105 grid grid-cols-3 gap-6 overflow-y-auto custom-scrollbar">
-              {[...analyses]
-                .sort(
-                  (a, b) =>
-                    new Date(b.analysis_date) - new Date(a.analysis_date)
-                )
-                .map((item) => (
-                  <div
-                    key={item.result_id}
-                    className="w-82.5 h-63 px-2.75 pt-4 pb-3 text-gray-3 relative flex flex-col justify-between items-center rounded-lg border border-primary-light"
-                  >
-                    <div className="w-full flex flex-col justify-start items-center">
-                      <div className="w-full pr-3 flex justify-between items-center mb-2">
-                        <p className="text-h7">{item.analysis_type}</p>
-                        <Icons.X
-                          onClick={() => {}}
-                          className="w-2 h-2 text-primary-light cursor-pointer"
-                        />
-                      </div>
-                      <div className="w-full mb-3 pr-3 text-right text-body2  text-secondary-dark">
-                        {item.analysis_date}
-                      </div>
 
-                      <div className="w-75 h-8.5 px-3 py-2 rounded flex justify-between items-center mb-3 text-body1 border border-secondary">
-                        <span>{item.chat}</span>
-                        <div className="flex items-center gap-0.5">
-                          <Icons.Person className="w-5.25 h-5.25 p-0.75 text-gray-2" />
-                          <span>{item.chat}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="w-74.5 px-2 flex flex-col justify-between items-center gap-0.5">
-                      <div className="w-full h-6 flex justify-start items-center gap-6.5 text-start">
-                        <p className="w-30">분석 기간</p>
-                        <p className="text-body2">25.04.14 ~ 25.04.14</p>
-                      </div>
-                      <div className="w-full h-6 flex justify-start items-center gap-6.5 text-start">
-                        <p className="w-30">분석 기간</p>
-                        <p className="text-body2">25.04.14</p>
-                      </div>
-                    </div>
-
-                    <div className="w-full flex justify-start items-center gap-4 ">
-                      <button className="ml-13 w-17.5 h-6.5 px-1.5 py-0.75 border border-secondary text-secondary text-button rounded hover:bg-primary-light hover:text-primary-dark cursor-pointer">
-                        분석 보기
-                      </button>
-                      <button className="w-17.5 h-6.5 px-1.5 py-0.75 border border-secondary text-secondary text-button rounded hover:bg-primary-light hover:text-primary-dark cursor-pointer">
-                        퀴즈 보기
-                      </button>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
+              <button
+                onClick={handleAnalyze}
+                disabled={loading}
+                className="mt-6 w-19.75 h-8.5 hover:bg-secondary-light hover:text-primary-dark cursor-pointer px-3 py-2 text-button text-secondary-light border border-secondary-light rounded-lg "
+              >
+                {loading ? "분석 중..." : "분석 시작"}
+              </button>
+            </>
+          )}
         </main>
+
+        {/* 오른쪽 */}
+        <div className="w-29 mt-50 flex flex-col items-center justify-start gap-4">
+          <div className="w-full h-full border-2 border-primary-light rounded-lg p-3 pb-5 bg-primary-dark">
+            <BigServices />
+          </div>
+        </div>
       </div>
+      <Icons.Chatto className="w-18.75 h-29.75 text-primary-light fixed bottom-5 right-12" />
     </div>
   );
 }
