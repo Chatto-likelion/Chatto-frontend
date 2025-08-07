@@ -126,7 +126,7 @@ export default function BusinessMyPage() {
                 .map((item) => (
                   <div
                     key={item.result_id}
-                    className="w-82.5 h-63 px-2.75 pt-4 pb-3 text-gray-7 relative flex flex-col justify-between items-center rounded-lg border border-primary-dark hover:bg-primary/10"
+                    className="w-82.5 h-63 px-2.75 pt-4 pb-3 text-gray-7 relative flex flex-col justify-between items-center rounded-lg border border-primary-dark"
                   >
                     <div className="w-full flex flex-col justify-start items-center">
                       <div className="w-full pr-3 flex justify-between items-center mb-2">
@@ -161,10 +161,10 @@ export default function BusinessMyPage() {
                     </div>
 
                     <div className="w-full flex justify-start items-center gap-4 ">
-                      <button className="ml-13 w-17.5 h-6.5 px-1.5 py-0.75 border border-secondary-dark text-secondary-dark text-button rounded hover:bg-secondary-dark hover:text-white cursor-pointer">
+                      <button className="ml-13 w-17.5 h-6.5 px-1.5 py-0.75 border border-primary-dark text-primary-dark text-button rounded hover:bg-primary-dark hover:text-white cursor-pointer">
                         분석 보기
                       </button>
-                      <button className="w-17.5 h-6.5 px-1.5 py-0.75 border border-secondary-dark text-secondary-dark text-button rounded hover:bg-secondary-dark hover:text-white cursor-pointer">
+                      <button className="w-17.5 h-6.5 px-1.5 py-0.75 border border-primary-dark text-primary-dark text-button rounded hover:bg-primary-dark hover:text-white cursor-pointer">
                         퀴즈 보기
                       </button>
                     </div>
