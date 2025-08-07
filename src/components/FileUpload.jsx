@@ -1,15 +1,41 @@
 import { useDropzone } from "react-dropzone";
 import * as Icons from "@/assets/svg";
 import useCurrentMode from "@/hooks/useCurrentMode";
+import { postChat } from "@/apis/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { useChat } from "@/contexts/ChatContext";
 
-export default function FileUpload({ onUpload }) {
+export default function FileUpload() {
+  const { user } = useAuth();
+  const { chatListReloadRef, setSelectedChatId } = useChat();
+
+  const handleFileUpload = async (file) => {
+    try {
+      // console.log("보낼 파일:", file);
+      // console.log("postChat 요청 시작 - userId:", user?.id || 1);
+      const result = await postChat(user?.id || 1, file);
+      console.log("파일 업로드 성공:", result);
+
+      if (chatListReloadRef.current) {
+        chatListReloadRef.current();
+      }
+
+      // 업로드한 채팅을 선택
+      if (result?.chat_id) {
+        setSelectedChatId(result.chat_id);
+      }
+    } catch (error) {
+      console.error("파일 업로드 실패:", error);
+    }
+  };
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: { "text/plain": [".txt"] },
     multiple: false,
     onDrop: (acceptedFiles) => {
       const file = acceptedFiles[0];
       console.log("업로드된 파일:", file);
-      onUpload?.(file);
+      handleFileUpload(file);
     },
   });
 

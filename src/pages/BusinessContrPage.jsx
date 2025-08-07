@@ -6,21 +6,15 @@ import {
   DetailForm,
   SmallServices,
 } from "@/components";
-import {
-  postChat_Bus,
-  postAnalyze_Bus,
-  getAnalysisDetail_Bus,
-} from "@/apis/api";
-import { useState, useRef, useEffect } from "react";
+import { postAnalyze_Bus, getAnalysisDetail_Bus } from "@/apis/api";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { useChat } from "@/contexts/ChatContext";
 import * as Icons from "@/assets/svg/index.js";
 
 export default function BusinessContrPage() {
-  const { user } = useAuth();
+  const { selectedChatId } = useChat();
   const navigate = useNavigate();
-  const [selectedChatId, setSelectedChatId] = useState(null);
-  const chatListReloadRef = useRef();
 
   const [peopleNum, setPeopleNum] = useState("23명");
   const [relation, setRelation] = useState("동아리 부원");
@@ -31,29 +25,6 @@ export default function BusinessContrPage() {
   const [analysisResult, setAnalysisResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  const handleChatSelect = (chatId) => {
-    setSelectedChatId((prevId) => (prevId === chatId ? null : chatId));
-    console.log("선택된 채팅:", chatId === selectedChatId ? "해제됨" : chatId);
-  };
-
-  const handleFileUpload = async (file) => {
-    try {
-      const result = await postChat_Bus(user?.id || 1, file);
-      console.log("파일 업로드 성공:", result);
-
-      if (chatListReloadRef.current) {
-        chatListReloadRef.current();
-      }
-
-      // 업로드한 채팅을 선택
-      if (result?.chat_id_bus_contrib) {
-        setSelectedChatId(result.chat_id_bus_contrib);
-      }
-    } catch (error) {
-      console.error("파일 업로드 실패:", error);
-    }
-  };
 
   const convertPeriodToDate = (label, type) => {
     const now = new Date();
@@ -128,14 +99,9 @@ export default function BusinessContrPage() {
             </div>
             <p className="text-body2">업무 기여도 분석</p>
           </div>
-          <ChatList
-            onSelect={handleChatSelect}
-            selectedChatId={selectedChatId}
-            setSelectedChatId={setSelectedChatId}
-            onUploaded={chatListReloadRef}
-          />
+          <ChatList />
+          <FileUpload />
 
-          <FileUpload onUpload={handleFileUpload} />
           {analysisResult && (
             <div className="w-full flex justify-between items-center">
               <button
