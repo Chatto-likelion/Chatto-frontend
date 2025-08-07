@@ -161,10 +161,10 @@ export default function BusinessMyPage() {
                     </div>
 
                     <div className="w-full flex justify-start items-center gap-4 ">
-                      <button className="ml-13 w-17.5 h-6.5 px-1.5 py-0.75 border border-secondary-dark text-secondary-dark text-button rounded hover:bg-secondary-dark hover:text-white cursor-pointer">
+                      <button className="ml-13 w-17.5 h-6.5 px-1.5 py-0.75 border border-primary-dark text-primary-dark text-button rounded hover:bg-primary-dark hover:text-white cursor-pointer">
                         분석 보기
                       </button>
-                      <button className="w-17.5 h-6.5 px-1.5 py-0.75 border border-secondary-dark text-secondary-dark text-button rounded hover:bg-secondary-dark hover:text-white cursor-pointer">
+                      <button className="w-17.5 h-6.5 px-1.5 py-0.75 border border-primary-dark text-primary-dark text-button rounded hover:bg-primary-dark hover:text-white cursor-pointer">
                         퀴즈 보기
                       </button>
                     </div>

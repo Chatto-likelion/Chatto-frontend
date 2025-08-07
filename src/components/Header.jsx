@@ -52,7 +52,11 @@ export default function Header() {
     >
       <div
         className={`flex items-end gap-2  ${
-          mode === "business" ? "text-primary-light" : "text-primary-dark"
+          !mode
+            ? "text-black"
+            : mode === "business"
+            ? "text-primary-light"
+            : "text-primary-dark"
         }`}
       >
         <button onClick={handleLanding} className="text-h4">
