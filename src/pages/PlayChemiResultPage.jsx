@@ -5,7 +5,7 @@ import {
   DetailForm,
   SmallServices,
 } from "@/components";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import * as Icons from "@/assets/svg/index.js";
@@ -19,8 +19,6 @@ export default function ChemiResultPage() {
   const auth = useAuth();
   const user = auth?.user || { id: 1 }; // 기본값 세팅
   const navigate = useNavigate();
-  const [selectedChatId, setSelectedChatId] = useState(null);
-  const chatListReloadRef = useRef();
 
   const [peopleNum, setPeopleNum] = useState("23명");
   const [relation, setRelation] = useState("동아리 부원");
@@ -37,27 +35,14 @@ export default function ChemiResultPage() {
   const toneData = [63, 18, 7];
   const topicData = [42, 26, 18, 14];
 
-  const handleChatSelect = (chatId) => {
-    setSelectedChatId((prevId) => (prevId === chatId ? null : chatId));
-  };
-
-  const handleFileUpload = async (file) => {
-    console.log("파일 업로드:", file);
-  };
-
   return (
     <div className="flex flex-col justify-start items-center h-screen bg-primary-dark text-white">
       <Header />
       <div className="flex-1 w-300 mt-17.5 overflow-hidden flex justify-between items-start">
         {/* 왼쪽 */}
         <div className="gap-5 pt-6 w-61.5 mr-34.5 flex flex-col items-center justify-center">
-          {/* <ChatList
-  onSelect={handleChatSelect}
-  selectedChatId={selectedChatId}
-  setSelectedChatId={setSelectedChatId}
-  onUploaded={chatListReloadRef}
-/> */}
-          <FileUpload onUpload={handleFileUpload} />
+          {/* <ChatList /> */}
+          <FileUpload />
         </div>
 
         {/* 가운데 */}

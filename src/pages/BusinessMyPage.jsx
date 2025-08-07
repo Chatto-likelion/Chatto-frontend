@@ -1,6 +1,6 @@
 import { Header, ChatList, FileUpload } from "@/components";
-import { postChat_Bus, getAnalysisList_Bus } from "@/apis/api";
-import { useState, useRef, useEffect } from "react";
+import { getAnalysisList_Bus } from "@/apis/api";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import * as Icons from "@/assets/svg/index.js";
@@ -8,37 +8,9 @@ import * as Icons from "@/assets/svg/index.js";
 export default function BusinessMyPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [selectedChatId, setSelectedChatId] = useState(null);
-  const chatListReloadRef = useRef();
   const [analyses, setAnalyses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const handleChatSelect = (chatId) => {
-    setSelectedChatId((prevId) => (prevId === chatId ? null : chatId));
-  };
-
-  const handleFileUpload = async (file) => {
-    console.log("handleFileUpload 실행됨!", file);
-    try {
-      console.log("보낼 파일:", file);
-      console.log("postChat 요청 시작 - userId:", user?.id || 1);
-
-      const result = await postChat_Bus(user?.id || 1, file);
-      console.log("파일 업로드 성공:", result);
-
-      if (chatListReloadRef.current) {
-        chatListReloadRef.current();
-      }
-
-      // 업로드한 채팅을 선택
-      if (result?.chat_id) {
-        setSelectedChatId(result.chat_id);
-      }
-    } catch (error) {
-      console.error("파일 업로드 실패:", error);
-    }
-  };
 
   const loadAnalyses = () => {
     setLoading(true);
@@ -65,13 +37,8 @@ export default function BusinessMyPage() {
       <div className="flex-1 pl-25.5 mt-18 overflow-hidden flex justify-between items-start">
         {/* 왼쪽 */}
         <div className="gap-5 pt-47 w-55.5 mr-12.75 flex flex-col items-center justify-center">
-          <ChatList
-            onSelect={handleChatSelect}
-            selectedChatId={selectedChatId}
-            setSelectedChatId={setSelectedChatId}
-            onUploaded={chatListReloadRef}
-          />
-          <FileUpload onUpload={handleFileUpload} />
+          <ChatList />
+          <FileUpload />
         </div>
 
         <main className="flex-1 pt-36 w-269.25 flex flex-col justify-start items-center">

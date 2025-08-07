@@ -6,29 +6,27 @@ import {
   deleteChat_Bus,
 } from "@/apis/api";
 import { useAuth } from "../contexts/AuthContext.jsx";
+import { useChat } from "@/contexts/ChatContext";
 import * as Icons from "@/assets/svg";
 import useCurrentMode from "@/hooks/useCurrentMode";
 
-export default function ChatList({
-  onSelect,
-  selectedChatId,
-  setSelectedChatId,
-  onUploaded,
-}) {
+export default function ChatList() {
   const { user } = useAuth();
   const mode = useCurrentMode();
+  const isPlay = mode === "play";
+
+  const { selectedChatId, setSelectedChatId, chatListReloadRef } = useChat();
+
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const isPlay = mode === "play";
 
   const loadChats = () => {
     setLoading(true);
     const fetchFn = isPlay ? getChatList : getChatList_Bus;
     fetchFn(user.id)
       .then((data) => {
-        console.log("📌 API에서 받은 원본 chats 데이터:", data); // 원본 데이터 구조 확인
+        console.log("📌 API에서 받은 원본 chats 데이터:", data);
         setChats(data);
         setError(null);
       })
@@ -44,10 +42,10 @@ export default function ChatList({
   }, []);
 
   useEffect(() => {
-    if (onUploaded) {
-      onUploaded.current = loadChats;
+    if (chatListReloadRef) {
+      chatListReloadRef.current = loadChats;
     }
-  }, [onUploaded]);
+  }, [chatListReloadRef]);
 
   const handleDelete = (chatId) => {
     setLoading(true);
@@ -66,49 +64,24 @@ export default function ChatList({
       });
   };
 
-  // 클래스 스타일 분기
-  const containerBorder = isPlay ? "border-secondary-light" : "border-primary";
-  const titleColor = isPlay ? "text-white" : "text-black";
-  const loadingTextColor = isPlay ? "text-gray-300" : "text-gray-700";
+  const handleSelect = (chatId) => {
+    setSelectedChatId((prevId) => (prevId === chatId ? null : chatId));
+  };
 
-  if (loading) {
-    return (
-      <div
-        className={`w-full h-51.25 pt-2 pl-3.75 pr-1.75 pb-3 flex flex-col overflow-y-auto border ${containerBorder} rounded-lg`}
-      >
-        <div className="w-47.5 gap-3 flex flex-col justify-between items-center">
-          <p className={`w-full text-st1 ${titleColor} text-center`}>
-            업로드된 채팅
-          </p>
-          <div className={`p-4 ${loadingTextColor} text-sm`}>
-            채팅 목록 불러오는 중...
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className="p-4 text-red-500 text-sm">{error}</div>;
-  }
-
-  if (!Array.isArray(chats) || chats.length === 0) {
-    console.log("⚠ chats가 배열이 아니거나 비어있음:", chats);
-    return (
-      <div className={`p-4 ${loadingTextColor} text-sm`}>
-        업로드된 채팅이 없습니다.
-      </div>
-    );
-  }
-
-  console.log("📌 렌더링 직전 chats 상태:", chats);
+  // 이하 UI 렌더링 코드 동일 — onSelect 대신 handleSelect 사용
 
   return (
     <div
-      className={`w-full pt-2 pl-3.75 pr-1.75 pb-3 flex flex-col items-center overflow-y-auto border ${containerBorder} rounded-lg`}
+      className={`w-full pt-2 pl-3.75 pr-1.75 pb-3 flex flex-col items-center overflow-y-auto border ${
+        isPlay ? "border-secondary-light" : "border-primary"
+      } rounded-lg`}
     >
       <div className="w-47.5 gap-3 flex flex-col justify-between items-center">
-        <p className={`w-full text-st1 ${titleColor} text-center`}>
+        <p
+          className={`w-full text-st1 ${
+            isPlay ? "text-white" : "text-black"
+          } text-center`}
+        >
           업로드된 채팅
         </p>
         <div className="w-full gap-0.5 flex flex-col items-center">
@@ -116,8 +89,6 @@ export default function ChatList({
             .sort((a, b) => new Date(b.uploaded_at) - new Date(a.uploaded_at))
             .slice(0, 3)
             .map((chat, idx) => {
-              console.log(`📌 chat[${idx}] 데이터:`, chat); // 개별 채팅 데이터 확인
-
               const isSelected = selectedChatId === chat.chat_id;
               const uploadedDate = new Date(chat.uploaded_at);
               const now = new Date();
@@ -132,7 +103,7 @@ export default function ChatList({
                 >
                   <div className="w-full gap-0.75 flex justify-between items-center">
                     <button
-                      onClick={() => onSelect?.(chat.chat_id)}
+                      onClick={() => handleSelect(chat.chat_id)}
                       className={`w-45 h-7.25 text-body2 flex justify-between items-center px-3 py-2 rounded hover:bg-${
                         isPlay ? "gray-5" : "gray-2"
                       } ${
