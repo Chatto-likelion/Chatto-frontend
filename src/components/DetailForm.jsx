@@ -4,8 +4,8 @@ export default function DetailForm({
   isAnalysis,
   peopleNum,
   setPeopleNum,
-  relation,
-  setRelation,
+  relationship,
+  setRelationship,
   situation,
   setSituation,
   startPeriod,
@@ -41,8 +41,8 @@ export default function DetailForm({
         <div className={`${w} pr-3.25 flex justify-end items-center`}>
           <select
             className={`${text} text-end`}
-            value={relation}
-            onChange={(e) => setRelation(e.target.value)}
+            value={relationship}
+            onChange={(e) => setRelationship(e.target.value)}
           >
             <option>동아리 부원</option>
             <option>회사 동료</option>

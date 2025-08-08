@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { useChat } from "@/contexts/ChatContext";
 import * as Icons from "@/assets/svg/index.js";
 
-export default function PlayChemiPage() {
+export default function PlayMbtiPage() {
   const { selectedChatId } = useChat();
   const navigate = useNavigate();
 

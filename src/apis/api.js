@@ -1,11 +1,5 @@
 import { instance, instanceWithToken } from "./axios";
 
-const USE_MOCK = false; // 🚀 서버 붙이면 false로 바꾸기
-/**
- * ✅ 인증 관련
- */
-
-// 회원가입
 export const signup = async (data) => {
   try {
     const response = await instance.post("/account/signup/", {
@@ -112,16 +106,6 @@ export const postChat = async (userId, file) => {
 };
 
 export const deleteChat = async (chatId) => {
-  if (USE_MOCK) {
-    console.log("📦 목업 채팅 삭제 요청...");
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log("✅ 목업 삭제 완료");
-        resolve();
-      }, 500);
-    });
-  }
-
   try {
     const response = await instanceWithToken.delete(
       `/play/chat/${chatId}/delete/`
@@ -154,27 +138,6 @@ export const deleteChat = async (chatId) => {
 };
 
 export const getChatList = async () => {
-  if (USE_MOCK) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([
-          {
-            chat_id_play_chem: 123,
-            title: "멋사 잡담방",
-            people_num: 23,
-            uploaded_at: "2025-07-01T12:34:56",
-          },
-          {
-            chat_id_play_chem: 125,
-            title: "준영이",
-            people_num: 2,
-            uploaded_at: "2025-07-03T15:45:12",
-          },
-        ]);
-      }, 500);
-    });
-  }
-
   try {
     const response = await instanceWithToken.get(`/play/chat/`);
 
@@ -193,22 +156,10 @@ export const getChatList = async () => {
   }
 };
 
-export const postAnalyze = async (chatId, payload) => {
-  if (USE_MOCK) {
-    console.log("📦 [MOCK] 분석 요청:", { chatId, payload });
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log("✅ [MOCK] 분석 완료");
-        resolve({
-          result_id_play_chem: 999, // 예시 ID
-        });
-      }, 1000);
-    });
-  }
-
+export const postChemiAnalyze = async (chatId, payload) => {
   try {
     const response = await instanceWithToken.post(
-      `/play/chat/${chatId}/analyze/`,
+      `/play/chat/${chatId}/analyze/chem/`,
       payload
     );
 
@@ -246,27 +197,6 @@ export const postAnalyze = async (chatId, payload) => {
  */
 
 export const getAnalysisList = async () => {
-  if (USE_MOCK) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([
-          {
-            analysis_date: "2024-07-01T12:00:00",
-            title: "멋사 잡담방 케미 분석",
-            analysis_type: "케미측정",
-            analysis_result: "케미지수 78점",
-          },
-          {
-            analysis_date: "2024-07-02T15:30:00",
-            title: "양재동 패거리 케미 분석",
-            analysis_type: "케미측정",
-            analysis_result: "케미지수 82점",
-          },
-        ]);
-      }, 500);
-    });
-  }
-
   try {
     const response = await instanceWithToken.get(`/play/analysis/`);
     if (response.status === 200) {
@@ -283,20 +213,10 @@ export const getAnalysisList = async () => {
   }
 };
 
-export const getAnalysisDetail = async (resultId) => {
-  if (USE_MOCK) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          content: "이것은 예시 분석 결과 내용입니다. 화이팅!",
-        });
-      }, 1000);
-    });
-  }
-
+export const getChemiAnalysisDetail = async (resultId) => {
   try {
     const response = await instanceWithToken.get(
-      `/play/analysis/${resultId}/detail/`
+      `/play/analysis/chem/${resultId}/detail/`
     );
     return response.data; // { content }
   } catch (error) {
@@ -319,16 +239,6 @@ export const getAnalysisDetail = async (resultId) => {
 };
 
 export const deleteAnalysis = async (resultId) => {
-  if (USE_MOCK) {
-    console.log("📦 목업 분석 결과 삭제 요청...");
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log("✅ 목업 분석 결과 삭제 완료");
-        resolve();
-      }, 500);
-    });
-  }
-
   try {
     const response = await instanceWithToken.delete(
       `/play/analysis/${resultId}/detail/`
@@ -365,18 +275,6 @@ export const deleteAnalysis = async (resultId) => {
  */
 // 파일 업로드
 export const postChat_Bus = async (userId, file) => {
-  if (USE_MOCK) {
-    console.log("📦 목업 파일 업로드 중...");
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log("✅ 목업 업로드 완료");
-        resolve({
-          chat_id_play_chem: 123,
-        });
-      }, 800);
-    });
-  }
-
   const formData = new FormData();
   formData.append("user_id", userId);
   formData.append("file", file);
@@ -395,20 +293,6 @@ export const postChat_Bus = async (userId, file) => {
 
 // 채팅 삭제
 export const deleteChat_Bus = async (chatId) => {
-  if (USE_MOCK) {
-    console.log("📦 목업 채팅 삭제 요청...");
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log("✅ 목업 삭제 완료");
-        resolve();
-      }, 500);
-    });
-  }
-
-  const response = await instanceWithToken.delete(
-    `/business/chat/${chatId}/delete/`
-  );
-
   if (response.status === 204) {
     console.log("채팅 삭제 성공");
   } else {
@@ -418,27 +302,6 @@ export const deleteChat_Bus = async (chatId) => {
 
 // 채팅 목록 조회
 export const getChatList_Bus = async () => {
-  if (USE_MOCK) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([
-          {
-            chat_id_play_chem: 123,
-            title: "멋사 잡담방",
-            people_num: 23,
-            uploaded_at: "2025-07-01T12:34:56",
-          },
-          {
-            chat_id_play_chem: 124,
-            title: "양재동 패거리",
-            people_num: 7,
-            uploaded_at: "2025-07-02T09:20:00",
-          },
-        ]);
-      }, 500);
-    });
-  }
-
   const response = await instanceWithToken.get(`/business/chat/`);
 
   if (response.status === 200) {
@@ -450,17 +313,6 @@ export const getChatList_Bus = async () => {
 
 // 분석 요청
 export const postAnalyze_Bus = async (chatId, payload) => {
-  if (USE_MOCK) {
-    console.log("📦 목업 분석 요청...", payload);
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log("✅ 목업 분석 완료");
-        resolve({
-          result_id_play_chem: 999,
-        });
-      }, 1000);
-    });
-  }
   const response = await instanceWithToken.post(
     `/business/chat/${chatId}/analyze/`,
     payload
@@ -476,16 +328,6 @@ export const postAnalyze_Bus = async (chatId, payload) => {
 
 // 분석 결과 저장
 export const saveAnalysis_Bus = async (resultId) => {
-  if (USE_MOCK) {
-    console.log("📦 목업 결과 저장 요청...");
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log("✅ 목업 결과 저장 완료");
-        resolve();
-      }, 500);
-    });
-  }
-
   const response = await instanceWithToken.post(
     `/business/analysis/${resultId}/save/`
   );
@@ -499,21 +341,6 @@ export const saveAnalysis_Bus = async (resultId) => {
 
 // 분석 목록 조회
 export const getAnalysisList_Bus = async () => {
-  if (USE_MOCK) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([
-          {
-            analysis_date: "2024-07-01T12:00:00",
-            title: "업무 대화 분석",
-            analysis_type: "케미측정",
-            analysis_result: "케미지수 80점",
-          },
-        ]);
-      }, 500);
-    });
-  }
-
   const response = await instanceWithToken.get(`/business/analysis/`);
 
   if (response.status === 200) {
@@ -525,16 +352,6 @@ export const getAnalysisList_Bus = async () => {
 
 // 분석 상세 조회
 export const getAnalysisDetail_Bus = async (resultId) => {
-  if (USE_MOCK) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          content: "이것은 예시 업무 분석 결과입니다.",
-        });
-      }, 500);
-    });
-  }
-
   const response = await instanceWithToken.get(
     `/business/analysis/${resultId}/detail/`
   );
@@ -548,16 +365,6 @@ export const getAnalysisDetail_Bus = async (resultId) => {
 
 // 분석 결과 삭제
 export const deleteAnalysis_Bus = async (resultId) => {
-  if (USE_MOCK) {
-    console.log("📦 목업 분석 결과 삭제 요청...");
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log("✅ 목업 분석 결과 삭제 완료");
-        resolve();
-      }, 500);
-    });
-  }
-
   const response = await instanceWithToken.delete(
     `/business/analysis/${resultId}/detail/`
   );
@@ -572,7 +379,6 @@ export const deleteAnalysis_Bus = async (resultId) => {
 /**
  * ✅ 사용자 정보 관리
  */
-
 export const updateMe = async (data) => {
   const response = await instanceWithToken.put("/me", data);
   if (response.status === 200) {

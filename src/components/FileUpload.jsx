@@ -16,8 +16,8 @@ export default function FileUpload() {
       const result = await postChat(user?.id || 1, file);
       console.log("파일 업로드 성공:", result);
 
-      if (chatListReloadRef.current) {
-        chatListReloadRef.current();
+      if (typeof chatListReloadRef?.current === "function") {
+        await chatListReloadRef.current();
       }
 
       // 업로드한 채팅을 선택
