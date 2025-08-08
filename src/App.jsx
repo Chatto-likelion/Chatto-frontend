@@ -2,8 +2,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import PlayPage from "./pages/PlayPage";
 import PlayChemiPage from "./pages/PlayChemiPage";
+import PlayChemiAnalysisPage from "./pages/PlayChemiAnalysisPage";
 import PlayChemiResultPage from "./pages/PlayChemiResultPage";
 import PlaySomePage from "./pages/PlaySomePage";
+import PlaySomeAnalysisPage from "./pages/PlaySomeAnalysisPage";
+import PlayMbtiPage from "./pages/PlayMbtiPage.jsx";
+import PlayMbtiAnalysisPage from "./pages/PlayMbtiAnalysisPage";
 import PlayMyPage from "./pages/PlayMyPage";
 import BusinessPage from "./pages/BusinessPage";
 import BusinessContrPage from "./pages/BusinessContrPage";
@@ -22,10 +26,17 @@ function App() {
         <Route path="/play" element={<PlayPage />} />
         <Route path="/play/chemi" element={<PlayChemiPage />} />
         <Route
+          path="/play/chemi/:resultId"
+          element={<PlayChemiAnalysisPage />}
+        />
+        <Route
           path="/play/chemi/result-test"
           element={<PlayChemiResultPage />}
         />
         <Route path="/play/some" element={<PlaySomePage />} />
+        <Route path="/play/some/:resultId" element={<PlaySomeAnalysisPage />} />
+        <Route path="/play/mbti" element={<PlayMbtiPage />} />
+        <Route path="/play/Mbti/:resultId" element={<PlayMbtiAnalysisPage />} />
         <Route path="/play/mypage" element={<PlayMyPage />} />
         <Route path="/business" element={<BusinessPage />} />
         <Route path="/business/contr" element={<BusinessContrPage />} />

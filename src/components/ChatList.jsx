@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   getChatList,
   deleteChat,
@@ -21,54 +21,75 @@ export default function ChatList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const loadChats = () => {
-    setLoading(true);
-    const fetchFn = isPlay ? getChatList : getChatList_Bus;
-    fetchFn(user.id)
-      .then((data) => {
-        console.log("📌 API에서 받은 원본 chats 데이터:", data);
-        setChats(data);
-        setError(null);
-      })
-      .catch((err) => {
-        console.error(err);
-        setError("채팅 목록을 불러오는데 실패했습니다.");
-      })
-      .finally(() => setLoading(false));
-  };
+  // ✅ 의존성 맞춘 안전한 로더
+  const loadChats = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const fetchFn = isPlay ? getChatList : getChatList_Bus;
 
+      // NOTE: GET /play/chat/ 은 path param 없음 → 인자 없이 호출
+      const data = await fetchFn();
+      console.log("📌 API에서 받은 원본 chats 데이터:", data);
+      setChats(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error(err);
+      setError("채팅 목록을 불러오는데 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  }, [isPlay /*, user?.id ← 필요시 모드 외 조건 추가*/]);
+
+  // 최초 및 모드 변경시 로드
   useEffect(() => {
     loadChats();
-  }, []);
+  }, [loadChats]);
 
+  // ✅ ref에 함수 주입 (마운트/의존성 변경시 갱신)
   useEffect(() => {
     if (chatListReloadRef) {
       chatListReloadRef.current = loadChats;
-    }
-  }, [chatListReloadRef]);
-
-  const handleDelete = (chatId) => {
-    setLoading(true);
-    const deleteFn = isPlay ? deleteChat : deleteChat_Bus;
-    deleteFn(chatId)
-      .then(() => {
-        loadChats();
-        if (selectedChatId === chatId) {
-          setSelectedChatId(null);
+      return () => {
+        // 언마운트 시 정리
+        if (chatListReloadRef.current === loadChats) {
+          chatListReloadRef.current = null;
         }
-      })
-      .catch((err) => {
-        console.error("채팅 삭제 실패:", err);
-        setError("채팅 삭제에 실패했습니다.");
-        setLoading(false);
-      });
+      };
+    }
+  }, [chatListReloadRef, loadChats]);
+
+  const handleDelete = async (chatId) => {
+    try {
+      setLoading(true);
+      const deleteFn = isPlay ? deleteChat : deleteChat_Bus;
+      await deleteFn(chatId);
+      await loadChats();
+      if (selectedChatId === chatId) setSelectedChatId(null);
+    } catch (err) {
+      console.error("채팅 삭제 실패:", err);
+      setError("채팅 삭제에 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSelect = (chatId) => {
     setSelectedChatId((prevId) => (prevId === chatId ? null : chatId));
   };
 
-  // 이하 UI 렌더링 코드 동일 — onSelect 대신 handleSelect 사용
+  if (loading && chats.length === 0) {
+    return (
+      <div
+        className={`w-full pt-2 pl-3.75 pr-1.75 pb-3 flex flex-col items-center overflow-y-auto border ${
+          isPlay ? "border-secondary-light" : "border-primary"
+        } rounded-lg`}
+      >
+        <p className={`${isPlay ? "text-white" : "text-black"}`}>
+          불러오는 중...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div

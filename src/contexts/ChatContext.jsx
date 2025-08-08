@@ -8,7 +8,7 @@ export const ChatProvider = ({ children }) => {
 
   return (
     <ChatContext.Provider
-      value={(selectedChatId, setSelectedChatId, chatListReloadRef)}
+      value={{ selectedChatId, setSelectedChatId, chatListReloadRef }}
     >
       {children}
     </ChatContext.Provider>
