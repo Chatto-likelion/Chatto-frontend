@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getChemiAnalysisDetail } from "@/apis/api"; // 실제 API 호출 함수
 
-export default function PlayChemiResultPage() {
+export default function PlayChemiAnalysisPage() {
   const { resultId } = useParams(); // URL 파라미터 추출
   const [resultData, setResultData] = useState(null);
   const [loading, setLoading] = useState(true);

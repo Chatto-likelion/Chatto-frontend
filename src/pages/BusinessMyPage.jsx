@@ -86,10 +86,7 @@ export default function BusinessMyPage() {
           <div className="w-full pr-1.5 border-r-2 border-primary-dark">
             <div className="w-full h-105 grid grid-cols-3 gap-6 overflow-y-auto custom-scrollbar-bus">
               {[...analyses]
-                .sort(
-                  (a, b) =>
-                    new Date(b.analysis_date) - new Date(a.analysis_date)
-                )
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
                 .map((item) => (
                   <div
                     key={item.result_id}
@@ -97,21 +94,21 @@ export default function BusinessMyPage() {
                   >
                     <div className="w-full flex flex-col justify-start items-center">
                       <div className="w-full pr-3 flex justify-between items-center mb-2">
-                        <p className="text-h7">{item.analysis_type}</p>
+                        <p className="text-h7">{item.project_type}</p>
                         <Icons.X
                           onClick={() => {}}
                           className="w-2 h-2 text-primary-light cursor-pointer"
                         />
                       </div>
                       <div className="w-full mb-3 pr-3 text-right text-body2  text-secondary-dark">
-                        {item.analysis_date}
+                        {item.created_at}
                       </div>
 
                       <div className="w-75 h-8.5 px-3 py-2 rounded flex justify-between items-center mb-3 text-body1 text-primary-dark border border-secondary-dark">
-                        <span>{item.chat}</span>
+                        <span>{item.title}</span>
                         <div className="flex items-center gap-0.5">
                           <Icons.Person className="w-5.25 h-5.25 p-0.75" />
-                          <span>{item.chat}</span>
+                          <span>{item.people_num}</span>
                         </div>
                       </div>
                     </div>
@@ -119,16 +116,21 @@ export default function BusinessMyPage() {
                     <div className="w-74.5 px-2 flex flex-col justify-between items-center gap-0.5">
                       <div className="w-full h-6 flex justify-start items-center gap-6.5 text-start">
                         <p className="w-30">분석 기간</p>
-                        <p className="text-body2">25.04.14 ~ 25.04.14</p>
+                        <p className="text-body2">{item.analysis_date_start}</p>
                       </div>
                       <div className="w-full h-6 flex justify-start items-center gap-6.5 text-start">
                         <p className="w-30">분석 기간</p>
-                        <p className="text-body2">25.04.14</p>
+                        <p className="text-body2">{item.analysis_date_end}</p>
                       </div>
                     </div>
 
                     <div className="w-full flex justify-start items-center gap-4 ">
-                      <button className="ml-13 w-17.5 h-6.5 px-1.5 py-0.75 border border-primary-dark text-primary-dark text-button rounded hover:bg-primary-dark hover:text-white cursor-pointer">
+                      <button
+                        onClick={() => {
+                          navigate(`/business/contr/${item.result_id}`);
+                        }}
+                        className="ml-13 w-17.5 h-6.5 px-1.5 py-0.75 border border-primary-dark text-primary-dark text-button rounded hover:bg-primary-dark hover:text-white cursor-pointer"
+                      >
                         분석 보기
                       </button>
                       <button className="w-17.5 h-6.5 px-1.5 py-0.75 border border-primary-dark text-primary-dark text-button rounded hover:bg-primary-dark hover:text-white cursor-pointer">

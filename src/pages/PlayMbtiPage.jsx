@@ -5,7 +5,7 @@ import {
   DetailForm,
   BigServices,
 } from "@/components";
-import { postChemiAnalyze } from "@/apis/api";
+import { postMbtiAnalyze } from "@/apis/api";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useChat } from "@/contexts/ChatContext";
@@ -46,17 +46,15 @@ export default function PlayMbtiPage() {
     setError(null);
 
     const payload = {
-      relationship: relationship,
-      situation,
       analysis_start: convertPeriodToDate(startPeriod, "start"),
       analysis_end: convertPeriodToDate(endPeriod, "end"),
     };
 
     try {
-      const analyzeResponse = await postChemiAnalyze(selectedChatId, payload);
+      const analyzeResponse = await postMbtiAnalyze(selectedChatId, payload);
       const resultId = analyzeResponse.result_id;
       // 결과 페이지로 이동
-      navigate(`/play/chemi/${resultId}`);
+      navigate(`/play/mbti/${resultId}`);
     } catch (err) {
       setError(err.message || "분석에 실패했습니다.");
     } finally {
