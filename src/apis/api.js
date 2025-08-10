@@ -270,7 +270,7 @@ export const postMbtiAnalyze = async (chatId, payload) => {
 
 export const getAnalysisList = async () => {
   try {
-    const response = await instanceWithToken.get(`/play/analysis/`);
+    const response = await instanceWithToken.get(`/play/analysis/chem/`);
     if (response.status === 200) {
       return response.data;
     } else {
@@ -550,17 +550,24 @@ export const saveAnalysis_Bus = async (resultId) => {
 
 // 분석 목록 조회
 export const getAnalysisList_Bus = async () => {
-  const response = await instanceWithToken.get(`/business/analysis/`);
-
-  if (response.status === 200) {
-    return response.data;
-  } else {
-    throw new Error("분석 목록 조회 실패");
+  try {
+    const response = await instanceWithToken.get(`/business/analysis/all/`);
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
+    }
+  } catch (error) {
+    if (error.response?.status === 401) {
+      throw new Error("로그인이 필요합니다. (401)");
+    }
+    console.error("분석 목록 조회 에러:", error);
+    throw new Error("분석 목록을 불러오는 데 실패했습니다.");
   }
 };
 
 // 분석 상세 조회
-export const getAnalysisDetail_Bus = async (resultId) => {
+export const getContrAnalysisDetail = async (resultId) => {
   const response = await instanceWithToken.get(
     `/business/analysis/${resultId}/detail/`
   );
@@ -573,7 +580,7 @@ export const getAnalysisDetail_Bus = async (resultId) => {
 };
 
 // 분석 결과 삭제
-export const deleteAnalysis_Bus = async (resultId) => {
+export const deleteContrAnalysis = async (resultId) => {
   const response = await instanceWithToken.delete(
     `/business/analysis/${resultId}/detail/`
   );

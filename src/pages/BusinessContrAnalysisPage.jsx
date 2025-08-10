@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getAnalysisDetail_Bus } from "@/apis/api"; // 실제 API 호출 함수
+import { getContrAnalysisDetail } from "@/apis/api"; // 실제 API 호출 함수
 
 export default function BusinessContrAnalysisPage() {
   const { resultId } = useParams(); // URL 파라미터 추출
@@ -11,7 +11,7 @@ export default function BusinessContrAnalysisPage() {
   useEffect(() => {
     const fetchResult = async () => {
       try {
-        const data = await getAnalysisDetail_Bus(resultId); // API 호출
+        const data = await getContrAnalysisDetail(resultId); // API 호출
         setResultData(data);
       } catch (err) {
         setError(err.message || "결과를 불러오지 못했습니다.");
