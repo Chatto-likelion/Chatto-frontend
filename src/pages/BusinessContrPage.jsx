@@ -4,9 +4,8 @@ import {
   FileUpload,
   BigServices,
   DetailForm,
-  SmallServices,
 } from "@/components";
-import { postAnalyze_Bus, getAnalysisDetail_Bus } from "@/apis/api";
+import { postContrAnalyze } from "@/apis/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useChat } from "@/contexts/ChatContext";
@@ -16,13 +15,13 @@ export default function BusinessContrPage() {
   const { selectedChatId } = useChat();
   const navigate = useNavigate();
 
+  const [analysisResult, setAnalysisResult] = useState();
   const [peopleNum, setPeopleNum] = useState("23명");
   const [relation, setRelation] = useState("동아리 부원");
   const [situation, setSituation] = useState("일상대화");
   const [startPeriod, setStartPeriod] = useState("처음부터");
   const [endPeriod, setEndPeriod] = useState("끝까지");
 
-  const [analysisResult, setAnalysisResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -49,19 +48,17 @@ export default function BusinessContrPage() {
     setAnalysisResult(null);
 
     const payload = {
-      people_num: parseInt(peopleNum),
-      rel: relation,
-      situation,
+      project_type: "dummy",
+      team_type: "dummy",
       analysis_start: convertPeriodToDate(startPeriod, "start"),
       analysis_end: convertPeriodToDate(endPeriod, "end"),
     };
 
     try {
-      const analyzeResponse = await postAnalyze_Bus(selectedChatId, payload);
+      const analyzeResponse = await postContrAnalyze(selectedChatId, payload);
       const resultId = analyzeResponse.result_id;
 
-      const detailResponse = await getAnalysisDetail_Bus(resultId);
-      setAnalysisResult(detailResponse);
+      navigate(`/business/contr/${resultId}`);
     } catch (err) {
       console.error(err);
       setError(err.message || "분석에 실패했습니다.");

@@ -5,7 +5,7 @@ import {
   DetailForm,
   BigServices,
 } from "@/components";
-import { postChemiAnalyze } from "@/apis/api";
+import { postSomeAnalyze } from "@/apis/api";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useChat } from "@/contexts/ChatContext";
@@ -47,16 +47,16 @@ export default function PlaySomePage() {
 
     const payload = {
       relationship: relationship,
-      situation,
+      age: "dummy age",
       analysis_start: convertPeriodToDate(startPeriod, "start"),
       analysis_end: convertPeriodToDate(endPeriod, "end"),
     };
 
     try {
-      const analyzeResponse = await postChemiAnalyze(selectedChatId, payload);
+      const analyzeResponse = await postSomeAnalyze(selectedChatId, payload);
       const resultId = analyzeResponse.result_id;
       // 결과 페이지로 이동
-      navigate(`/play/chemi/${resultId}`);
+      navigate(`/play/some/${resultId}`);
     } catch (err) {
       setError(err.message || "분석에 실패했습니다.");
     } finally {

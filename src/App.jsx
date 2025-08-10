@@ -11,6 +11,7 @@ import PlayMbtiAnalysisPage from "./pages/PlayMbtiAnalysisPage";
 import PlayMyPage from "./pages/PlayMyPage";
 import BusinessPage from "./pages/BusinessPage";
 import BusinessContrPage from "./pages/BusinessContrPage";
+import BusinessContrAnalysisPage from "./pages/BusinessContrAnalysisPage";
 import BusinessMyPage from "./pages/BusinessMyPage";
 import CreditsPage from "./pages/CreditsPage";
 import ResultPage from "./pages/ResultPage";
@@ -36,10 +37,14 @@ function App() {
         <Route path="/play/some" element={<PlaySomePage />} />
         <Route path="/play/some/:resultId" element={<PlaySomeAnalysisPage />} />
         <Route path="/play/mbti" element={<PlayMbtiPage />} />
-        <Route path="/play/Mbti/:resultId" element={<PlayMbtiAnalysisPage />} />
+        <Route path="/play/mbti/:resultId" element={<PlayMbtiAnalysisPage />} />
         <Route path="/play/mypage" element={<PlayMyPage />} />
         <Route path="/business" element={<BusinessPage />} />
         <Route path="/business/contr" element={<BusinessContrPage />} />
+        <Route
+          path="/business/contr/:resultId"
+          element={<BusinessContrAnalysisPage />}
+        />
         <Route path="/business/mypage" element={<BusinessMyPage />} />
         <Route path="/credits" element={<CreditsPage />} />
         <Route path="/result/:analysisId" element={<ResultPage />} />

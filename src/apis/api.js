@@ -192,6 +192,78 @@ export const postChemiAnalyze = async (chatId, payload) => {
   }
 };
 
+export const postSomeAnalyze = async (chatId, payload) => {
+  try {
+    const response = await instanceWithToken.post(
+      `/play/chat/${chatId}/analyze/some/`,
+      payload
+    );
+
+    if (response.status === 201) {
+      console.log("분석 성공:", response.data);
+      return response.data; // { result_id: number }
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
+    }
+  } catch (error) {
+    if (error.response) {
+      const status = error.response.status;
+
+      if (status === 400) {
+        throw new Error("입력값이 잘못되었습니다. (400)");
+      }
+      if (status === 401) {
+        throw new Error("로그인이 필요합니다. (401)");
+      }
+      if (status === 403) {
+        throw new Error("분석 요청 권한이 없습니다. (403)");
+      }
+      if (status === 404) {
+        throw new Error("해당 채팅을 찾을 수 없습니다. (404)");
+      }
+    }
+
+    console.error("분석 요청 에러:", error);
+    throw new Error("채팅 분석 요청 중 문제가 발생했습니다.");
+  }
+};
+
+export const postMbtiAnalyze = async (chatId, payload) => {
+  try {
+    const response = await instanceWithToken.post(
+      `/play/chat/${chatId}/analyze/mbti/`,
+      payload
+    );
+
+    if (response.status === 201) {
+      console.log("분석 성공:", response.data);
+      return response.data; // { result_id: number }
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
+    }
+  } catch (error) {
+    if (error.response) {
+      const status = error.response.status;
+
+      if (status === 400) {
+        throw new Error("입력값이 잘못되었습니다. (400)");
+      }
+      if (status === 401) {
+        throw new Error("로그인이 필요합니다. (401)");
+      }
+      if (status === 403) {
+        throw new Error("분석 요청 권한이 없습니다. (403)");
+      }
+      if (status === 404) {
+        throw new Error("해당 채팅을 찾을 수 없습니다. (404)");
+      }
+    }
+
+    console.error("분석 요청 에러:", error);
+    throw new Error("채팅 분석 요청 중 문제가 발생했습니다.");
+  }
+};
+
 /**
  * ✅ 분석 결과
  */
@@ -238,10 +310,124 @@ export const getChemiAnalysisDetail = async (resultId) => {
   }
 };
 
-export const deleteAnalysis = async (resultId) => {
+export const getSomeAnalysisDetail = async (resultId) => {
+  try {
+    const response = await instanceWithToken.get(
+      `/play/analysis/some/${resultId}/detail/`
+    );
+    return response.data; // { content }
+  } catch (error) {
+    if (error.response) {
+      const status = error.response.status;
+
+      if (status === 401) {
+        throw new Error("로그인이 필요합니다. (401)");
+      }
+      if (status === 403) {
+        throw new Error("접근 권한이 없습니다. (403)");
+      }
+      if (status === 404) {
+        throw new Error("분석 결과를 찾을 수 없습니다. (404)");
+      }
+    }
+    console.error("상세 결과 조회 에러:", error);
+    throw new Error("분석 결과를 불러오는 데 실패했습니다.");
+  }
+};
+
+export const getMbtiAnalysisDetail = async (resultId) => {
+  try {
+    const response = await instanceWithToken.get(
+      `/play/analysis/mbti/${resultId}/detail/`
+    );
+    return response.data; // { content }
+  } catch (error) {
+    if (error.response) {
+      const status = error.response.status;
+
+      if (status === 401) {
+        throw new Error("로그인이 필요합니다. (401)");
+      }
+      if (status === 403) {
+        throw new Error("접근 권한이 없습니다. (403)");
+      }
+      if (status === 404) {
+        throw new Error("분석 결과를 찾을 수 없습니다. (404)");
+      }
+    }
+    console.error("상세 결과 조회 에러:", error);
+    throw new Error("분석 결과를 불러오는 데 실패했습니다.");
+  }
+};
+
+export const deleteChemiAnalysis = async (resultId) => {
   try {
     const response = await instanceWithToken.delete(
-      `/play/analysis/${resultId}/detail/`
+      `/play/analysis/chem/${resultId}/detail/`
+    );
+
+    if (response.status === 204) {
+      console.log("분석 결과 삭제 성공");
+      return;
+    } else {
+      throw new Error("알 수 없는 응답 상태");
+    }
+  } catch (error) {
+    if (error.response) {
+      const status = error.response.status;
+
+      if (status === 401) {
+        throw new Error("로그인이 필요합니다. (401)");
+      }
+      if (status === 403) {
+        throw new Error("해당 결과를 삭제할 권한이 없습니다. (403)");
+      }
+      if (status === 404) {
+        throw new Error("분석 결과를 찾을 수 없습니다. (404)");
+      }
+    }
+
+    console.error("분석 결과 삭제 에러:", error);
+    throw new Error("분석 결과 삭제 중 오류가 발생했습니다.");
+  }
+};
+
+export const deleteSomeAnalysis = async (resultId) => {
+  try {
+    const response = await instanceWithToken.delete(
+      `/play/analysis/some/${resultId}/detail/`
+    );
+
+    if (response.status === 204) {
+      console.log("분석 결과 삭제 성공");
+      return;
+    } else {
+      throw new Error("알 수 없는 응답 상태");
+    }
+  } catch (error) {
+    if (error.response) {
+      const status = error.response.status;
+
+      if (status === 401) {
+        throw new Error("로그인이 필요합니다. (401)");
+      }
+      if (status === 403) {
+        throw new Error("해당 결과를 삭제할 권한이 없습니다. (403)");
+      }
+      if (status === 404) {
+        throw new Error("분석 결과를 찾을 수 없습니다. (404)");
+      }
+    }
+
+    console.error("분석 결과 삭제 에러:", error);
+    throw new Error("분석 결과 삭제 중 오류가 발생했습니다.");
+  }
+};
+
+export const deleteMbtiAnalysis = async (resultId) => {
+  try {
+    const response = await instanceWithToken.delete(
+      `/play/analysis/mbti/${resultId}/detail/`
     );
 
     if (response.status === 204) {
@@ -279,15 +465,29 @@ export const postChat_Bus = async (userId, file) => {
   formData.append("user_id", userId);
   formData.append("file", file);
 
-  const response = await instanceWithToken.post("/business/chat/", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  try {
+    const response = await instanceWithToken.post("/business/chat/", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
 
-  if (response.status === 201) {
-    console.log("파일 업로드 성공:", response.data);
-    return response.data;
-  } else {
-    throw new Error("파일 업로드 실패");
+    if (response.status === 201) {
+      console.log("파일 업로드 성공:", response.data);
+      return response.data; // { chat_id_play_chem: integer }
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
+    }
+  } catch (error) {
+    if (error.response) {
+      const status = error.response.status;
+      if (status === 400) {
+        throw new Error("파일 또는 입력값이 잘못되었습니다. (400)");
+      }
+      if (status === 401) {
+        throw new Error("로그인이 필요합니다. (401)");
+      }
+    }
+    console.error("파일 업로드 에러:", error);
+    throw new Error("파일 업로드 중 오류가 발생했습니다.");
   }
 };
 
@@ -302,19 +502,28 @@ export const deleteChat_Bus = async (chatId) => {
 
 // 채팅 목록 조회
 export const getChatList_Bus = async () => {
-  const response = await instanceWithToken.get(`/business/chat/`);
+  try {
+    const response = await instanceWithToken.get(`/business/chat/`);
 
-  if (response.status === 200) {
-    return response.data;
-  } else {
-    throw new Error("목록 조회 실패");
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
+    }
+  } catch (error) {
+    if (error.response?.status === 401) {
+      throw new Error("로그인이 필요합니다. (401)");
+    }
+
+    console.error("채팅 목록 조회 에러:", error);
+    throw new Error("채팅 목록을 불러오는 데 실패했습니다.");
   }
 };
 
 // 분석 요청
-export const postAnalyze_Bus = async (chatId, payload) => {
+export const postContrAnalyze = async (chatId, payload) => {
   const response = await instanceWithToken.post(
-    `/business/chat/${chatId}/analyze/`,
+    `/business/chat/${chatId}/analyze/contrib/`,
     payload
   );
 
