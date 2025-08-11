@@ -69,44 +69,41 @@ export default function Header() {
         {!mode && (
           <span className="text-st2">당신의 어떤 대화라도 분석해드릴게요</span>
         )}
-        {mode === "play" && (
-          <div className="w-32 h-6.5 px-2.5 pt-1 pb-1.5 flex justify-between items-center">
-            <p
-              onClick={handlePlayPage}
-              className="pr-1.5 text-primary-dark border-r-1 border-gray-6 text-button cursor-pointer"
-            >
-              PLAY
-            </p>
-            <p
-              onClick={
-                pathname.includes("mypage")
+        <div className="w-32 h-6.5 px-2.5 pt-1 pb-1.5 flex justify-between items-center">
+          {/* PLAY 탭 */}
+          <p
+            onClick={
+              mode === "play"
+                ? handlePlayPage
+                : pathname.includes("mypage")
+                ? handlePlayMyPage
+                : handlePlayPage
+            }
+            className={[
+              "border-r-1 pr-1.5 text-button cursor-pointer",
+              mode === "play" ? " text-primary-dark" : " text-gray-6",
+            ].join(" ")}
+          >
+            PLAY
+          </p>
+
+          {/* BUSINESS 탭 */}
+          <p
+            onClick={
+              mode === "play"
+                ? pathname.includes("mypage")
                   ? handleBusinessMyPage
                   : handleBusinessPage
-              }
-              className="pl-1.25 text-center text-gray-5 text-button cursor-pointer"
-            >
-              BUSINESS
-            </p>
-          </div>
-        )}
-        {mode === "business" && (
-          <div className="w-32 h-6.5 px-2.5 pt-1 pb-1.5 flex justify-between items-center">
-            <p
-              onClick={handleBusinessPage}
-              className="pr-1.5 text-primary-light border-r-1 border-gray-6 text-button cursor-pointer"
-            >
-              BUSINESS
-            </p>
-            <p
-              onClick={
-                pathname.includes("mypage") ? handlePlayMyPage : handlePlayPage
-              }
-              className="pl-1.25 text-center text-gray-6 text-button cursor-pointer"
-            >
-              PLAY
-            </p>
-          </div>
-        )}
+                : handleBusinessPage
+            }
+            className={[
+              "pl-1.25 text-button cursor-pointer",
+              mode === "play" ? "text-gray-5" : "text-primary-light",
+            ].join(" ")}
+          >
+            BUSINESS
+          </p>
+        </div>
       </div>
 
       <nav
