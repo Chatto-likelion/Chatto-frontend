@@ -108,7 +108,7 @@ export default function ChatList() {
         <div className="w-full gap-0.5 flex flex-col items-center">
           {[...chats]
             .sort((a, b) => new Date(b.uploaded_at) - new Date(a.uploaded_at))
-            .slice(0, 3)
+            .slice(0, 5)
             .map((chat, idx) => {
               const isSelected = selectedChatId === chat.chat_id;
               const uploadedDate = new Date(chat.uploaded_at);

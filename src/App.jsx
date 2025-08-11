@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
+import AboutPage from "./pages/AboutPage";
 import PlayPage from "./pages/PlayPage";
 import PlayChemiPage from "./pages/PlayChemiPage";
 import PlayChemiAnalysisPage from "./pages/PlayChemiAnalysisPage";
@@ -24,6 +25,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/play" element={<PlayPage />} />
         <Route path="/play/chemi" element={<PlayChemiPage />} />
         <Route
@@ -46,7 +48,7 @@ function App() {
           element={<BusinessContrAnalysisPage />}
         />
         <Route path="/business/mypage" element={<BusinessMyPage />} />
-        <Route path="/credits" element={<CreditsPage />} />
+        <Route path="/credit" element={<CreditsPage />} />
         <Route path="/result/:analysisId" element={<ResultPage />} />
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />

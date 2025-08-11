@@ -83,19 +83,6 @@ export default function BusinessContrPage() {
             analysisResult ? "w-61.5 mr-34.5" : "w-53.5 mr-60.5"
           } flex flex-col items-center justify-center`}
         >
-          <div className="absolute left-0 top-6 w-full flex justify-start items-end gap-2 text-primary-dark">
-            <div
-              className="text-h6 cursor-pointer flex justify-center items-center"
-              onClick={() => {
-                navigate("/business");
-              }}
-            >
-              <p className="">
-                Chatto <span className="bold">Business</span>
-              </p>
-            </div>
-            <p className="text-body2">업무 기여도 분석</p>
-          </div>
           <ChatList />
           <FileUpload />
 
@@ -134,6 +121,7 @@ export default function BusinessContrPage() {
         >
           {!loading && !analysisResult && (
             <>
+              <p className="text-h6 mb-4">업무 참여도 분석</p>
               <Icons.ContrIconFull className="mb-5" />
               <div className="w-full flex flex-col items-center text-gray-8 text-body2 text-center mb-18">
                 <p>팀원의 업무 기여도가 얼마나 높을까요?</p>
