@@ -26,6 +26,10 @@ export default function Header() {
     navigate("/business");
   };
 
+  const handleAboutPage = () => {
+    navigate("/about");
+  };
+
   const handlePlayMyPage = () => {
     navigate("/play/mypage");
   };
@@ -35,7 +39,7 @@ export default function Header() {
   };
 
   const handleCreditPage = () => {
-    navigate("/credits");
+    navigate("/credit");
   };
 
   return (
@@ -65,6 +69,44 @@ export default function Header() {
         {!mode && (
           <span className="text-st2">당신의 어떤 대화라도 분석해드릴게요</span>
         )}
+        {mode === "play" && (
+          <div className="w-32 h-6.5 px-2.5 pt-1 pb-1.5 flex justify-between items-center">
+            <p
+              onClick={handlePlayPage}
+              className="pr-1.5 text-primary-dark border-r-1 border-gray-6 text-button cursor-pointer"
+            >
+              PLAY
+            </p>
+            <p
+              onClick={
+                pathname.includes("mypage")
+                  ? handleBusinessMyPage
+                  : handleBusinessPage
+              }
+              className="pl-1.25 text-center text-gray-5 text-button cursor-pointer"
+            >
+              BUSINESS
+            </p>
+          </div>
+        )}
+        {mode === "business" && (
+          <div className="w-32 h-6.5 px-2.5 pt-1 pb-1.5 flex justify-between items-center">
+            <p
+              onClick={handleBusinessPage}
+              className="pr-1.5 text-primary-light border-r-1 border-gray-6 text-button cursor-pointer"
+            >
+              BUSINESS
+            </p>
+            <p
+              onClick={
+                pathname.includes("mypage") ? handlePlayMyPage : handlePlayPage
+              }
+              className="pl-1.25 text-center text-gray-6 text-button cursor-pointer"
+            >
+              PLAY
+            </p>
+          </div>
+        )}
       </div>
 
       <nav
@@ -72,6 +114,25 @@ export default function Header() {
           mode === "business" ? "text-gray-3" : "text-gray-7"
         }`}
       >
+        {!mode && (
+          <p
+            onClick={handleAboutPage}
+            className={` text-h7 ${
+              pathname.includes("about") ? "text-primary" : "text-gray-7"
+            }`}
+          >
+            About
+          </p>
+        )}
+        {user && (
+          <p
+            className={`text-h7 ${
+              mode === "business" ? "text-primary-light" : "text-primary"
+            }`}
+          >
+            {user.username}
+          </p>
+        )}
         <div
           className="relative"
           onMouseEnter={() => setShowDropdown(true)}
@@ -127,23 +188,7 @@ export default function Header() {
 
         {user && (
           <button onClick={handleCreditPage} className="text-h7">
-            300C
-          </button>
-        )}
-        {mode === "play" && (
-          <button
-            onClick={handleBusinessPage}
-            className="bold text-h7 text-primary-dark"
-          >
-            Business
-          </button>
-        )}
-        {mode === "business" && (
-          <button
-            onClick={handlePlayPage}
-            className="bold text-h7 text-primary-light"
-          >
-            Play
+            {user.point}C
           </button>
         )}
         {user ? (

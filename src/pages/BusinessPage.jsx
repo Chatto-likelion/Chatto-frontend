@@ -17,7 +17,7 @@ export default function BusinessPage() {
         </div>
         <div className="grid grid-cols-3 gap-12">
           <ServiceCard
-            title="대화 참여도 분석"
+            title="업무 참여도 분석"
             description={
               <>
                 구성원의 대화 참여율, <br />
@@ -28,14 +28,14 @@ export default function BusinessPage() {
             textColor="text-primary-dark"
             border="border border-2 border-primary-dark"
             icon={ChattoBusiness}
-            navigateTo="/business/part"
+            navigateTo="/business/contr"
           />
           <ServiceCard
-            title="업무 기여도 분석"
+            title="소통 구조 분석"
             description={
               <>
                 메신저 내용을 바탕으로 <br />
-                업무 기여도를 분석합니다.
+                팀의 소통 구조를 분석합니다.
               </>
             }
             bgColor="bg-white"

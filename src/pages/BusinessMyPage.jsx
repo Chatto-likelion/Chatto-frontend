@@ -1,12 +1,14 @@
 import { Header, ChatList, FileUpload } from "@/components";
-import { getAnalysisList_Bus } from "@/apis/api";
+import { getAnalysisList_Bus, deleteContrAnalysis } from "@/apis/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useChat } from "@/contexts/ChatContext";
 import * as Icons from "@/assets/svg/index.js";
 
 export default function BusinessMyPage() {
   const { user } = useAuth();
+  const { setSelectedChatId } = useChat();
   const navigate = useNavigate();
   const [analyses, setAnalyses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,6 +32,20 @@ export default function BusinessMyPage() {
   useEffect(() => {
     loadAnalyses();
   }, []);
+
+  const handleDeleteAnalysis = (type, resultId) => {
+    const deleteFn = type == 2 ? deleteContrAnalysis : deleteContrAnalysis;
+    deleteFn(resultId)
+      .then(() => {
+        setSelectedChatId(null);
+        setError(null);
+        loadAnalyses();
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("분석 목록을 불러오는데 실패했습니다.");
+      });
+  };
 
   return (
     <div className="flex flex-col justify-start items-start h-screen bg-white text-gray-7">
@@ -58,7 +74,7 @@ export default function BusinessMyPage() {
                     <p className="text-body1 mr-1.5">{user.point}C</p>
                     <button
                       onClick={() => {
-                        navigate("/CreditsPage");
+                        navigate("/credit");
                       }}
                       className="w-8 h-5 border border-secondary-dark rounded-sm hover:bg-secondary-dark hover:text-white cursor-pointer"
                     >
@@ -89,23 +105,29 @@ export default function BusinessMyPage() {
                 .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
                 .map((item) => (
                   <div
-                    key={item.result_id}
+                    key={item.created_at}
                     className="w-82.5 h-63 px-2.75 pt-4 pb-3 text-gray-7 relative flex flex-col justify-between items-center rounded-lg border border-primary-dark"
                   >
                     <div className="w-full flex flex-col justify-start items-center">
-                      <div className="w-full pr-3 flex justify-between items-center mb-2">
-                        <p className="text-h7">{item.project_type}</p>
+                      <div className="w-full pr-3 flex justify-start items-center mb-2">
+                        <p className="w-65 mr-5.5 text-h7">
+                          {item.type == 1
+                            ? "업무 참여도 분석"
+                            : "소통 구조 분석"}
+                        </p>
                         <Icons.X
-                          onClick={() => {}}
-                          className="w-2 h-2 text-primary-light cursor-pointer"
+                          onClick={() => {
+                            handleDeleteAnalysis(item.type, item.result_id);
+                          }}
+                          className="w-2.25 h-2.25 text-primary-light cursor-pointer"
                         />
                       </div>
-                      <div className="w-full mb-3 pr-3 text-right text-body2  text-secondary-dark">
+                      <div className="w-full mb-3 pr-3 text-right text-body2 text-secondary-dark">
                         {item.created_at}
                       </div>
 
-                      <div className="w-75 h-8.5 px-3 py-2 rounded flex justify-between items-center mb-3 text-body1 text-primary-dark border border-secondary-dark">
-                        <span>{item.title}</span>
+                      <div className="w-75 h-8.5 px-2 py-1 rounded flex justify-start items-center text-body1 text-primary-dark border border-secondary-dark">
+                        <span className="w-36.5">{item.title}</span>
                         <div className="flex items-center gap-0.5">
                           <Icons.Person className="w-5.25 h-5.25 p-0.75" />
                           <span>{item.people_num}</span>
@@ -113,21 +135,45 @@ export default function BusinessMyPage() {
                       </div>
                     </div>
 
-                    <div className="w-74.5 px-2 flex flex-col justify-between items-center gap-0.5">
-                      <div className="w-full h-6 flex justify-start items-center gap-6.5 text-start">
-                        <p className="w-30">분석 기간</p>
-                        <p className="text-body2">{item.analysis_date_start}</p>
+                    {item.type == 1 && (
+                      <div className="w-74.5 px-2 flex flex-col justify-between items-center gap-0.5">
+                        <div className="w-full h-6 flex justify-start items-center gap-6.5 text-start">
+                          <p className="w-30">프로젝트 유형</p>
+                          <p className="text-body2">{item.project_type}</p>
+                        </div>
+                        <div className="w-full h-6 flex justify-start items-center gap-6.5 text-start">
+                          <p className="w-30">팀 유형</p>
+                          <p className="text-body2">{item.team_type}</p>
+                        </div>
+                        <div className="w-full h-6 flex justify-start items-center gap-6.5 text-start">
+                          <p className="w-30">분석 기간</p>
+                          <p className="text-body2">25.04.13. ~ 25.08.03.</p>
+                        </div>
                       </div>
-                      <div className="w-full h-6 flex justify-start items-center gap-6.5 text-start">
-                        <p className="w-30">분석 기간</p>
-                        <p className="text-body2">{item.analysis_date_end}</p>
+                    )}
+
+                    {item.type == 2 && (
+                      <div className="w-74.5 px-2 flex flex-col justify-between items-center gap-0.5">
+                        <div className="w-full h-6 flex justify-start items-center gap-6.5 text-start">
+                          <p className="w-30">프로젝트 유형</p>
+                          <p className="text-body2">{item.project_type}</p>
+                        </div>
+                        <div className="w-full h-6 flex justify-start items-center gap-6.5 text-start">
+                          <p className="w-30">팀 유형</p>
+                          <p className="text-body2">{item.team_type}</p>
+                        </div>
+                        <div className="w-full h-6 flex justify-start items-center gap-6.5 text-start">
+                          <p className="w-30">분석 기간</p>
+                          <p className="text-body2">25.04.13. ~ 25.08.03.</p>
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     <div className="w-full flex justify-start items-center gap-4 ">
                       <button
                         onClick={() => {
-                          navigate(`/business/contr/${item.result_id}`);
+                          const type = item.type == 1 ? "contr" : "contr";
+                          navigate(`/business/${type}/${item.result_id}`);
                         }}
                         className="ml-13 w-17.5 h-6.5 px-1.5 py-0.75 border border-primary-dark text-primary-dark text-button rounded hover:bg-primary-dark hover:text-white cursor-pointer"
                       >

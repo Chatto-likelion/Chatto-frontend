@@ -270,7 +270,7 @@ export const postMbtiAnalyze = async (chatId, payload) => {
 
 export const getAnalysisList = async () => {
   try {
-    const response = await instanceWithToken.get(`/play/analysis/chem/`);
+    const response = await instanceWithToken.get(`/play/analysis/all/`);
     if (response.status === 200) {
       return response.data;
     } else {

@@ -68,15 +68,7 @@ export default function PlayMbtiPage() {
       <div className="flex-1 w-300 mt-17.5 overflow-hidden flex justify-between items-start">
         {/* 왼쪽 */}
         <div className="gap-5 pt-6 w-53.5 mr-60.5 flex flex-col items-center justify-center">
-          <div className="w-full mb-32 flex justify-start items-end gap-2 text-primary-light">
-            <p
-              className="text-h6 cursor-pointer"
-              onClick={() => navigate("/play")}
-            >
-              Chatto Play
-            </p>
-            <p className="text-body2">케미측정</p>
-          </div>
+          <div className="w-full mb-32"></div>
           <ChatList />
           <FileUpload />
 
@@ -87,6 +79,7 @@ export default function PlayMbtiPage() {
         <main className="flex-1 overflow-y-auto max-h-240 scrollbar-hide pt-28 w-157 pr-57 flex flex-col justify-start items-center">
           {!loading && (
             <>
+              <p className="text-h6 mb-4">MBTI 분석</p>
               <Icons.ChemiIconFull className="mb-4" />
               <div className="w-full flex flex-col items-center text-body2 text-center mb-21">
                 <p>우리의 케미는 얼마나 잘 맞을까?</p>
