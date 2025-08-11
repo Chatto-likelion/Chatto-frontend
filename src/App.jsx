@@ -18,6 +18,7 @@ import ResultPage from "./pages/ResultPage";
 import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
 import ForgetPasswordPage from "./pages/ForgetPasswordPage";
+import BusinessResultPage from "./pages/BusinessResultPage_test.jsx";
 
 function App() {
   return (
@@ -44,6 +45,10 @@ function App() {
         <Route
           path="/business/contr/:resultId"
           element={<BusinessContrAnalysisPage />}
+        />
+        <Route
+          path="/business/contr/result-test"
+          element={<BusinessResultPage />}
         />
         <Route path="/business/mypage" element={<BusinessMyPage />} />
         <Route path="/credits" element={<CreditsPage />} />
