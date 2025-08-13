@@ -105,10 +105,10 @@ export default function ChatList() {
         >
           업로드된 채팅
         </p>
-        <div className="w-full gap-0.5 flex flex-col items-center">
+        <div className="w-full h-55.75 overflow-y-auto scrollbar-hide gap-0.5 flex flex-col items-center">
           {[...chats]
             .sort((a, b) => new Date(b.uploaded_at) - new Date(a.uploaded_at))
-            .slice(0, 5)
+            // .slice(0, 5)
             .map((chat, idx) => {
               const isSelected = selectedChatId === chat.chat_id;
               const uploadedDate = new Date(chat.uploaded_at);

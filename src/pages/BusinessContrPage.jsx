@@ -16,7 +16,6 @@ export default function BusinessContrPage() {
   const navigate = useNavigate();
 
   const [analysisResult, setAnalysisResult] = useState();
-  const [peopleNum, setPeopleNum] = useState("23명");
   const [relation, setRelation] = useState("동아리 부원");
   const [situation, setSituation] = useState("일상대화");
   const [startPeriod, setStartPeriod] = useState("처음부터");
@@ -147,8 +146,6 @@ export default function BusinessContrPage() {
                 </div>
                 <DetailForm
                   isAnalysis={false}
-                  peopleNum={peopleNum}
-                  setPeopleNum={setPeopleNum}
                   relation={relation}
                   setRelation={setRelation}
                   situation={situation}
