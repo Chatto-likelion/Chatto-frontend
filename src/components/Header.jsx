@@ -66,44 +66,45 @@ export default function Header() {
         <button onClick={handleLanding} className="text-h4">
           Chatto
         </button>
-        {!mode && (
+        {!mode ? (
           <span className="text-st2">당신의 어떤 대화라도 분석해드릴게요</span>
-        )}
-        <div className="w-32 h-6.5 px-2.5 pt-1 pb-1.5 flex justify-between items-center">
-          {/* PLAY 탭 */}
-          <p
-            onClick={
-              mode === "play"
-                ? handlePlayPage
-                : pathname.includes("mypage")
-                ? handlePlayMyPage
-                : handlePlayPage
-            }
-            className={[
-              "border-r-1 pr-1.5 text-button cursor-pointer",
-              mode === "play" ? " text-primary-dark" : " text-gray-6",
-            ].join(" ")}
-          >
-            PLAY
-          </p>
+        ) : (
+          <div className="w-32 h-6.5 px-2.5 pt-1 pb-1.5 flex justify-between items-center">
+            {/* PLAY 탭 */}
+            <p
+              onClick={
+                mode === "play"
+                  ? handlePlayPage
+                  : pathname.includes("mypage")
+                  ? handlePlayMyPage
+                  : handlePlayPage
+              }
+              className={[
+                "border-r-1 pr-1.5 text-button cursor-pointer",
+                mode === "play" ? " text-primary-dark" : " text-gray-6",
+              ].join(" ")}
+            >
+              PLAY
+            </p>
 
-          {/* BUSINESS 탭 */}
-          <p
-            onClick={
-              mode === "play"
-                ? pathname.includes("mypage")
-                  ? handleBusinessMyPage
+            {/* BUSINESS 탭 */}
+            <p
+              onClick={
+                mode === "play"
+                  ? pathname.includes("mypage")
+                    ? handleBusinessMyPage
+                    : handleBusinessPage
                   : handleBusinessPage
-                : handleBusinessPage
-            }
-            className={[
-              "pl-1.25 text-button cursor-pointer",
-              mode === "play" ? "text-gray-5" : "text-primary-light",
-            ].join(" ")}
-          >
-            BUSINESS
-          </p>
-        </div>
+              }
+              className={[
+                "pl-1.25 text-button cursor-pointer",
+                mode === "play" ? "text-gray-5" : "text-primary-light",
+              ].join(" ")}
+            >
+              BUSINESS
+            </p>
+          </div>
+        )}
       </div>
 
       <nav
@@ -111,16 +112,6 @@ export default function Header() {
           mode === "business" ? "text-gray-3" : "text-gray-7"
         }`}
       >
-        {!mode && (
-          <p
-            onClick={handleAboutPage}
-            className={` text-h7 ${
-              pathname.includes("about") ? "text-primary" : "text-gray-7"
-            }`}
-          >
-            About
-          </p>
-        )}
         {user && (
           <p
             className={`text-h7 ${
@@ -128,6 +119,16 @@ export default function Header() {
             }`}
           >
             {user.username}
+          </p>
+        )}
+        {!mode && (
+          <p
+            onClick={handleAboutPage}
+            className={` text-h7 cursor-pointer ${
+              pathname.includes("about") ? "text-primary" : "text-gray-7"
+            }`}
+          >
+            About
           </p>
         )}
         <div
@@ -184,19 +185,22 @@ export default function Header() {
         </div>
 
         {user && (
-          <button onClick={handleCreditPage} className="text-h7">
+          <button onClick={handleCreditPage} className="text-h7 cursor-pointer">
             {user.point}C
           </button>
         )}
         {user ? (
-          <button onClick={logout} className="w-20 text-start text-h7">
+          <button
+            onClick={logout}
+            className="w-20 text-start text-h7 cursor-pointer"
+          >
             Sign out
           </button>
         ) : (
           <button
             // onClick={handleTempSignIn}
             onClick={handleSignIn}
-            className="w-20 text-start text-h7"
+            className="w-20 text-start text-h7 cursor-pointer"
           >
             Sign in
           </button>
