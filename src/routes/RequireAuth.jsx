@@ -16,7 +16,7 @@ export default function RequireAuth() {
       if (window.confirm("로그인이 필요합니다. 로그인 페이지로 이동할까요?")) {
         navigate("/signin", { replace: true, state: { from: location } });
       } else {
-        navigate(-1); // 또는 원하는 안전 경로("/")
+        navigate(-1);
       }
     }
   }, [user, asked, location, navigate]);
