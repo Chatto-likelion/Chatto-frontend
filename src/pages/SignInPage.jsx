@@ -3,7 +3,7 @@ import Input from "../components/Input.jsx";
 import Button from "../components/Button.jsx";
 import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext.jsx";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { EyeClosed, EyeOpened } from "../assets/svg/index.js";
 import { login as loginAPI } from "../apis/api.js";
 
@@ -13,6 +13,16 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  const location = useLocation();
+
+  const fromLocation = location.state?.from;
+  const fallback = "/"; // 기본 복귀 경로
+
+  const redirectTo =
+    (fromLocation?.pathname || "") +
+    (fromLocation?.search || "") +
+    (fromLocation?.hash || "");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,7 +40,7 @@ export default function SignInPage() {
         point: res.point,
         phone: res.phone,
       });
-      navigate("/");
+      navigate(redirectTo || fallback, { replace: true });
     } catch (error) {
       alert(error.message);
     }

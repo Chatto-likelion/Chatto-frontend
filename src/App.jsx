@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import RequireAuth from "./routes/RequireAuth";
 import LandingPage from "./pages/LandingPage";
 import AboutPage from "./pages/AboutPage";
 import PlayPage from "./pages/PlayPage";
@@ -29,35 +30,49 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/play" element={<PlayPage />} />
         <Route path="/play/chemi" element={<PlayChemiPage />} />
-        <Route
-          path="/play/chemi/:resultId"
-          element={<PlayChemiAnalysisPage />}
-        />
+        <Route path="/business" element={<BusinessPage />} />
+        <Route path="/business/contr" element={<BusinessContrPage />} />
+
+        <Route path="/signin" element={<SignInPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/forget" element={<ForgetPasswordPage />} />
+
         <Route
           path="/play/chemi/result-test"
           element={<PlayChemiResultPage />}
-        />
-        <Route path="/play/some" element={<PlaySomePage />} />
-        <Route path="/play/some/:resultId" element={<PlaySomeAnalysisPage />} />
-        <Route path="/play/mbti" element={<PlayMbtiPage />} />
-        <Route path="/play/mbti/:resultId" element={<PlayMbtiAnalysisPage />} />
-        <Route path="/play/mypage" element={<PlayMyPage />} />
-        <Route path="/business" element={<BusinessPage />} />
-        <Route path="/business/contr" element={<BusinessContrPage />} />
-        <Route
-          path="/business/contr/:resultId"
-          element={<BusinessContrAnalysisPage />}
         />
         <Route
           path="/business/contr/result-test"
           element={<BusinessResultPage />}
         />
-        <Route path="/business/mypage" element={<BusinessMyPage />} />
-        <Route path="/credit" element={<CreditsPage />} />
-        <Route path="/result/:analysisId" element={<ResultPage />} />
-        <Route path="/signin" element={<SignInPage />} />
-        <Route path="/signup" element={<SignUpPage />} />
-        <Route path="/forget" element={<ForgetPasswordPage />} />
+
+        <Route element={<RequireAuth />}>
+          <Route
+            path="/play/chemi/:resultId"
+            element={<PlayChemiAnalysisPage />}
+          />
+
+          <Route path="/play/some" element={<PlaySomePage />} />
+          <Route
+            path="/play/some/:resultId"
+            element={<PlaySomeAnalysisPage />}
+          />
+          <Route path="/play/mbti" element={<PlayMbtiPage />} />
+          <Route
+            path="/play/mbti/:resultId"
+            element={<PlayMbtiAnalysisPage />}
+          />
+          <Route path="/play/mypage" element={<PlayMyPage />} />
+
+          <Route
+            path="/business/contr/:resultId"
+            element={<BusinessContrAnalysisPage />}
+          />
+
+          <Route path="/business/mypage" element={<BusinessMyPage />} />
+          <Route path="/credit" element={<CreditsPage />} />
+          <Route path="/result/:analysisId" element={<ResultPage />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );
