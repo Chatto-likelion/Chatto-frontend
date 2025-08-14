@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   getChatList,
   deleteChat,
@@ -20,6 +20,9 @@ export default function ChatList() {
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [editingId, setEditingId] = useState(null);
+  const [editingValue, setEditingValue] = useState("");
 
   const loadChats = useCallback(async () => {
     try {
@@ -73,6 +76,37 @@ export default function ChatList() {
 
   const handleSelect = (chatId) => {
     setSelectedChatId((prevId) => (prevId === chatId ? null : chatId));
+  };
+
+  const startEdit = (chat) => {
+    setEditingId(chat.chat_id);
+    setEditingValue(chat.title || "");
+  };
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditingValue("");
+  };
+  const saveEdit = async (chat, title) => {
+    if (!title) return; // 빈 제목은 무시 (원하면 경고)
+    // 낙관적 업데이트
+    const prev = chats;
+    setChats((old) =>
+      old.map((c) => (c.chat_id === chat.chat_id ? { ...c, title } : c))
+    );
+    // try {
+    //   const fn = isPlay ? patchChatTitle : patchChatTitle_Bus;
+    //   await fn(chat.chat_id, title);
+    //   // 필요 시 서버 싱크 보장:
+    //   // await loadChats();
+    // } catch (e) {
+    //   console.error("제목 수정 실패:", e);
+    //   // 롤백
+    //   setChats(prev);
+    //   setError("제목 수정에 실패했습니다.");
+    // } finally {
+    //   cancelEdit();
+    // }
+    cancelEdit();
   };
 
   if (loading && chats.length === 0) {
@@ -154,27 +188,86 @@ export default function ChatList() {
               return `${y}.${m}.${day}.`;
             };
 
-            const Item = ({ chat, isSelected }) => (
-              <div className="w-47.5 mb-2 flex flex-col justify-center items-center">
-                <div className="w-full gap-0.75 flex justify-between items-center">
-                  <button
-                    onClick={() => handleSelect(chat.chat_id)}
-                    className={`w-45 h-7.25 text-body2 flex justify-between items-center px-3 py-2 rounded
-              hover:${isPlay ? "bg-gray-5" : "bg-gray-2"} ${
-                      isSelected
-                        ? isPlay
-                          ? "bg-secondary-light text-primary-dark"
-                          : "bg-primary-light text-primary-dark"
-                        : isPlay
-                        ? "border border-secondary text-secondary-light opacity-80"
-                        : "border border-primary text-gray-6 opacity-80"
-                    }`}
-                  >
-                    <div className="flex items-center gap-0.75">
-                      <span className={isPlay ? "" : "text-gray-7"}>
-                        {chat.title?.slice(0, 12) || "제목 없음"}
+            const Item = ({ chat, isSelected }) => {
+              const isEditingThis = editingId === chat.chat_id;
+              const [isComposing, setIsComposing] = useState(false);
+              const inputRef = useRef(null);
+
+              const onKeyDown = (e) => {
+                // IME 조합 중이면 단축키 무시
+                // @ts-ignore
+                if (isComposing || e.nativeEvent?.isComposing) return;
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  const title = (inputRef.current?.value || "").trim();
+                  if (!title) return;
+                  saveEdit(chat, title); // 아래 참고
+                }
+                if (e.key === "Escape") {
+                  e.preventDefault();
+                  cancelEdit();
+                }
+              };
+
+              const CommonInner = (
+                <>
+                  <div className="flex items-center gap-0.75">
+                    {isEditingThis ? (
+                      <input
+                        ref={inputRef}
+                        defaultValue={chat.title || ""}
+                        onClick={(e) => e.stopPropagation()}
+                        onCompositionStart={() => setIsComposing(true)}
+                        onCompositionEnd={() => setIsComposing(false)}
+                        onKeyDown={onKeyDown}
+                        autoFocus
+                        maxLength={40}
+                        className="w-21.5 bg-transparent border-b border-primary-dark focus:outline-none"
+                        placeholder="제목 입력"
+                        // value / onChange 없음!  ← 중요
+                      />
+                    ) : (
+                      <span
+                        className={
+                          isPlay ? "cursor-text" : "text-gray-7 cursor-text"
+                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startEdit(chat);
+                        }}
+                        title={chat.title || "제목 없음"}
+                      >
+                        {(chat.title ?? "제목 없음").slice(0, 12)}
                       </span>
-                    </div>
+                    )}
+
+                    {isEditingThis && (
+                      <div
+                        className="flex items-center gap-1 ml-1"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          className="w-8 py-0.25 text-caption rounded border border-secondary hover:bg-primary-light hover:text-primary-dark"
+                          onClick={() =>
+                            saveEdit(
+                              chat,
+                              (inputRef.current?.value || "").trim()
+                            )
+                          }
+                        >
+                          저장
+                        </button>
+                        <button
+                          className="w-8 py-0.25 text-caption rounded border border-gray-400 hover:bg-gray-200"
+                          onClick={cancelEdit}
+                        >
+                          취소
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {!isEditingThis && (
                     <div className="flex items-center gap-0.5">
                       <Icons.Person
                         className={`w-5.25 h-5.25 p-0.75 ${
@@ -187,23 +280,63 @@ export default function ChatList() {
                       />
                       <span>{chat.people_num}</span>
                     </div>
-                  </button>
+                  )}
+                </>
+              );
 
-                  <Icons.X
-                    className={`w-2 h-2 ${
-                      isPlay ? "text-primary-light" : "text-primary"
-                    } opacity-10 hover:opacity-100 cursor-pointer`}
-                    onClick={() => handleDelete(chat.chat_id)}
-                  />
-                </div>
+              return (
+                <div className="w-47.5 mb-2 flex flex-col justify-center items-center">
+                  <div className="w-full gap-0.75 flex justify-between items-center">
+                    {isEditingThis ? (
+                      <div
+                        className={[
+                          "w-45 h-7.25 text-body2 flex justify-between items-center px-3 py-2 rounded",
+                          isSelected
+                            ? isPlay
+                              ? "bg-secondary-light text-primary-dark"
+                              : "bg-primary-light text-primary-dark"
+                            : isPlay
+                            ? "border border-secondary text-secondary-light opacity-80"
+                            : "border border-primary text-gray-6 opacity-80",
+                        ].join(" ")}
+                      >
+                        {CommonInner}
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => handleSelect(chat.chat_id)}
+                        className={[
+                          "w-45 h-7.25 text-body2 flex justify-between items-center px-3 py-2 rounded",
+                          isPlay ? "hover:bg-gray-6" : "hover:bg-gray-3",
+                          isSelected
+                            ? isPlay
+                              ? "bg-secondary-light text-primary-dark"
+                              : "bg-primary-light text-primary-dark"
+                            : isPlay
+                            ? "border border-secondary text-secondary-light opacity-80"
+                            : "border border-primary text-gray-6 opacity-80",
+                        ].join(" ")}
+                      >
+                        {CommonInner}
+                      </button>
+                    )}
 
-                {isSelected && (
-                  <div className="pr-3 w-full text-secondary-dark text-overline text-right opacity-100">
-                    업로드 날짜: {toDotYMD_KST(chat.uploaded_at)}
+                    <Icons.X
+                      className={`w-2 h-2 ${
+                        isPlay ? "text-primary-light" : "text-primary"
+                      } opacity-10 hover:opacity-100 cursor-pointer`}
+                      onClick={() => handleDelete(chat.chat_id)}
+                    />
                   </div>
-                )}
-              </div>
-            );
+
+                  {isSelected && (
+                    <div className="pr-3 w-full text-secondary-dark text-overline text-right opacity-100">
+                      업로드 날짜: {toDotYMD_KST(chat.uploaded_at)}
+                    </div>
+                  )}
+                </div>
+              );
+            };
 
             const Section = ({ title, items }) =>
               items.length ? (
