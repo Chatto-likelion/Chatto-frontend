@@ -247,7 +247,10 @@ export default function ChatList() {
                         onClick={(e) => e.stopPropagation()}
                       >
                         <button
-                          className="w-8 py-0.25 text-caption rounded border border-secondary hover:bg-primary-light hover:text-primary-dark"
+                          className={`w-8 py-0.25 text-caption rounded border ${
+                            isPlay ? "border-secondary" : "border-primary-dark"
+                          } hover:bg-primary-light hover:text-primary-dark`}
+
                           onClick={() =>
                             saveEdit(
                               chat,
@@ -258,7 +261,9 @@ export default function ChatList() {
                           저장
                         </button>
                         <button
-                          className="w-8 py-0.25 text-caption rounded border border-gray-400 hover:bg-gray-200"
+                          className={`w-8 py-0.25 text-caption rounded border ${
+                            isPlay ? "border-secondary" : "border-primary-dark"
+                          } hover:bg-gray-2 hover:text-primary-dark`}
                           onClick={cancelEdit}
                         >
                           취소
