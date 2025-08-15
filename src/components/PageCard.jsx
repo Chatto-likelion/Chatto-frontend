@@ -39,7 +39,7 @@ export default function PageCard({
         </div>
         <button
           onClick={handleClick}
-          className={`text-button px-3 py-1.5 rounded-lg bg-white text-primary-dark ${buttonBorder}`}
+          className={`text-button px-3 py-1.5 rounded-lg bg-white text-primary-dark hover:bg-primary-light hover:text-primary-dark transition-colors cursor-pointer ${buttonBorder}`}
         >
           {buttonText}
         </button>
