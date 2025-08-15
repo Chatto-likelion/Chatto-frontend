@@ -1,4 +1,11 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import React from "react";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import RequireAuth from "./routes/RequireAuth";
 import LandingPage from "./pages/LandingPage";
 import AboutPage from "./pages/AboutPage";
@@ -21,6 +28,20 @@ import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
 import ForgetPasswordPage from "./pages/ForgetPasswordPage";
 import BusinessResultPage from "./pages/BusinessResultPage_test.jsx";
+
+/** ✅ demo=1 쿼리를 자동으로 붙여주는 래퍼 (API 안 타고 목데이터로 렌더) */
+function DemoWrapper({ children }) {
+  const nav = useNavigate();
+  const loc = useLocation();
+  React.useEffect(() => {
+    const sp = new URLSearchParams(loc.search);
+    if (sp.get("demo") !== "1") {
+      sp.set("demo", "1");
+      nav(`${loc.pathname}?${sp.toString()}`, { replace: true });
+    }
+  }, [loc.pathname, loc.search, nav]);
+  return children;
+}
 
 function App() {
   return (
@@ -46,12 +67,39 @@ function App() {
           element={<BusinessResultPage />}
         />
 
+        {/** --------------------- 🎯 DEMO ROUTES (no login, no resultId) --------------------- */}
+        <Route
+          path="/demo/chemi"
+          element={
+            <DemoWrapper>
+              <PlayChemiAnalysisPage />
+            </DemoWrapper>
+          }
+        />
+        <Route
+          path="/demo/some"
+          element={
+            <DemoWrapper>
+              <PlaySomeAnalysisPage />
+            </DemoWrapper>
+          }
+        />
+        <Route
+          path="/demo/mbti"
+          element={
+            <DemoWrapper>
+              <PlayMbtiAnalysisPage />
+            </DemoWrapper>
+          }
+        />
+        {/** ---------------------------------------------------------------------------------- */}
+
+        {/** 원래 보호 라우트들은 그대로 유지 */}
         <Route element={<RequireAuth />}>
           <Route
             path="/play/chemi/:resultId"
             element={<PlayChemiAnalysisPage />}
           />
-
           <Route path="/play/some" element={<PlaySomePage />} />
           <Route
             path="/play/some/:resultId"
@@ -68,7 +116,6 @@ function App() {
             path="/business/contr/:resultId"
             element={<BusinessContrAnalysisPage />}
           />
-
           <Route path="/business/mypage" element={<BusinessMyPage />} />
           <Route path="/credit" element={<CreditsPage />} />
           <Route path="/result/:analysisId" element={<ResultPage />} />
