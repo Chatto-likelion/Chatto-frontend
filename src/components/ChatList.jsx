@@ -250,6 +250,7 @@ export default function ChatList() {
                           className={`w-8 py-0.25 text-caption rounded border ${
                             isPlay ? "border-secondary" : "border-primary-dark"
                           } hover:bg-primary-light hover:text-primary-dark`}
+
                           onClick={() =>
                             saveEdit(
                               chat,
