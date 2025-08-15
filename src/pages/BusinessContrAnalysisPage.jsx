@@ -16,10 +16,13 @@ export default function BusinessContrAnalysisPage() {
   const { resultId } = useParams(); // URL 파라미터 추출
   const { setSelectedChatId } = useChat();
   const navigate = useNavigate();
-  const [relation, setRelation] = useState("동아리 부원");
-  const [situation, setSituation] = useState("일상대화");
-  const [startPeriod, setStartPeriod] = useState("처음부터");
-  const [endPeriod, setEndPeriod] = useState("끝까지");
+  const [form, setForm] = useState({
+    project_type: "",
+    team_type: "입력 안 함",
+    analysis_start: "처음부터",
+    analysis_end: "끝까지",
+  });
+  const updateForm = (patch) => setForm((prev) => ({ ...prev, ...patch }));
   const [resultData, setResultData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -90,7 +93,7 @@ export default function BusinessContrAnalysisPage() {
                 <p>team_type: {resultData.team_type}</p>
                 <p>analysis_date_start: {resultData.analysis_date_start}</p>
                 <p>analysis_date_end: {resultData.analysis_date_end}</p>
-                <p>analysis_date: {resultData.analysis_date}</p>
+                <p>created_at: {resultData.created_at}</p>
                 <p>chat: {resultData.chat}</p>
               </div>
             </div>
@@ -101,15 +104,10 @@ export default function BusinessContrAnalysisPage() {
         <div className="w-[214px] mt-52.5 flex flex-col items-center justify-start gap-4">
           <div className="w-full py-4 px-1 flex flex-col justify-center items-center border border-primary rounded-lg  bg-white">
             <DetailForm
+              type={1} // 1=contr
+              value={form}
+              onChange={updateForm}
               isAnalysis={true}
-              relation={relation}
-              setRelation={setRelation}
-              situation={situation}
-              setSituation={setSituation}
-              startPeriod={startPeriod}
-              setStartPeriod={setStartPeriod}
-              endPeriod={endPeriod}
-              setEndPeriod={setEndPeriod}
             />
             <button
               onClick={() => {}}

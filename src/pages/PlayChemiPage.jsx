@@ -15,27 +15,18 @@ export default function PlayChemiPage() {
   const { selectedChatId } = useChat();
   const navigate = useNavigate();
 
-  const [peopleNum, setPeopleNum] = useState("23명");
-  const [relationship, setRelationship] = useState("입력 안 함");
-  const [situation, setSituation] = useState("입력 안 함");
-  const [startPeriod, setStartPeriod] = useState("처음부터");
-  const [endPeriod, setEndPeriod] = useState("끝까지");
+  const [form, setForm] = useState({
+    relationship: "",
+    situation: "",
+    analysis_start: "처음부터",
+    analysis_end: "끝까지",
+  });
+  const updateForm = (patch) => setForm((prev) => ({ ...prev, ...patch }));
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const convertPeriodToDate = (label, type) => {
-    const now = new Date();
-    switch (label) {
-      case "처음부터":
-        return new Date(now.getFullYear() - 1, 0, 1).toISOString();
-      default:
-        return type === "end"
-          ? now.toISOString()
-          : new Date(now.getFullYear() - 1, 0, 1).toISOString();
-    }
-  };
-
+  const normalize = (s) => (s && s.trim() ? s.trim() : "입력 안 함");
   const handleAnalyze = async () => {
     if (!selectedChatId) {
       alert("먼저 채팅을 선택하세요.");
@@ -45,17 +36,15 @@ export default function PlayChemiPage() {
     setLoading(true);
     setError(null);
 
-    const payload = {
-      relationship: relationship,
-      situation,
-      analysis_start: convertPeriodToDate(startPeriod, "start"),
-      analysis_end: convertPeriodToDate(endPeriod, "end"),
-    };
-
     try {
+      const payload = {
+        ...form,
+        relationship: normalize(form.relationship),
+        situation: normalize(form.situation),
+      };
+
       const analyzeResponse = await postChemiAnalyze(selectedChatId, payload);
       const resultId = analyzeResponse.result_id;
-      // 결과 페이지로 이동
       navigate(`/play/chemi/${resultId}`);
     } catch (err) {
       setError(err.message || "분석에 실패했습니다.");
@@ -104,17 +93,10 @@ export default function PlayChemiPage() {
                   </p>
                 </div>
                 <DetailForm
+                  type={1} // 1=chemi, 2=some, 3=mbti
+                  value={form}
+                  onChange={updateForm}
                   isAnalysis={false}
-                  peopleNum={peopleNum}
-                  setPeopleNum={setPeopleNum}
-                  relationship={relationship}
-                  setRelationship={setRelationship}
-                  situation={situation}
-                  setSituation={setSituation}
-                  startPeriod={startPeriod}
-                  setStartPeriod={setStartPeriod}
-                  endPeriod={endPeriod}
-                  setEndPeriod={setEndPeriod}
                 />
               </div>
 

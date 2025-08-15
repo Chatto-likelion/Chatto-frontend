@@ -221,8 +221,8 @@ export default function ChatList() {
                         onCompositionEnd={() => setIsComposing(false)}
                         onKeyDown={onKeyDown}
                         autoFocus
-                        maxLength={40}
-                        className="w-21.5 bg-transparent border-b border-primary-dark focus:outline-none"
+                        maxLength={9}
+                        className="w-30 bg-transparent border-b border-primary-dark focus:outline-none"
                         placeholder="제목 입력"
                         // value / onChange 없음!  ← 중요
                       />
@@ -237,54 +237,23 @@ export default function ChatList() {
                         }}
                         title={chat.title || "제목 없음"}
                       >
-                        {(chat.title ?? "제목 없음").slice(0, 12)}
+                        {(chat.title ?? "제목 없음").slice(0, 9)}
                       </span>
-                    )}
-
-                    {isEditingThis && (
-                      <div
-                        className="flex items-center gap-1 ml-1"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <button
-                          className={`w-8 py-0.25 text-caption rounded border ${
-                            isPlay ? "border-secondary" : "border-primary-dark"
-                          } hover:bg-primary-light hover:text-primary-dark`}
-                          onClick={() =>
-                            saveEdit(
-                              chat,
-                              (inputRef.current?.value || "").trim()
-                            )
-                          }
-                        >
-                          저장
-                        </button>
-                        <button
-                          className={`w-8 py-0.25 text-caption rounded border ${
-                            isPlay ? "border-secondary" : "border-primary-dark"
-                          } hover:bg-gray-2 hover:text-primary-dark`}
-                          onClick={cancelEdit}
-                        >
-                          취소
-                        </button>
-                      </div>
                     )}
                   </div>
 
-                  {!isEditingThis && (
-                    <div className="flex items-center gap-0.5">
-                      <Icons.Person
-                        className={`w-5.25 h-5.25 p-0.75 ${
-                          isSelected
-                            ? "text-primary-dark"
-                            : isPlay
-                            ? "text-secondary-light"
-                            : "text-gray-6 opacity-80"
-                        }`}
-                      />
-                      <span>{chat.people_num}</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-0.5">
+                    <Icons.Person
+                      className={`w-5.25 h-5.25 p-0.75 ${
+                        isSelected
+                          ? "text-primary-dark"
+                          : isPlay
+                          ? "text-secondary-light"
+                          : "text-gray-6 opacity-80"
+                      }`}
+                    />
+                    <span>{chat.people_num}</span>
+                  </div>
                 </>
               );
 
