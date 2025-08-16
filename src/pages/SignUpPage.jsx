@@ -65,10 +65,13 @@ export default function SignUpPage() {
       });
 
       login({
-        id: res.user.id,
-        username: res.user.username,
-        email: res.user.email,
-        point: res.point,
+        user: {
+          id: res.user.id,
+          username: res.user.username,
+          email: res.user.email,
+        },
+        credit: res.credit,
+        phone: res.phone,
       });
 
       navigate("/");

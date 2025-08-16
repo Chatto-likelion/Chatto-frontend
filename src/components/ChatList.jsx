@@ -2,16 +2,16 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import {
   getChatList,
   deleteChat,
+  putChat,
   getChatList_Bus,
   deleteChat_Bus,
+  putChat_Bus,
 } from "@/apis/api";
-import { useAuth } from "../contexts/AuthContext.jsx";
 import { useChat } from "@/contexts/ChatContext";
 import * as Icons from "@/assets/svg";
 import useCurrentMode from "@/hooks/useCurrentMode";
 
 export default function ChatList() {
-  const { user } = useAuth();
   const mode = useCurrentMode();
   const isPlay = mode === "play";
 
@@ -93,20 +93,18 @@ export default function ChatList() {
     setChats((old) =>
       old.map((c) => (c.chat_id === chat.chat_id ? { ...c, title } : c))
     );
-    // try {
-    //   const fn = isPlay ? patchChatTitle : patchChatTitle_Bus;
-    //   await fn(chat.chat_id, title);
-    //   // 필요 시 서버 싱크 보장:
-    //   // await loadChats();
-    // } catch (e) {
-    //   console.error("제목 수정 실패:", e);
-    //   // 롤백
-    //   setChats(prev);
-    //   setError("제목 수정에 실패했습니다.");
-    // } finally {
-    //   cancelEdit();
-    // }
-    cancelEdit();
+    try {
+      const fn = isPlay ? putChat : putChat_Bus;
+      await fn(chat.chat_id, title);
+      //await loadChats();
+      window.location.reload();
+    } catch (e) {
+      console.error("제목 수정 실패:", e);
+      setChats(prev);
+      setError("제목 수정에 실패했습니다.");
+    } finally {
+      cancelEdit();
+    }
   };
 
   if (loading && chats.length === 0) {

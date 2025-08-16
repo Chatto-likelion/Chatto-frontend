@@ -118,7 +118,7 @@ export default function Header() {
               mode === "business" ? "text-primary-light" : "text-primary"
             }`}
           >
-            {user.username}
+            {user.user.username}
           </p>
         )}
         {!mode && (
@@ -152,7 +152,7 @@ export default function Header() {
                     ? mode === "business"
                       ? "text-primary-light"
                       : "text-primary"
-                    : ""
+                    : "cursor-pointer"
                 }`}
               >
                 My page
@@ -186,7 +186,7 @@ export default function Header() {
 
         {user && (
           <button onClick={handleCreditPage} className="text-h7 cursor-pointer">
-            {user.point}C
+            {user.credit}C
           </button>
         )}
         {user ? (

@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getMbtiAnalysisDetail } from "@/apis/api"; // 실제 API 호출 함수
+import { getMbtiAnalysisDetail, deleteMbtiAnalysis } from "@/apis/api"; // 실제 API 호출 함수
 import {
   Header,
   ChatList,
@@ -40,6 +40,17 @@ export default function PlayMbtiAnalysisPage() {
 
     fetchResult();
   }, [resultId]);
+
+  const handleDelete = async () => {
+    try {
+      await deleteMbtiAnalysis(resultId);
+      navigate("/play/mbti/");
+    } catch (err) {
+      setError(err.message || "분석에 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) return <p>결과를 불러오는 중...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
@@ -93,7 +104,7 @@ export default function PlayMbtiAnalysisPage() {
         </main>
 
         {/* 오른쪽 */}
-        <div className="w-[214px] mt-52.5 flex flex-col items-center justify-start gap-4">
+        <div className="w-[214px] mt-52.5 flex flex-col items-center justify-start gap-1.5">
           <div className="w-full py-4 px-1 flex flex-col justify-center items-center border border-secondary-light rounded-lg">
             <DetailForm
               type={3} // 1=chemi, 2=some, 3=mbti
@@ -113,26 +124,26 @@ export default function PlayMbtiAnalysisPage() {
             <button
               onClick={() => {}}
               disabled={loading}
-              className="w-16 h-8.5 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-2 text-button border border-secondary rounded-lg"
+              className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
             >
               결과 공유
             </button>
             <button
               onClick={() => {}}
               disabled={loading}
-              className="w-16 h-8.5 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-2 text-button border border-secondary rounded-lg"
-            >
-              결과 저장
-            </button>
-            <button
-              onClick={() => {}}
-              disabled={loading}
-              className="w-16 h-8.5 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-2 text-button border border-secondary rounded-lg"
+              className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
             >
               퀴즈 생성
             </button>
+            <button
+              onClick={() => handleDelete()}
+              disabled={loading}
+              className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
+            >
+              결과 삭제
+            </button>
           </div>
-          <div className="w-full h-[170px] p-3.75 pb-4.5 border border-secondary-light rounded-lg text-primary-light">
+          <div className="w-full h-[170px] mt-2 p-3.75 pb-4.5 border border-secondary-light rounded-lg text-primary-light">
             <SmallServices />
           </div>
         </div>
