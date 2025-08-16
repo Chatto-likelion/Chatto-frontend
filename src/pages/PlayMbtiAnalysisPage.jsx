@@ -16,10 +16,11 @@ export default function PlayMbtiAnalysisPage() {
   const { resultId } = useParams(); // URL 파라미터 추출
   const { setSelectedChatId } = useChat();
   const navigate = useNavigate();
-  const [relation, setRelation] = useState("동아리 부원");
-  const [situation, setSituation] = useState("일상대화");
-  const [startPeriod, setStartPeriod] = useState("처음부터");
-  const [endPeriod, setEndPeriod] = useState("끝까지");
+  const [form, setForm] = useState({
+    startPeriod: "처음부터",
+    endPeriod: "끝까지",
+  });
+  const updateForm = (patch) => setForm((prev) => ({ ...prev, ...patch }));
   const [resultData, setResultData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -95,7 +96,7 @@ export default function PlayMbtiAnalysisPage() {
                 <p>is_saved: {resultData.is_saved}</p>
                 <p>analysis_date_start: {resultData.analysis_date_start}</p>
                 <p>analysis_date_end: {resultData.analysis_date_end}</p>
-                <p>analysis_date: {resultData.analysis_date}</p>
+                <p>created_at: {resultData.created_at}</p>
                 <p>chat: {resultData.chat}</p>
               </div>
             </div>
@@ -106,15 +107,10 @@ export default function PlayMbtiAnalysisPage() {
         <div className="w-[214px] mt-52.5 flex flex-col items-center justify-start gap-1.5">
           <div className="w-full py-4 px-1 flex flex-col justify-center items-center border border-secondary-light rounded-lg">
             <DetailForm
+              type={3} // 1=chemi, 2=some, 3=mbti
+              value={form}
+              onChange={updateForm}
               isAnalysis={true}
-              relation={relation}
-              setRelation={setRelation}
-              situation={situation}
-              setSituation={setSituation}
-              startPeriod={startPeriod}
-              setStartPeriod={setStartPeriod}
-              endPeriod={endPeriod}
-              setEndPeriod={setEndPeriod}
             />
             <button
               onClick={() => {}}

@@ -199,7 +199,7 @@ export default function PlayMyPage() {
                       </div>
                       <div className="w-full h-6 flex justify-start items-center gap-6.5 text-start">
                         <p className="w-30">분석 기간</p>
-                        <p className="text-body2">
+                        <p className="text-body2 tracking-tight">
                           {labelKST(item.analysis_date_start)} ~{" "}
                           {labelKST(item.analysis_date_end)}
                         </p>
@@ -218,7 +218,7 @@ export default function PlayMyPage() {
                       </div>
                       <div className="w-full h-6 flex justify-start items-center gap-6.5 text-start">
                         <p className="w-30">분석 기간</p>
-                        <p className="text-body2">
+                        <p className="text-body2 tracking-tight">
                           {labelKST(item.analysis_date_start)} ~{" "}
                           {labelKST(item.analysis_date_end)}
                         </p>
@@ -229,7 +229,7 @@ export default function PlayMyPage() {
                     <div className="w-74.5 px-2 flex flex-col justify-between items-center gap-0.5">
                       <div className="w-full h-6 flex justify-start items-center gap-6.5 text-start">
                         <p className="w-30">분석 기간</p>
-                        <p className="text-body2">
+                        <p className="text-body2 tracking-tight">
                           {labelKST(item.analysis_date_start)} ~{" "}
                           {labelKST(item.analysis_date_end)}
                         </p>

@@ -15,26 +15,14 @@ export default function PlayMbtiPage() {
   const { selectedChatId } = useChat();
   const navigate = useNavigate();
 
-  const [peopleNum, setPeopleNum] = useState("23명");
-  const [relationship, setRelationship] = useState("입력 안 함");
-  const [situation, setSituation] = useState("입력 안 함");
-  const [startPeriod, setStartPeriod] = useState("처음부터");
-  const [endPeriod, setEndPeriod] = useState("끝까지");
+  const [form, setForm] = useState({
+    analysis_start: "처음부터",
+    analysis_end: "끝까지",
+  });
+  const updateForm = (patch) => setForm((prev) => ({ ...prev, ...patch }));
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  const convertPeriodToDate = (label, type) => {
-    const now = new Date();
-    switch (label) {
-      case "처음부터":
-        return new Date(now.getFullYear() - 1, 0, 1).toISOString();
-      default:
-        return type === "end"
-          ? now.toISOString()
-          : new Date(now.getFullYear() - 1, 0, 1).toISOString();
-    }
-  };
 
   const handleAnalyze = async () => {
     if (!selectedChatId) {
@@ -102,17 +90,10 @@ export default function PlayMbtiPage() {
                   </p>
                 </div>
                 <DetailForm
+                  type={3} // 1=chemi, 2=some, 3=mbti
+                  value={form}
+                  onChange={updateForm}
                   isAnalysis={false}
-                  peopleNum={peopleNum}
-                  setPeopleNum={setPeopleNum}
-                  relationship={relationship}
-                  setRelationship={setRelationship}
-                  situation={situation}
-                  setSituation={setSituation}
-                  startPeriod={startPeriod}
-                  setStartPeriod={setStartPeriod}
-                  endPeriod={endPeriod}
-                  setEndPeriod={setEndPeriod}
                 />
               </div>
 

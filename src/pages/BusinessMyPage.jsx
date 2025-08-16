@@ -185,7 +185,7 @@ export default function BusinessMyPage() {
                       </div>
                       <div className="w-full h-6 flex justify-start items-center gap-6.5 text-start">
                         <p className="w-30">분석 기간</p>
-                        <p className="text-body2">
+                        <p className="text-body2 tracking-tight">
                           {labelKST(item.analysis_date_start)} ~{" "}
                           {labelKST(item.analysis_date_end)}
                         </p>
@@ -205,7 +205,7 @@ export default function BusinessMyPage() {
                       </div>
                       <div className="w-full h-6 flex justify-start items-center gap-6.5 text-start">
                         <p className="w-30">분석 기간</p>
-                        <p className="text-body2">
+                        <p className="text-body2 tracking-tight">
                           {labelKST(item.analysis_date_start)} ~{" "}
                           {labelKST(item.analysis_date_end)}
                         </p>

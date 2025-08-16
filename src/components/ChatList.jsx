@@ -219,8 +219,8 @@ export default function ChatList() {
                         onCompositionEnd={() => setIsComposing(false)}
                         onKeyDown={onKeyDown}
                         autoFocus
-                        maxLength={10}
-                        className="w-28 bg-transparent border-b border-primary-dark focus:outline-none"
+                        maxLength={9}
+                        className="w-30 bg-transparent border-b border-primary-dark focus:outline-none"
                         placeholder="제목 입력"
                         // value / onChange 없음!  ← 중요
                       />
@@ -235,7 +235,7 @@ export default function ChatList() {
                         }}
                         title={chat.title || "제목 없음"}
                       >
-                        {(chat.title ?? "제목 없음").slice(0, 10)}
+                        {(chat.title ?? "제목 없음").slice(0, 9)}
                       </span>
                     )}
                   </div>
