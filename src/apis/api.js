@@ -74,9 +74,8 @@ export const getMe = async () => {
  * ✅ 파일 업로드 및 관리
  */
 
-export const postChat = async (userId, file) => {
+export const postChat = async (file) => {
   const formData = new FormData();
-  formData.append("user_id", userId);
   formData.append("file", file);
 
   try {
@@ -482,9 +481,8 @@ export const deleteMbtiAnalysis = async (resultId) => {
  * ✅ 파일 업로드 및 관리
  */
 // 파일 업로드
-export const postChat_Bus = async (userId, file) => {
+export const postChat_Bus = async (file) => {
   const formData = new FormData();
-  formData.append("user_id", userId);
   formData.append("file", file);
 
   try {
