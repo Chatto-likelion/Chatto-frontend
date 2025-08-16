@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getChemiAnalysisDetail } from "@/apis/api"; // 실제 API 호출 함수
+import { getChemiAnalysisDetail, deleteChemiAnalysis } from "@/apis/api"; // 실제 API 호출 함수
 import {
   Header,
   ChatList,
@@ -39,6 +39,17 @@ export default function PlayChemiAnalysisPage() {
 
     fetchResult();
   }, [resultId]);
+
+  const handleDelete = async () => {
+    try {
+      await deleteChemiAnalysis(resultId);
+      navigate("/play/chemi/");
+    } catch (err) {
+      setError(err.message || "분석에 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) return <p>결과를 불러오는 중...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
@@ -128,14 +139,14 @@ export default function PlayChemiAnalysisPage() {
               disabled={loading}
               className="w-16 h-8.5 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-2 text-button border border-secondary rounded-lg"
             >
-              결과 저장
+              퀴즈 생성
             </button>
             <button
-              onClick={() => {}}
+              onClick={() => handleDelete()}
               disabled={loading}
               className="w-16 h-8.5 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-2 text-button border border-secondary rounded-lg"
             >
-              퀴즈 생성
+              결과 삭제
             </button>
           </div>
           <div className="w-full h-[170px] p-3.75 pb-4.5 border border-secondary-light rounded-lg text-primary-light">

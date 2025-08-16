@@ -7,13 +7,11 @@ import {
   deleteChat_Bus,
   putChat_Bus,
 } from "@/apis/api";
-import { useAuth } from "../contexts/AuthContext.jsx";
 import { useChat } from "@/contexts/ChatContext";
 import * as Icons from "@/assets/svg";
 import useCurrentMode from "@/hooks/useCurrentMode";
 
 export default function ChatList() {
-  const { user } = useAuth();
   const mode = useCurrentMode();
   const isPlay = mode === "play";
 

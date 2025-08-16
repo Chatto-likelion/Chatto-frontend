@@ -25,7 +25,7 @@ export default function BusinessMyPage() {
 
   const loadAnalyses = () => {
     setLoading(true);
-    Promise.all([getAnalysisList_Bus(user.id), getChatList_Bus(user.id)])
+    Promise.all([getAnalysisList_Bus(), getChatList_Bus()])
       .then(([analysisData, chatData]) => {
         console.log("📌 analysis:", analysisData);
         console.log("📌 chats:", chatData);
@@ -91,11 +91,13 @@ export default function BusinessMyPage() {
                 </p>
               </div>
               <div className="pt-3 w-46 flex flex-col gap-5.5">
-                <p className="w-full text-h6 text-start">{user.username}</p>
+                <p className="w-full text-h6 text-start">
+                  {user.user.username}
+                </p>
                 <div className="w-full flex flex-col justify-center items-start gap-0.5">
                   <div className="w-full gap-1.5 flex justify-start items-center">
                     <p className="text-body1 text-secondary-dark">크레딧</p>
-                    <p className="text-body1 mr-1.5">{user.point}C</p>
+                    <p className="text-body1 mr-1.5">{user.credit}C</p>
                     <button
                       onClick={() => {
                         navigate("/credit");
@@ -111,7 +113,7 @@ export default function BusinessMyPage() {
                   </div>
                   <div className="w-full gap-1.5 flex justify-start items-center">
                     <p className="text-body1 text-secondary-dark">이메일</p>
-                    <p className="text-body1">{user.email}</p>
+                    <p className="text-body1">{user.user.email}</p>
                   </div>
                 </div>
               </div>

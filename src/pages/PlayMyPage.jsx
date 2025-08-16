@@ -98,11 +98,13 @@ export default function PlayMyPage() {
                 </p>
               </div>
               <div className="pt-3 w-46 flex flex-col gap-5.5">
-                <p className="w-full text-h6 text-start">{user.username}</p>
+                <p className="w-full text-h6 text-start">
+                  {user.user.username}
+                </p>
                 <div className="w-full flex flex-col justify-center items-start gap-0.5">
                   <div className="w-full gap-1.5 flex justify-start items-center">
                     <p className="text-body1 text-secondary">크레딧</p>
-                    <p className="text-body1 mr-1.5">{user.point}C</p>
+                    <p className="text-body1 mr-1.5">{user.credit}C</p>
                     <button
                       onClick={() => {
                         navigate("/credit");
@@ -118,7 +120,7 @@ export default function PlayMyPage() {
                   </div>
                   <div className="w-full gap-1.5 flex justify-start items-center">
                     <p className="text-body1 text-secondary">이메일</p>
-                    <p className="text-body1">{user.email}</p>
+                    <p className="text-body1">{user.user.email}</p>
                   </div>
                 </div>
               </div>
