@@ -8,3 +8,4 @@ export { default as Input } from "./Input";
 export { default as PageCard } from "./PageCard";
 export { default as SmallServices } from "./SmallServices";
 export { default as DetailForm } from "./DetailForm";
+export { default as ShareModal } from "./ShareModal";

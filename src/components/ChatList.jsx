@@ -23,6 +23,7 @@ export default function ChatList() {
 
   const [editingId, setEditingId] = useState(null);
   const [editingValue, setEditingValue] = useState("");
+  const editBoxRef = useRef(null);
 
   const loadChats = useCallback(async () => {
     try {
@@ -58,6 +59,25 @@ export default function ChatList() {
       };
     }
   }, [chatListReloadRef, loadChats]);
+
+  useEffect(() => {
+    if (editingId == null) return;
+
+    const handleOutside = (e) => {
+      const box = editBoxRef.current;
+      if (box && !box.contains(e.target)) {
+        cancelEdit(); // 👉 바깥 클릭 시 편집 취소
+      }
+    };
+
+    // 캡처 단계에서 먼저 실행되게 true
+    document.addEventListener("mousedown", handleOutside, true);
+    document.addEventListener("touchstart", handleOutside, true);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside, true);
+      document.removeEventListener("touchstart", handleOutside, true);
+    };
+  }, [editingId]);
 
   const handleDelete = async (chatId) => {
     try {
@@ -219,7 +239,7 @@ export default function ChatList() {
                         onCompositionEnd={() => setIsComposing(false)}
                         onKeyDown={onKeyDown}
                         autoFocus
-                        maxLength={9}
+                        maxLength={10}
                         className="w-30 bg-transparent border-b border-primary-dark focus:outline-none"
                         placeholder="제목 입력"
                         // value / onChange 없음!  ← 중요
@@ -235,7 +255,7 @@ export default function ChatList() {
                         }}
                         title={chat.title || "제목 없음"}
                       >
-                        {(chat.title ?? "제목 없음").slice(0, 9)}
+                        {(chat.title ?? "제목 없음").slice(0, 10)}
                       </span>
                     )}
                   </div>
@@ -260,6 +280,7 @@ export default function ChatList() {
                   <div className="w-full gap-0.75 flex justify-between items-center">
                     {isEditingThis ? (
                       <div
+                        ref={editBoxRef}
                         className={[
                           "w-45 h-7.25 text-body2 flex justify-between items-center px-3 py-2 rounded",
                           isSelected

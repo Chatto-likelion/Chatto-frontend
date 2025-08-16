@@ -12,6 +12,7 @@ import {
   FileUpload,
   SmallServices,
   DetailForm,
+  ShareModal,
 } from "@/components";
 import { useNavigate } from "react-router-dom";
 import { useChat } from "@/contexts/ChatContext";
@@ -21,9 +22,11 @@ export default function PlaySomeAnalysisPage() {
   const { resultId } = useParams(); // URL 파라미터 추출
   const { setSelectedChatId } = useChat();
   const navigate = useNavigate();
+  const [modalOpen, setModalOpen] = useState(false);
+  const shareUrl = "https://www.figma.com/file/abc...";
   const [form, setForm] = useState({
     relationship: "",
-    age: "",
+    age: "입력 안 함",
     analysis_start: "처음부터",
     analysis_end: "끝까지",
   });
@@ -84,7 +87,6 @@ export default function PlaySomeAnalysisPage() {
     const payload = {
       ...form,
       relationship: normalize(form.relationship),
-      age: normalize(form.age),
     };
     console.log(resultData.result, payload);
     const isSame =
@@ -212,12 +214,17 @@ export default function PlaySomeAnalysisPage() {
           </div>
           <div className="w-full flex justify-between items-center">
             <button
-              onClick={() => {}}
+              onClick={() => setModalOpen(true)}
               disabled={loading}
               className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
             >
               결과 공유
             </button>
+            <ShareModal
+              open={modalOpen}
+              onClose={() => setModalOpen(false)}
+              url={shareUrl}
+            />
             <button
               onClick={() => {}}
               disabled={loading}
