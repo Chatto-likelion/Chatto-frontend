@@ -105,7 +105,7 @@ export default function PlayChemiAnalysisPage() {
         </main>
 
         {/* 오른쪽 */}
-        <div className="w-[214px] mt-52.5 flex flex-col items-center justify-start gap-4">
+        <div className="w-[214px] mt-52.5 flex flex-col items-center justify-start gap-1.5">
           <div className="w-full py-4 px-1 flex flex-col justify-center items-center border border-secondary-light rounded-lg">
             <DetailForm
               isAnalysis={true}
@@ -121,35 +121,36 @@ export default function PlayChemiAnalysisPage() {
             <button
               onClick={() => {}}
               disabled={loading}
-              className="mt-6 w-19.75 h-8.5 hover:bg-secondary hover:text-primary-dark px-3 py-2 text-button border border-secondary rounded-lg"
+              className="mt-6 w-18.5 h-6.5 px-1.5 py-1 flex justify-center gap-0.5 items-center hover:bg-secondary-light hover:text-primary-dark text-caption border border-secondary-light rounded-lg"
             >
               다시 분석
+              <Icons.Search className="w-2.5 h-2.5" />
             </button>
           </div>
           <div className="w-full flex justify-between items-center">
             <button
               onClick={() => {}}
               disabled={loading}
-              className="w-16 h-8.5 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-2 text-button border border-secondary rounded-lg"
+              className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
             >
               결과 공유
             </button>
             <button
               onClick={() => {}}
               disabled={loading}
-              className="w-16 h-8.5 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-2 text-button border border-secondary rounded-lg"
+              className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
             >
               퀴즈 생성
             </button>
             <button
               onClick={() => handleDelete()}
               disabled={loading}
-              className="w-16 h-8.5 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-2 text-button border border-secondary rounded-lg"
+              className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
             >
               결과 삭제
             </button>
           </div>
-          <div className="w-full h-[170px] p-3.75 pb-4.5 border border-secondary-light rounded-lg text-primary-light">
+          <div className="w-full h-[170px] mt-2 p-3.75 pb-4.5 border border-secondary-light rounded-lg text-primary-light">
             <SmallServices />
           </div>
         </div>

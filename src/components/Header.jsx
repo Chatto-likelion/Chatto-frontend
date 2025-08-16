@@ -152,7 +152,7 @@ export default function Header() {
                     ? mode === "business"
                       ? "text-primary-light"
                       : "text-primary"
-                    : ""
+                    : "cursor-pointer"
                 }`}
               >
                 My page

@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getContrAnalysisDetail } from "@/apis/api"; // 실제 API 호출 함수
+import { getContrAnalysisDetail, deleteContrAnalysis } from "@/apis/api"; // 실제 API 호출 함수
 import {
   Header,
   ChatList,
@@ -39,6 +39,17 @@ export default function BusinessContrAnalysisPage() {
 
     fetchResult();
   }, [resultId]);
+
+  const handleDelete = async () => {
+    try {
+      await deleteContrAnalysis(resultId);
+      navigate("/business/contr/");
+    } catch (err) {
+      setError(err.message || "분석에 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) return <p>결과를 불러오는 중...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
@@ -98,7 +109,7 @@ export default function BusinessContrAnalysisPage() {
         </main>
 
         {/* 오른쪽 */}
-        <div className="w-[214px] mt-52.5 flex flex-col items-center justify-start gap-4">
+        <div className="w-[214px] mt-52.5 flex flex-col items-center justify-start gap-1.5">
           <div className="w-full py-4 px-1 flex flex-col justify-center items-center border border-primary rounded-lg  bg-white">
             <DetailForm
               isAnalysis={true}
@@ -114,35 +125,29 @@ export default function BusinessContrAnalysisPage() {
             <button
               onClick={() => {}}
               disabled={loading}
-              className="mt-6 w-19.75 h-8.5 hover:bg-primary hover:text-white px-3 py-2 text-button text-primary border border-primary rounded-lg"
+              className="mt-6 w-18.5 h-6.5 px-1.5 py-1 flex justify-center gap-0.5 items-center hover:bg-primary hover:text-white text-caption text-primary border border-primary rounded-lg"
             >
               다시 분석
+              <Icons.Search className="w-2.5 h-2.5" />
             </button>
           </div>
           <div className="w-full flex justify-between items-center">
             <button
               onClick={() => {}}
               disabled={loading}
-              className="w-16 h-8.5 hover:bg-primary hover:text-white cursor-pointer px-0.25 py-2 text-button text-primary border border-primary rounded-lg"
+              className="w-25 h-8 hover:bg-primary-dark hover:text-white cursor-pointer px-1.5 py-1 text-button text-primary-dark border-2 border-primary-dark rounded-lg"
             >
               결과 공유
             </button>
             <button
-              onClick={() => {}}
+              onClick={() => handleDelete}
               disabled={loading}
-              className="w-16 h-8.5 hover:bg-primary hover:text-white cursor-pointer px-0.25 py-2 text-button text-primary border border-primary rounded-lg"
+              className="w-25 h-8 hover:bg-primary-dark hover:text-white cursor-pointer px-1.5 py-1 text-button text-primary-dark border-2 border-primary-dark rounded-lg"
             >
-              결과 저장
-            </button>
-            <button
-              onClick={() => {}}
-              disabled={loading}
-              className="w-16 h-8.5 hover:bg-primary hover:text-white cursor-pointer px-0.25 py-2 text-button text-primary border border-primary rounded-lg"
-            >
-              퀴즈 생성
+              결과 삭제
             </button>
           </div>
-          <div className="w-full h-[116px] p-3.75 pb-4.5 border border-primary bg-white rounded-lg text-primary-dark">
+          <div className="w-full h-[116px] mt-2 p-3.75 pb-4.5 border border-primary bg-white rounded-lg text-primary-dark">
             <SmallServices />
           </div>
         </div>
