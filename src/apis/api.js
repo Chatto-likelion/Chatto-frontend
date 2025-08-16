@@ -106,9 +106,7 @@ export const postChat = async (file) => {
 
 export const deleteChat = async (chatId) => {
   try {
-    const response = await instanceWithToken.delete(
-      `/play/chat/${chatId}/delete/`
-    );
+    const response = await instanceWithToken.delete(`/play/chat/${chatId}/`);
 
     if (response.status === 204) {
       console.log("채팅 삭제 성공");

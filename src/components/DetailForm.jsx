@@ -55,7 +55,7 @@ function Row({
   return (
     <div className={`${ui.text} flex flex-col gap-3`}>
       <div className={`w-full ${ui.gap} flex justify-end items-center`}>
-        <p className={narrow && "tracking-tight"}>{label}</p>
+        <p className={narrow ? "tracking-tight" : ""}>{label}</p>
         <div
           className={`${ui.w} ${rightWrapClass} flex justify-end items-center`}
         >

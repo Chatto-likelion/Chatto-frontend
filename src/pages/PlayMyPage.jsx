@@ -29,8 +29,6 @@ export default function PlayMyPage() {
     setLoading(true);
     Promise.all([getAnalysisList(user.id), getChatList(user.id)])
       .then(([analysisData, chatData]) => {
-        console.log("📌 analysis:", analysisData);
-        console.log("📌 chats:", chatData);
         setAnalyses(analysisData);
         const map = Object.fromEntries(
           (chatData || []).map((c) => [

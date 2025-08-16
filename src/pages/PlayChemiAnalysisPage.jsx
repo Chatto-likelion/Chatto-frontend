@@ -1,12 +1,18 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getChemiAnalysisDetail, deleteChemiAnalysis } from "@/apis/api"; // 실제 API 호출 함수
+import {
+  getChemiAnalysisDetail,
+  getChatList,
+  postChemiAnalyze,
+  deleteChemiAnalysis,
+} from "@/apis/api"; // 실제 API 호출 함수
 import {
   Header,
   ChatList,
   FileUpload,
   SmallServices,
   DetailForm,
+  ShareModal,
 } from "@/components";
 import { useNavigate } from "react-router-dom";
 import { useChat } from "@/contexts/ChatContext";
@@ -16,32 +22,112 @@ export default function PlayChemiAnalysisPage() {
   const { resultId } = useParams(); // URL 파라미터 추출
   const { setSelectedChatId } = useChat();
   const navigate = useNavigate();
+  const [modalOpen, setModalOpen] = useState(false);
+  const shareUrl = "https://www.figma.com/file/abc...";
   const [form, setForm] = useState({
     relationship: "",
     situation: "",
-    startPeriod: "처음부터",
-    endPeriod: "끝까지",
+    analysis_start: "처음부터",
+    analysis_end: "끝까지",
   });
   const updateForm = (patch) => setForm((prev) => ({ ...prev, ...patch }));
   const [resultData, setResultData] = useState(null);
+  const [chatIds, setChatIds] = useState(() => new Set()); // 채팅 id 집합
+  const [hasSourceChat, setHasSourceChat] = useState(null); // true/false/null
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchResult = async () => {
+    let alive = true;
+    setLoading(true);
+
+    (async () => {
       try {
-        const data = await getChemiAnalysisDetail(resultId); // API 호출
-        setResultData(data.result);
-        setSelectedChatId(data.result.chat);
+        const [detail, chats] = await Promise.all([
+          getChemiAnalysisDetail(resultId),
+          getChatList(),
+        ]);
+
+        if (!alive) return;
+
+        const chatId = detail.result.chat;
+        setResultData(detail);
+        setSelectedChatId(chatId);
+        setForm({
+          relationship: detail.result.relationship,
+          situation: detail.result.situation,
+          analysis_start: detail.result.analysis_date_start,
+          analysis_end: detail.result.analysis_date_end,
+        });
+
+        const ids = new Set((chats || []).map((c) => c.chat_id));
+        setChatIds(ids);
+
+        setHasSourceChat(ids.has(chatId));
       } catch (err) {
-        setError(err.message || "결과를 불러오지 못했습니다.");
+        if (!alive) return;
+        setError(err.message || "결과/채팅 목록을 불러오지 못했습니다.");
       } finally {
-        setLoading(false);
+        if (alive) setLoading(false);
       }
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, [resultId]);
+
+  const normalize = (s) => (s && s.trim() ? s.trim() : "입력 안 함");
+  const handleAnalyze = async () => {
+    if (!hasSourceChat) {
+      window.alert("원본 채팅이 삭제되어 재분석할 수 없습니다.");
+      return;
+    }
+
+    const payload = {
+      ...form,
+      relationship: normalize(form.relationship),
+      situation: normalize(form.situation),
     };
 
-    fetchResult();
-  }, [resultId]);
+    const isSame =
+      resultData.result.relationship === payload.relationship &&
+      resultData.result.situation === payload.situation &&
+      resultData.result.analysis_date_start === payload.analysis_start &&
+      resultData.result.analysis_date_end === payload.analysis_end;
+
+    if (isSame) {
+      window.alert(
+        "이전 분석과 동일한 조건입니다. 변경 후 다시 시도해 주세요."
+      );
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const analyzeResponse = await postChemiAnalyze(
+        resultData.result.chat,
+        payload
+      );
+      const newResultId = analyzeResponse.result_id;
+      navigate(`/play/chemi/${newResultId}`);
+    } catch (err) {
+      const status = err.response?.status;
+      const data = err.response?.data;
+      console.error("analyze failed:", status, data);
+      setError(
+        data
+          ? typeof data === "string"
+            ? data
+            : JSON.stringify(data)
+          : err.message || "분석에 실패했습니다."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDelete = async () => {
     try {
@@ -94,14 +180,16 @@ export default function PlayChemiAnalysisPage() {
               <div>
                 <h1>케미 결과 페이지</h1>
                 <p>결과 ID: {resultId}</p>
-                <p>content: {resultData.content}</p>
-                <p>is_saved: {resultData.is_saved}</p>
-                <p>relationship: {resultData.relationship}</p>
-                <p>situation: {resultData.situation}</p>
-                <p>analysis_date_start: {resultData.analysis_date_start}</p>
-                <p>analysis_date_end: {resultData.analysis_date_end}</p>
-                <p>created_at: {resultData.created_at}</p>
-                <p>chat: {resultData.chat}</p>
+                <p>content: {resultData.result.content}</p>
+                <p>is_saved: {resultData.result.is_saved}</p>
+                <p>relationship: {resultData.result.relationship}</p>
+                <p>situation: {resultData.result.situation}</p>
+                <p>
+                  analysis_date_start: {resultData.result.analysis_date_start}
+                </p>
+                <p>analysis_date_end: {resultData.result.analysis_date_end}</p>
+                <p>created_at: {resultData.result.created_at}</p>
+                <p>chat: {resultData.result.chat}</p>
               </div>
             </div>
           </div>
@@ -117,7 +205,7 @@ export default function PlayChemiAnalysisPage() {
               isAnalysis={true}
             />
             <button
-              onClick={() => {}}
+              onClick={() => handleAnalyze()}
               disabled={loading}
               className="mt-6 w-18.5 h-6.5 px-1.5 py-1 flex justify-center gap-0.5 items-center hover:bg-secondary-light hover:text-primary-dark text-caption border border-secondary-light rounded-lg"
             >
@@ -127,12 +215,17 @@ export default function PlayChemiAnalysisPage() {
           </div>
           <div className="w-full flex justify-between items-center">
             <button
-              onClick={() => {}}
+              onClick={() => setModalOpen(true)}
               disabled={loading}
               className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
             >
               결과 공유
             </button>
+            <ShareModal
+              open={modalOpen}
+              onClose={() => setModalOpen(false)}
+              url={shareUrl}
+            />
             <button
               onClick={() => {}}
               disabled={loading}
