@@ -1,6 +1,11 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getMbtiAnalysisDetail, deleteMbtiAnalysis } from "@/apis/api"; // 실제 API 호출 함수
+import {
+  getMbtiAnalysisDetail,
+  getChatList,
+  postMbtiAnalyze,
+  deleteMbtiAnalysis,
+} from "@/apis/api"; // 실제 API 호출 함수
 import {
   Header,
   ChatList,
@@ -17,29 +22,101 @@ export default function PlayMbtiAnalysisPage() {
   const { setSelectedChatId } = useChat();
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    startPeriod: "처음부터",
-    endPeriod: "끝까지",
+    analysis_start: "처음부터",
+    analysis_end: "끝까지",
   });
   const updateForm = (patch) => setForm((prev) => ({ ...prev, ...patch }));
   const [resultData, setResultData] = useState(null);
+  const [chatIds, setChatIds] = useState(() => new Set()); // 채팅 id 집합
+  const [hasSourceChat, setHasSourceChat] = useState(null); // true/false/null
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchResult = async () => {
-      try {
-        const data = await getMbtiAnalysisDetail(resultId); // API 호출
-        setResultData(data.result);
-        setSelectedChatId(data.result.chat);
-      } catch (err) {
-        setError(err.message || "결과를 불러오지 못했습니다.");
-      } finally {
-        setLoading(false);
-      }
-    };
+    let alive = true;
+    setLoading(true);
 
-    fetchResult();
+    (async () => {
+      try {
+        const [detail, chats] = await Promise.all([
+          getMbtiAnalysisDetail(resultId),
+          getChatList(),
+        ]);
+
+        if (!alive) return;
+
+        const chatId = detail.result.chat;
+        setResultData(detail);
+        setSelectedChatId(chatId);
+        setForm({
+          analysis_start: detail.result.analysis_date_start,
+          analysis_end: detail.result.analysis_date_end,
+        });
+
+        const ids = new Set((chats || []).map((c) => c.chat_id));
+        setChatIds(ids);
+
+        setHasSourceChat(ids.has(chatId));
+      } catch (err) {
+        if (!alive) return;
+        setError(err.message || "결과/채팅 목록을 불러오지 못했습니다.");
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+
+    return () => {
+      alive = false;
+    };
   }, [resultId]);
+
+  const handleAnalyze = async () => {
+    if (!hasSourceChat) {
+      window.alert("원본 채팅이 삭제되어 재분석할 수 없습니다.");
+      return;
+    }
+
+    const payload = {
+      ...form,
+    };
+    const isSame =
+      resultData.result.relationship === payload.relationship &&
+      resultData.result.age === payload.age &&
+      resultData.result.analysis_date_start === payload.analysis_start &&
+      resultData.result.analysis_date_end === payload.analysis_end;
+
+    if (isSame) {
+      window.alert(
+        "이전 분석과 동일한 조건입니다. 변경 후 다시 시도해 주세요."
+      );
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const analyzeResponse = await postMbtiAnalyze(
+        resultData.result.chat,
+        payload
+      );
+      const newResultId = analyzeResponse.result_id;
+      navigate(`/play/mbti/${newResultId}`);
+    } catch (err) {
+      const status = err.response?.status;
+      const data = err.response?.data;
+      console.error("analyze failed:", status, data);
+      setError(
+        data
+          ? typeof data === "string"
+            ? data
+            : JSON.stringify(data)
+          : err.message || "분석에 실패했습니다."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDelete = async () => {
     try {
@@ -92,12 +169,14 @@ export default function PlayMbtiAnalysisPage() {
               <div>
                 <h1>MBTI 결과 페이지</h1>
                 <p>결과 ID: {resultId}</p>
-                <p>content: {resultData.content}</p>
-                <p>is_saved: {resultData.is_saved}</p>
-                <p>analysis_date_start: {resultData.analysis_date_start}</p>
-                <p>analysis_date_end: {resultData.analysis_date_end}</p>
-                <p>created_at: {resultData.created_at}</p>
-                <p>chat: {resultData.chat}</p>
+                <p>content: {resultData.result.content}</p>
+                <p>is_saved: {resultData.result.is_saved}</p>
+                <p>
+                  analysis_date_start: {resultData.result.analysis_date_start}
+                </p>
+                <p>analysis_date_end: {resultData.result.analysis_date_end}</p>
+                <p>created_at: {resultData.result.created_at}</p>
+                <p>chat: {resultData.result.chat}</p>
               </div>
             </div>
           </div>
@@ -113,11 +192,12 @@ export default function PlayMbtiAnalysisPage() {
               isAnalysis={true}
             />
             <button
-              onClick={() => {}}
+              onClick={() => handleAnalyze()}
               disabled={loading}
-              className="mt-6 w-19.75 h-8.5 hover:bg-secondary hover:text-primary-dark px-3 py-2 text-button border border-secondary rounded-lg"
+              className="mt-6 w-18.5 h-6.5 px-1.5 py-1 flex justify-center gap-0.5 items-center hover:bg-secondary-light hover:text-primary-dark text-caption border border-secondary-light rounded-lg"
             >
               다시 분석
+              <Icons.Search className="w-2.5 h-2.5" />
             </button>
           </div>
           <div className="w-full flex justify-between items-center">

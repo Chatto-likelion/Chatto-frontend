@@ -27,8 +27,6 @@ export default function BusinessMyPage() {
     setLoading(true);
     Promise.all([getAnalysisList_Bus(), getChatList_Bus()])
       .then(([analysisData, chatData]) => {
-        console.log("📌 analysis:", analysisData);
-        console.log("📌 chats:", chatData);
         setAnalyses(analysisData);
         const map = Object.fromEntries(
           (chatData || []).map((c) => [
