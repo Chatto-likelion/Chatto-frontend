@@ -70,6 +70,25 @@ export const getMe = async () => {
   }
 };
 
+export const putProfile = async (data) => {
+  try {
+    const res = await instanceWithToken.put(`/account/profile/`, data);
+
+    if (res.status === 200) return res.data;
+    throw new Error(`예상치 못한 응답 상태: ${res.status}`);
+  } catch (error) {
+    if (error.response) {
+      const { status } = error.response;
+      if (status === 400) throw new Error("입력값이 잘못되었습니다. (400)");
+      if (status === 401) throw new Error("로그인이 필요합니다. (401)");
+      if (status === 404)
+        throw new Error("유저 정보를 찾을 수 없습니다. (404)");
+    }
+    console.error("유저 정보 수정 에러:", error);
+    throw new Error("유저 정보 수정 중 오류가 발생했습니다.");
+  }
+};
+
 /**
  * ✅ 파일 업로드 및 관리
  */

@@ -77,9 +77,9 @@ export default function PlayMyPage() {
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
   return (
-    <div className="flex flex-col justify-start items-start h-screen bg-primary-dark text-white">
+    <div className="flex flex-col justify-start items-center h-screen bg-primary-dark text-white">
       <Header />
-      <div className="flex-1 pl-25.5 mt-18 overflow-hidden flex justify-between items-start">
+      <div className="flex-1 mt-18 overflow-hidden flex justify-between items-start">
         {/* 왼쪽 */}
         <div className="gap-5 pt-36 w-55.5 mr-12.75 flex flex-col items-center justify-center">
           <ChatList />
@@ -123,9 +123,14 @@ export default function PlayMyPage() {
                 </div>
               </div>
             </div>
-            <div className="w-full h-6 flex justify-end items-center">
+            <button
+              onClick={() => {
+                navigate("/profileedit");
+              }}
+              className="w-full h-6 flex justify-end items-center"
+            >
               <p className="text-caption cursor-pointer">정보수정</p>
-            </div>
+            </button>
           </div>
           <div className="w-full mb-5.75 flex justify-center items-center">
             <p className="text-h6">분석 결과</p>

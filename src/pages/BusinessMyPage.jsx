@@ -70,9 +70,9 @@ export default function BusinessMyPage() {
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
   return (
-    <div className="flex flex-col justify-start items-start h-screen bg-white text-gray-7">
+    <div className="flex flex-col justify-start items-center h-screen bg-white text-gray-7">
       <Header />
-      <div className="flex-1 pl-25.5 mt-18 overflow-hidden flex justify-between items-start">
+      <div className="flex-1 mt-18 overflow-hidden flex justify-between items-start">
         {/* 왼쪽 */}
         <div className="gap-5 pt-36 w-55.5 mr-12.75 flex flex-col items-center justify-center">
           <ChatList />

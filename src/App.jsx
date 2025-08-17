@@ -21,6 +21,7 @@ import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
 import ForgetPasswordPage from "./pages/ForgetPasswordPage";
 import BusinessResultPage from "./pages/BusinessResultPage_test.jsx";
+import ProfileEditPage from "./pages/ProfileEditPage.jsx";
 
 function App() {
   return (
@@ -73,6 +74,7 @@ function App() {
 
           <Route path="/credit" element={<CreditsPage />} />
           <Route path="/result/:analysisId" element={<ResultPage />} />
+          <Route path="/profileedit" element={<ProfileEditPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

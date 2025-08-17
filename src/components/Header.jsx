@@ -7,7 +7,8 @@ export default function Header() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const mode = useCurrentMode();
-  const { pathname } = useLocation();
+  const { pathname, search, hash } = useLocation();
+  const isLanding = pathname === "/" && !search && !hash;
   const [showDropdown, setShowDropdown] = useState(false);
 
   const handleSignIn = () => {
@@ -121,7 +122,7 @@ export default function Header() {
             {user.user.username}
           </p>
         )}
-        {!mode && (
+        {isLanding && (
           <p
             onClick={handleAboutPage}
             className={` text-h7 cursor-pointer ${
