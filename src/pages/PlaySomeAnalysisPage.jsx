@@ -27,62 +27,188 @@ function Panel({ title, children, className = "" }) {
     </section>
   );
 }
+
 function Section({ title, children }) {
   return (
-    <section className="rounded-lg border border-secondary-light/70 bg-white/5 p-5 sm:p-6 w-full">
-      <h2 className="mb-4 text-base font-semibold tracking-wide">{title}</h2>
+    <section
+      className="rounded-lg p-5 sm:p-6 w-full border"
+      style={{ borderColor: "#FFF8DE" }}
+    >
+      <h2 className="relative mb-6 inline-block text-base font-semibold tracking-wide">
+        {title}
+        {/* 제목 '위' 짧은 라인 */}
+        <span
+          className="absolute left-0 -top-1 h-0.5 w-24"
+          style={{ backgroundColor: "#FFF8DE" }}
+        />
+      </h2>
       {children}
     </section>
   );
 }
-function Meter({ value = 0 }) {
+
+/* -------------------- 타이포/라벨 공통 스타일 -------------------- */
+const body1 = {
+  fontFamily: '"LINE Seed Sans KR", sans-serif',
+  fontSize: "16px",
+  fontWeight: 400,
+  lineHeight: "24px",
+  letterSpacing: "0.3px",
+};
+
+const labelStyle = { ...body1 };
+
+/* -------------------- 말투/감정 게이지 -------------------- */
+function MeterBar({ value = 0 }) {
   const v = Math.max(0, Math.min(100, value));
   return (
-    <div className="h-3 w-full rounded-full bg-white/10 overflow-hidden">
+    <div
+      className="relative h-5 w-full rounded-sm overflow-hidden border z-0"
+      style={{ borderColor: "#FFF8DE" }}
+    >
       <div
-        className="h-full bg-gradient-to-r from-white/70 to-white"
-        style={{ width: `${v}%` }}
+        className="h-full"
+        style={{ width: `${v}%`, backgroundColor: "#FFF8DE" }}
       />
+      {/* 퍼센트 중앙 표시 - 헤더 위로 뜨지 않게 z-0 */}
+      <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
+        <span className="text-sm" style={{ color: "#2d1a52" }}>
+          {v}%
+        </span>
+      </div>
     </div>
   );
 }
-function MeterRow({ label, leftLabel, rightLabel, value, example }) {
+
+function AnalysisGauge({ title, left, right, value, desc, example }) {
   return (
-    <div className="space-y-2">
-      <div className="flex items-end justify-between">
-        <p className="text-sm text-white/80">{label}</p>
-        <p className="text-xs text-white/60">
-          {leftLabel} <span className="mx-2 text-white/40">|</span> {rightLabel}
-        </p>
+    <div className="space-y-3 w-full">
+      {/* 소제목(크게) */}
+      <h3
+        className="text-lg font-semibold text-white/90"
+        style={{
+          fontFamily: '"LINE Seed Sans KR", sans-serif',
+          letterSpacing: "0.3px",
+          lineHeight: "28px",
+        }}
+      >
+        {title}
+      </h3>
+
+      {/* 좌/우 라벨 + 바 (왼쪽 정렬) */}
+      <div className="flex items-center gap-3">
+        <span className="text-sm text-white/80" style={body1}>
+          {left}
+        </span>
+        <div className="flex-1">
+          <MeterBar value={value} />
+        </div>
+        <span className="text-sm text-white/80" style={body1}>
+          {right}
+        </span>
       </div>
-      <Meter value={value} />
+
+      {/* 설명 */}
+      {desc && (
+        <p className="text-sm text-white/80 leading-6 whitespace-pre-line">
+          {desc}
+        </p>
+      )}
+
+      {/* 예시 */}
       {example && (
-        <p className="text-sm text-white/70 leading-6">예시: {example}</p>
+        <div className="text-sm text-white/80 leading-6">
+          <p className="text-white/70" style={body1}>
+            예시 대화 A:
+          </p>
+          <p className="mt-1">“{example}”</p>
+        </div>
       )}
     </div>
   );
 }
-function CompareBar({ title, left, right }) {
-  const total = (left?.value ?? 0) + (right?.value ?? 0) || 1;
-  const l = Math.round(((left?.value ?? 0) / total) * 100);
+
+/* -------------------- 대화 패턴 비교 표 -------------------- */
+function DualBar({ leftPct = 50 }) {
+  const l = Math.max(0, Math.min(100, leftPct));
   const r = 100 - l;
   return (
-    <div className="space-y-2">
-      <div className="flex items-end justify-between">
-        <p className="text-sm text-white/80">{title}</p>
-        <p className="text-xs text-white/60">
-          {left?.label} vs {right?.label}
-        </p>
+    <div
+      className="relative h-5 w-full rounded-sm overflow-hidden border"
+      style={{ borderColor: "#FFF8DE" }}
+    >
+      <div className="flex h-full w-full">
+        <div
+          className="h-full"
+          style={{ width: `${l}%`, backgroundColor: "#FFF8DE" }}
+        />
+        <div className="h-full" style={{ width: `${r}%` }} />
       </div>
-      <div className="h-3 w-full overflow-hidden rounded-full bg-white/10">
-        <div className="flex h-full w-full">
-          <div className="h-full bg-white/80" style={{ width: `${l}%` }} />
-          <div className="h-full bg-white/30" style={{ width: `${r}%` }} />
+    </div>
+  );
+}
+
+function CompareMetric({
+  title,
+  leftName = "철수",
+  rightName = "영희",
+  leftValue,
+  rightValue,
+  leftPct, // 0~100
+  leftDesc,
+  rightDesc,
+  leftExample,
+  rightExample,
+}) {
+  return (
+    <div className="space-y-2 w-full">
+      {/* 소제목(크게) */}
+      <h3
+        className="text-lg font-semibold text-white/90"
+        style={{
+          fontFamily: '"LINE Seed Sans KR", sans-serif',
+          letterSpacing: "0.3px",
+          lineHeight: "28px",
+        }}
+      >
+        {title}
+      </h3>
+
+      {/* 이름/값 + 바 */}
+      <div className="flex items-center">
+        <span className="text-sm text-white/70" style={body1}>
+          {leftName}
+        </span>
+        <div className="flex-1 mx-3">
+          <div className="relative">
+            <DualBar leftPct={leftPct} />
+            <div className="absolute inset-0 flex items-center justify-between px-3 pointer-events-none">
+              <span className="text-sm" style={{ color: "#2d1a52" }}>
+                {leftValue}
+              </span>
+              <span className="text-sm text-white">{rightValue}</span>
+            </div>
+          </div>
         </div>
+        <span className="text-sm text-white/70" style={body1}>
+          {rightName}
+        </span>
       </div>
-      <div className="flex justify-between text-xs text-white/70">
-        <span>{left?.desc}</span>
-        <span>{right?.desc}</span>
+
+      {/* 좌/우 설명 & 예시 */}
+      <div className="grid grid-cols-2 gap-8 mt-1">
+        <div className="text-sm text-white/80 leading-6 whitespace-pre-line">
+          {leftDesc && <p>{leftDesc}</p>}
+          {leftExample && (
+            <p className="mt-1 text-white/70">예시: “{leftExample}”</p>
+          )}
+        </div>
+        <div className="text-sm text-white/80 leading-6 whitespace-pre-line">
+          {rightDesc && <p>{rightDesc}</p>}
+          {rightExample && (
+            <p className="mt-1 text-white/70">예시: “{rightExample}”</p>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -139,10 +265,14 @@ export default function PlaySomeAnalysisPage() {
       : resultData && resultData.analysis_date) || MOCK.analysis_date;
   const oneLine = (resultData && resultData.one_line) ?? MOCK.one_line;
 
-  const talkSpeed = {
-    left: { label: "철수", value: 65, desc: "2분 45초" },
-    right: { label: "상대", value: 35, desc: "4분 10초" },
-  };
+  // 히어로 섹션용 타이틀/카피(없으면 데모 문구 사용)
+  const pairTitle = resultData?.pair_title || "철수와 영희의 썸 지수";
+  const heroCopy =
+    resultData?.hero_copy ||
+    `이 둘은 아슬아슬한 줄타기 중!
+친구보다 더 가까워졌지만, 누군가 한 발만 더 내디디면 연애로 직진 가능!
+지금 썸의 온도는… 딱 미지근한 꿀물 같습니다.
+달달하긴 한데, 조금 더 뜨거워져야 해요🔥`;
 
   useEffect(() => {
     const run = async () => {
@@ -178,9 +308,9 @@ export default function PlaySomeAnalysisPage() {
     );
 
   return (
-    <div className="flex flex-col justify-start items-center h-screen text-white bg-primary-dark">
+    <div className="min-h-screen bg-primary-dark text-white">
       <Header />
-      <div className="relative flex-1 w-[1352px] mt-17.5 overflow-hidden flex justify-between items-start">
+      <div className="mx-auto w-[1352px] mt-[70px] flex gap-6 items-start">
         {/* 왼쪽 */}
         <div className="gap-5 mt-52.5 w-53.5 flex flex-col items-center justify-center">
           <ChatList />
@@ -188,157 +318,288 @@ export default function PlaySomeAnalysisPage() {
         </div>
 
         {/* 가운데 */}
-        <main className="overflow-y-auto max-h-240 scrollbar-hide pt-28 w-[722px] flex flex-col items-center gap-6">
-          {/* 헤더 카드 */}
-          <Panel className="w-full">
-            <div className="flex justify-between">
-              <div className="flex flex-col">
-                <span className="text-st1">썸 분석 결과</span>
-                <div className="flex items-end gap-2">
-                  <span className="text-h2">{score}</span>
-                  <span className="text-xl">점</span>
+        <main className="pt-24 pb-24 w-[722px] flex flex-col gap-6">
+          {/* 상단 분석 */}
+          <section className="w-full">
+            <div className="w-full">
+              <div className="flex justify-between items-start">
+                {/* 왼쪽: 타이틀 + 점수 */}
+                <div className="flex-1 pr-6">
+                  <p
+                    className="mb-3 text-white/90"
+                    style={{
+                      fontFamily: '"LINE Seed Sans KR", sans-serif',
+                      fontSize: "24px",
+                      fontWeight: 600,
+                      lineHeight: "32px",
+                      letterSpacing: "0.3px",
+                    }}
+                  >
+                    {pairTitle}
+                  </p>
+                  <div className="flex items-end gap-2">
+                    {/* 숫자 */}
+                    <span
+                      style={{
+                        fontFamily: '"LINE Seed Sans KR", sans-serif',
+                        fontSize: "60px",
+                        fontWeight: 400, // Regular
+                        lineHeight: "72px",
+                        letterSpacing: "0px",
+                        color: "#FFE787", // 숫자는 아이보리
+                      }}
+                    >
+                      {score}
+                    </span>
+
+                    {/* '점' */}
+                    <span
+                      style={{
+                        fontFamily: '"LINE Seed Sans KR", sans-serif',
+                        fontSize: "60px",
+                        fontWeight: 400,
+                        lineHeight: "72px",
+                        letterSpacing: "0px",
+                        color: "#FFFFFF",
+                      }}
+                    >
+                      점
+                    </span>
+                  </div>
+                </div>
+
+                {/* 오른쪽: 수치 정보 */}
+                <div
+                  className="text-right pt-1 space-y-2"
+                  style={{
+                    fontFamily: '"LINE Seed Sans KR", sans-serif',
+                    fontSize: "16px",
+                    fontWeight: 400,
+                    lineHeight: "24px",
+                    letterSpacing: "0.3px",
+                  }}
+                >
+                  <p>분석된 메시지 수: {messageCount.toLocaleString()}개</p>
+                  <p>분석 기간: {periodText}</p>
                 </div>
               </div>
-              <div className="flex flex-col text-st2 gap-0.5 mt-1 text-right">
-                <p>분석된 메시지 수: {messageCount.toLocaleString()}개</p>
-                <p>참여자 수: {participantCount}명</p>
-                <p>분석 기간: {periodText}</p>
+
+              {/* 하단 카피 */}
+              <div className="mt-6">
+                <p
+                  className="text-white/80 whitespace-pre-line"
+                  style={{
+                    fontFamily: '"LINE Seed Sans KR", sans-serif',
+                    fontSize: "16px",
+                    fontWeight: 400,
+                    lineHeight: "24px",
+                    letterSpacing: "0.3px",
+                  }}
+                >
+                  {heroCopy}
+                </p>
               </div>
             </div>
-            <div className="text-st2 italic mt-3">{oneLine}</div>
-          </Panel>
+          </section>
 
           {/* 섹션 1: 호감 지수 분석 */}
           <Section title="호감 지수 분석">
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div className="space-y-2">
-                <p className="text-sm text-white/70">방향</p>
-                <ul className="list-disc list-inside text-sm text-white/90 leading-6">
-                  <li>철수 → 영희</li>
-                  <li>영희 → 철수</li>
-                </ul>
-                <p className="text-xs text-white/60">※ 최근 응답 흐름 기준</p>
-              </div>
-              <div className="space-y-2">
-                <p className="text-sm text-white/70">횟수</p>
-                <p className="text-xl font-semibold">
-                  {(resultData && resultData.signal_count) ?? 76}회
+            <div className="w-full max-w-[700px] mx-auto space-y-6 text-white/90">
+              {/* 방향 */}
+              <div className="flex items-start">
+                <p className="w-24 shrink-0" style={labelStyle}>
+                  방향
                 </p>
-                <p className="text-xs text-white/60">대화 패턴 탐지 수</p>
+                <p className="flex-1">철수 → 영희</p>
+                <p className="flex-1">영희 → 철수</p>
               </div>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2 mt-6">
-              <Panel title="특징">
-                <ul className="list-disc list-inside text-sm text-white/90 space-y-1">
-                  <li>짧고 잦은 반응 증가</li>
-                  <li>감정 표현 빈도 상승</li>
-                  <li>약속 제안 멘트 증가</li>
-                </ul>
-              </Panel>
-              <Panel title="주의">
-                <ul className="list-disc list-inside text-sm text-white/90 space-y-1">
-                  <li>업무/학업 대화로 귀결되는 경향</li>
-                  <li>반복되는 주제 패턴</li>
-                  <li>질문형 응답 감소</li>
-                </ul>
-              </Panel>
+
+              {/* 호감점수 */}
+              <div className="flex items-start">
+                <p className="w-24 shrink-0" style={labelStyle}>
+                  호감점수
+                </p>
+                <p className="flex-1">89점</p>
+                <p className="flex-1">76점</p>
+              </div>
+
+              {/* 특징 */}
+              <div className="flex items-start">
+                <p className="w-24 shrink-0" style={labelStyle}>
+                  특징
+                </p>
+                <div className="flex-1">
+                  <p className="mb-2">“관심 가득!”</p>
+                  <ul className="list-disc pl-5 space-y-1 text-sm">
+                    <li>대화 자주 시작</li>
+                    <li>이모지와 웃음 코드 풀가동!</li>
+                    <li>약속도 슬쩍 던져보는 적극러</li>
+                  </ul>
+                </div>
+                <div className="flex-1">
+                  <p className="mb-2">“좋긴 해요~”</p>
+                  <ul className="list-disc pl-5 space-y-1 text-sm">
+                    <li>반응 따뜻, 리액션도 굿!</li>
+                    <li>근데 먼저 다가오진 않음. 살짝 관망 모드?</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* 요약(텍스트만) */}
+              <div className="mt-6 space-y-1" style={{ color: "#FFF8DE" }}>
+                <p className="text-sm">💡 요약:</p>
+                <p className="text-sm">
+                  철수는 이미 마음을 2/3쯤 열었고,
+                  <br />
+                  영희는 약간의 밀당 장인일 가능성 농후!!
+                </p>
+              </div>
             </div>
           </Section>
 
           {/* 섹션 2: 말투 & 감정 */}
           <Section title="말투 & 감정 분석">
-            <div className="space-y-6 w-full">
-              <MeterRow
-                label="말투"
-                leftLabel="여유"
-                rightLabel="진담"
-                value={(resultData && resultData.tone_score) ?? 75}
+            <p className="text-xs text-white/60 -mt-1 mb-5">
+              가장 활발하게 서로 연결된 멤버 조합
+            </p>
+
+            <div className="space-y-10 w-full max-w-[700px] mx-auto">
+              <AnalysisGauge
+                title="말투"
+                left="어색"
+                right="편안"
+                value={resultData?.tone_score ?? 75}
+                desc={
+                  "말투는 이미 편안한 단계!\n서로 반말에다 장난도 종종 섞여서, 웬만하면 어색한 분위기는 없어요.\n근데 이상하게… 어느 순간부터 너무 친구 같다는 생각, 들지 않나요?"
+                }
+                example={"~~~~~ → 말한 사람 + 메시지 pair"}
               />
-              <MeterRow
-                label="감정 표현"
-                leftLabel="직유"
-                rightLabel="공유"
-                value={(resultData && resultData.emotion_score) ?? 74}
+
+              <AnalysisGauge
+                title="감정 표현"
+                left="적음"
+                right="풍부"
+                value={resultData?.emotion_score ?? 74}
+                desc={
+                  "감정 표현은 꽤 풍부!\n😂 ㅋㅋ, ㅎㅎ, “헐 대박” 같은 리액션은 계속 주고받고 있어요.\n이건 호감의 징조일 수도 있지만… 그냥 말버릇일 수도…?"
+                }
+                example={"~~~~~"}
               />
-              <MeterRow
-                label="호칭"
-                leftLabel="따뜻"
-                rightLabel="예정"
-                value={(resultData && resultData.nickname_score) ?? 76}
+
+              <AnalysisGauge
+                title="호칭"
+                left="딱딱"
+                right="애정"
+                value={resultData?.nickname_score ?? 76}
+                desc={
+                  "호칭은 여전히 ‘ㅇㅇ아’, ‘야’, ‘너’ 수준.\n애정이 느껴지는 호칭은 아직 아닌 것 같아요."
+                }
+                example={"~~~~~"}
               />
             </div>
           </Section>
 
           {/* 섹션 3: 대화 패턴 */}
           <Section title="대화 패턴 분석">
-            <div className="space-y-6">
-              <CompareBar
+            <div className="space-y-10 w-full max-w-[700px] mx-auto">
+              <CompareMetric
                 title="평균 답장 시간"
-                left={talkSpeed.left}
-                right={talkSpeed.right}
+                leftValue="2분 45초"
+                rightValue="4분 10초"
+                leftPct={65}
+                leftDesc="굉장히 빠른 답장 속도"
+                rightDesc={"살짝 느리긴 함\n밤 11시 이후엔 2배 빨라짐"}
+                leftExample="~~~"
+                rightExample="~~~"
               />
-              <CompareBar
+
+              <CompareMetric
                 title="약속 제안 횟수"
-                left={{
-                  label: "철수",
-                  value: (resultData && resultData.proposal_count_you) ?? 3,
-                  desc: "3회",
-                }}
-                right={{
-                  label: "상대",
-                  value: (resultData && resultData.proposal_count_partner) ?? 1,
-                  desc: "1회",
-                }}
+                leftValue={`${resultData?.proposal_count_you ?? 3}회`}
+                rightValue={`${resultData?.proposal_count_partner ?? 1}회`}
+                leftPct={
+                  ((resultData?.proposal_count_you ?? 3) /
+                    ((resultData?.proposal_count_you ?? 3) +
+                      (resultData?.proposal_count_partner ?? 1))) *
+                  100
+                }
+                leftDesc="2회 성공, 1회 흐지부지"
+                rightDesc="1회, 시간 안 맞아서 미뤄짐"
+                leftExample="~~~"
+                rightExample="~~~"
               />
-              <CompareBar
+
+              <CompareMetric
                 title="주제 시작 비율"
-                left={{
-                  label: "철수",
-                  value: (resultData && resultData.topic_start_ratio_you) ?? 62,
-                  desc: "선제적",
-                }}
-                right={{
-                  label: "상대",
-                  value:
-                    (resultData && resultData.topic_start_ratio_partner) ?? 38,
-                  desc: "응답형",
-                }}
+                leftValue={`${resultData?.topic_start_ratio_you ?? 62}%`}
+                rightValue={`${resultData?.topic_start_ratio_partner ?? 38}%`}
+                leftPct={resultData?.topic_start_ratio_you ?? 62}
+                leftDesc="적극적으로 말 거는 타입"
+                rightDesc={
+                  "보통 대답하는 타입\n하지만 종종 주제를 먼저 꺼내기도?"
+                }
+                leftExample="~~~"
+                rightExample="~~~"
               />
-              <CompareBar
+
+              <CompareMetric
                 title="평균 메시지 길이"
-                left={{
-                  label: "철수",
-                  value: (resultData && resultData.avg_len_you) ?? 38,
-                  desc: "짧고 굵게",
-                }}
-                right={{
-                  label: "상대",
-                  value: (resultData && resultData.avg_len_partner) ?? 62,
-                  desc: "서술형",
-                }}
+                leftValue={`${resultData?.avg_len_you ?? 38}자`}
+                rightValue={`${resultData?.avg_len_partner ?? 62}자`}
+                leftPct={
+                  ((resultData?.avg_len_you ?? 38) /
+                    ((resultData?.avg_len_you ?? 38) +
+                      (resultData?.avg_len_partner ?? 62))) *
+                  100
+                }
+                leftDesc="짧고 굵게"
+                rightDesc="서술형"
+                leftExample="~~~"
+                rightExample="~~~"
               />
-              <p className="text-sm text-white/70">
-                분석: 당신이 신호를 더 자주 보내고, 상대는 반응형 패턴이
-                강합니다. 짧은 호흡으로 주제를 여러 번 나누는 전략이 좋습니다.
+
+              {/* 하단 분석 문단 (아이보리 색상) */}
+              <p className="text-sm leading-6" style={{ color: "#FFF8DE" }}>
+                분석: 당신이 기획하는 상태라면, 상대는 피드백 위주의 관찰자
+                상태예요. 밸런스는 나쁘지 않지만, 1회 정도는 상대가 주제를
+                꺼내줘야 썸이 이어질 수 있어요!
               </p>
             </div>
           </Section>
 
-          {/* 섹션 4: 상담 */}
-          <Section title="챗또의 연애상담">
-            <div className="grid gap-3">
-              <Panel title="한 줄 요약">
-                <p className="text-sm text-white/80 leading-6">
-                  {(resultData && resultData.advice_summary) ??
-                    "지금은 ‘고백’보다는 ‘다음 약속’ 확정이 먼저!"}
+          {/* 섹션 4: 상담 (업데이트) */}
+          <Section title="챗토의 연애상담">
+            <div className="w-full max-w-[700px] mx-auto space-y-5">
+              {/* 요약 문단 */}
+              <p className="text-sm text-white/80 leading-7">
+                {resultData?.advice_intro ??
+                  "썸 지수 83점이면요… 이건 거의 “사귀자”를 기다리는 예열 상태! 하지만,"}
+              </p>
+              <p className="text-sm text-white/80 leading-7">
+                🍯 너무 당신만 믿고 있다면? 상대는 “편하긴 한데, 잘 모르겠어”
+                상태일 수도 있어요.
+              </p>
+
+              {/* Tip 섹션 */}
+              <div className="mt-2 space-y-3">
+                <p
+                  className="text-base font-semibold"
+                  style={{ color: "#FFF8DE" }}
+                >
+                  Tip
                 </p>
-              </Panel>
-              <Panel title="Tip">
-                <p className="text-sm text-white/80 leading-6">
-                  {(resultData && resultData.advice_tip) ??
-                    "‘이번 주 금요일 어때?’ 같이 구체적인 제안을 먼저 던지세요. 가벼운 리액션(👍 😀)도 자주."}
-                </p>
-              </Panel>
+                <ul className="text-sm text-white/80 leading-7 space-y-2">
+                  <li>“이번 주 금요일에 뭐해?” → 지금 시도해보세요.</li>
+                  <li>
+                    사진이나 링크 공유에 자주 웃는다면 → 다음엔 본인 셀카로
+                    공격! 📸
+                  </li>
+                  <li>
+                    읽씹 타이밍이 반복된다면 → “ㅋㅋ”로 말 걸어보고, 답장 속도
+                    체크해보세요.
+                  </li>
+                </ul>
+              </div>
             </div>
           </Section>
         </main>
