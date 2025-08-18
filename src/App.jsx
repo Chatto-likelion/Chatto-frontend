@@ -68,6 +68,16 @@ function App() {
         />
 
         {/** --------------------- 🎯 DEMO ROUTES (no login, no resultId) --------------------- */}
+
+        <Route
+          path="/demo/credit"
+          element={
+            <DemoWrapper>
+              <CreditsPage></CreditsPage>
+            </DemoWrapper>
+          }
+        />
+
         <Route
           path="/demo/chemi"
           element={
