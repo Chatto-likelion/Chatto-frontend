@@ -14,6 +14,8 @@ import NavMBTI from "./NavMBTI.svg?react";
 import NavMore from "./NavMore.svg?react";
 import NavSome from "./NavSome.svg?react";
 import NavStat from "./NavStat.svg?react";
+import XCircle from "./XCircle.svg?react";
+import CheckCircle from "./CheckCircle.svg?react";
 
 export {
   X,
@@ -32,4 +34,6 @@ export {
   NavSome,
   NavStat,
   ContrIconFull,
+  XCircle,
+  CheckCircle,
 };
