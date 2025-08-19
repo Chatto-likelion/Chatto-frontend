@@ -60,6 +60,8 @@ function Row({
   rightWrapClass = "pr-3.25",
   narrow = false,
 }) {
+  const mode = useCurrentMode();
+  const isPlay = mode === "play";
   const enhancedChildren = Children.map(children, (child) => {
     if (!isValidElement(child)) return child;
 
@@ -72,7 +74,10 @@ function Row({
 
     if (!isPlaceholder) return child;
 
-    const mergedClassName = [child.props.className, "text-white/50"]
+    const mergedClassName = [
+      child.props.className,
+      isPlay ? "text-white/50" : "text-primary-dark/50",
+    ]
       .filter(Boolean)
       .join(" ");
 

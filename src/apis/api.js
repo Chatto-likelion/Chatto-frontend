@@ -103,9 +103,7 @@ export const postChat = async (file) => {
   formData.append("file", file);
 
   try {
-    const response = await instanceWithToken.post("/play/chat/", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const response = await instanceWithToken.post("/play/chat/", formData);
 
     if (response.status === 201) {
       console.log("파일 업로드 성공:", response.data);
@@ -376,9 +374,7 @@ export const postChat_Bus = async (file) => {
   formData.append("file", file);
 
   try {
-    const response = await instanceWithToken.post("/business/chat/", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const response = await instanceWithToken.post("/business/chat/", formData);
 
     if (response.status === 201) {
       console.log("파일 업로드 성공:", response.data);
