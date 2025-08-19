@@ -2,16 +2,16 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import {
   getChatList,
   deleteChat,
+  putChat,
   getChatList_Bus,
   deleteChat_Bus,
+  putChat_Bus,
 } from "@/apis/api";
-import { useAuth } from "../contexts/AuthContext.jsx";
 import { useChat } from "@/contexts/ChatContext";
 import * as Icons from "@/assets/svg";
 import useCurrentMode from "@/hooks/useCurrentMode";
 
 export default function ChatList() {
-  const { user } = useAuth();
   const mode = useCurrentMode();
   const isPlay = mode === "play";
 
@@ -23,6 +23,7 @@ export default function ChatList() {
 
   const [editingId, setEditingId] = useState(null);
   const [editingValue, setEditingValue] = useState("");
+  const editBoxRef = useRef(null);
 
   const loadChats = useCallback(async () => {
     try {
@@ -59,6 +60,25 @@ export default function ChatList() {
     }
   }, [chatListReloadRef, loadChats]);
 
+  useEffect(() => {
+    if (editingId == null) return;
+
+    const handleOutside = (e) => {
+      const box = editBoxRef.current;
+      if (box && !box.contains(e.target)) {
+        cancelEdit(); // 👉 바깥 클릭 시 편집 취소
+      }
+    };
+
+    // 캡처 단계에서 먼저 실행되게 true
+    document.addEventListener("mousedown", handleOutside, true);
+    document.addEventListener("touchstart", handleOutside, true);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside, true);
+      document.removeEventListener("touchstart", handleOutside, true);
+    };
+  }, [editingId]);
+
   const handleDelete = async (chatId) => {
     try {
       setLoading(true);
@@ -93,20 +113,18 @@ export default function ChatList() {
     setChats((old) =>
       old.map((c) => (c.chat_id === chat.chat_id ? { ...c, title } : c))
     );
-    // try {
-    //   const fn = isPlay ? patchChatTitle : patchChatTitle_Bus;
-    //   await fn(chat.chat_id, title);
-    //   // 필요 시 서버 싱크 보장:
-    //   // await loadChats();
-    // } catch (e) {
-    //   console.error("제목 수정 실패:", e);
-    //   // 롤백
-    //   setChats(prev);
-    //   setError("제목 수정에 실패했습니다.");
-    // } finally {
-    //   cancelEdit();
-    // }
-    cancelEdit();
+    try {
+      const fn = isPlay ? putChat : putChat_Bus;
+      await fn(chat.chat_id, title);
+      //await loadChats();
+      window.location.reload();
+    } catch (e) {
+      console.error("제목 수정 실패:", e);
+      setChats(prev);
+      setError("제목 수정에 실패했습니다.");
+    } finally {
+      cancelEdit();
+    }
   };
 
   if (loading && chats.length === 0) {
@@ -221,8 +239,8 @@ export default function ChatList() {
                         onCompositionEnd={() => setIsComposing(false)}
                         onKeyDown={onKeyDown}
                         autoFocus
-                        maxLength={40}
-                        className="w-21.5 bg-transparent border-b border-primary-dark focus:outline-none"
+                        maxLength={10}
+                        className="w-30 bg-transparent border-b border-primary-dark focus:outline-none"
                         placeholder="제목 입력"
                         // value / onChange 없음!  ← 중요
                       />
@@ -237,50 +255,23 @@ export default function ChatList() {
                         }}
                         title={chat.title || "제목 없음"}
                       >
-                        {(chat.title ?? "제목 없음").slice(0, 12)}
+                        {(chat.title ?? "제목 없음").slice(0, 10)}
                       </span>
-                    )}
-
-                    {isEditingThis && (
-                      <div
-                        className="flex items-center gap-1 ml-1"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <button
-                          className="w-8 py-0.25 text-caption rounded border border-secondary hover:bg-primary-light hover:text-primary-dark"
-                          onClick={() =>
-                            saveEdit(
-                              chat,
-                              (inputRef.current?.value || "").trim()
-                            )
-                          }
-                        >
-                          저장
-                        </button>
-                        <button
-                          className="w-8 py-0.25 text-caption rounded border border-gray-400 hover:bg-gray-200"
-                          onClick={cancelEdit}
-                        >
-                          취소
-                        </button>
-                      </div>
                     )}
                   </div>
 
-                  {!isEditingThis && (
-                    <div className="flex items-center gap-0.5">
-                      <Icons.Person
-                        className={`w-5.25 h-5.25 p-0.75 ${
-                          isSelected
-                            ? "text-primary-dark"
-                            : isPlay
-                            ? "text-secondary-light"
-                            : "text-gray-6 opacity-80"
-                        }`}
-                      />
-                      <span>{chat.people_num}</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-0.5">
+                    <Icons.Person
+                      className={`w-5.25 h-5.25 p-0.75 ${
+                        isSelected
+                          ? "text-primary-dark"
+                          : isPlay
+                          ? "text-secondary-light"
+                          : "text-gray-6 opacity-80"
+                      }`}
+                    />
+                    <span>{chat.people_num}</span>
+                  </div>
                 </>
               );
 
@@ -289,6 +280,7 @@ export default function ChatList() {
                   <div className="w-full gap-0.75 flex justify-between items-center">
                     {isEditingThis ? (
                       <div
+                        ref={editBoxRef}
                         className={[
                           "w-45 h-7.25 text-body2 flex justify-between items-center px-3 py-2 rounded",
                           isSelected

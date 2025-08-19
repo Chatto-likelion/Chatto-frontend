@@ -28,6 +28,7 @@ import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
 import ForgetPasswordPage from "./pages/ForgetPasswordPage";
 import BusinessResultPage from "./pages/BusinessResultPage_test.jsx";
+import ProfileEditPage from "./pages/ProfileEditPage.jsx";
 
 /** ✅ demo=1 쿼리를 자동으로 붙여주는 래퍼 (API 안 타고 목데이터로 렌더) */
 function DemoWrapper({ children }) {
@@ -50,9 +51,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/play" element={<PlayPage />} />
-        <Route path="/play/chemi" element={<PlayChemiPage />} />
         <Route path="/business" element={<BusinessPage />} />
-        <Route path="/business/contr" element={<BusinessContrPage />} />
 
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
@@ -106,6 +105,7 @@ function App() {
 
         {/** 원래 보호 라우트들은 그대로 유지 */}
         <Route element={<RequireAuth />}>
+          <Route path="/play/chemi" element={<PlayChemiPage />} />
           <Route
             path="/play/chemi/:resultId"
             element={<PlayChemiAnalysisPage />}
@@ -122,13 +122,16 @@ function App() {
           />
           <Route path="/play/mypage" element={<PlayMyPage />} />
 
+          <Route path="/business/contr" element={<BusinessContrPage />} />
           <Route
             path="/business/contr/:resultId"
             element={<BusinessContrAnalysisPage />}
           />
           <Route path="/business/mypage" element={<BusinessMyPage />} />
+
           <Route path="/credit" element={<CreditsPage />} />
           <Route path="/result/:analysisId" element={<ResultPage />} />
+          <Route path="/profileedit" element={<ProfileEditPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

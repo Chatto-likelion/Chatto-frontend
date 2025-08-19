@@ -1,29 +1,49 @@
-// src/routes/RequireAuth.tsx
-import { useEffect, useState } from "react";
+// src/routes/RequireAuth.jsx
+import { useEffect, useRef } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+
 export default function RequireAuth() {
-  const { user } = useAuth();
+  const { user, status } = useAuth(); // status: "checking" | "authenticated" | "unauthenticated"
   const location = useLocation();
   const navigate = useNavigate();
-  const [asked, setAsked] = useState(false);
+  const promptedRef = useRef(false);
 
   useEffect(() => {
-    if (user) return;
+    // 1) 세션 확인 중이면 아무 것도 하지 않음
+    if (status === "checking") return;
 
-    if (!asked) {
-      setAsked(true);
-      if (window.confirm("로그인이 필요합니다. 로그인 페이지로 이동할까요?")) {
-        navigate("/signin", { replace: true, state: { from: location } });
-      } else {
-        navigate(-1);
-      }
+    // 2) 로그인 완료면 아무 것도 하지 않음
+    if (status === "authenticated" && user) return;
+
+    // 3) 비로그인 확정 시, 같은 히스토리 엔트리에서 한 번만 프롬프트
+    if (!location.state?.authPrompted) {
+      navigate(location.pathname + location.search + location.hash, {
+        replace: true,
+        state: { ...(location.state || {}), authPrompted: true },
+      });
+      return;
     }
-  }, [user, asked, location, navigate]);
 
-  // 로그인 상태면 자식 라우트 렌더
-  if (user) return <Outlet />;
+    if (promptedRef.current) return;
+    promptedRef.current = true;
 
-  // 비로그인 상태에선 모달만 띄우고 화면은 비워둠
-  return null;
+    const ok = window.confirm(
+      "로그인이 필요합니다. 로그인 페이지로 이동할까요?"
+    );
+    if (ok) {
+      // 원래 가려던 곳으로 돌아가기 위해 from을 넘김
+      navigate("/signin", { replace: true, state: { from: location } });
+    } else {
+      if (window.history.length > 1) navigate(-1);
+      else navigate("/", { replace: true });
+    }
+  }, [status, user, location, navigate]);
+
+  // 세션 확인 중에는 로딩 UI, 그 외엔 권한 없으면 null로 비워 깜빡임 방지
+  if (status === "checking") {
+    return <div style={{ padding: 16 }}>세션 확인 중…</div>;
+  }
+
+  return user ? <Outlet /> : null;
 }

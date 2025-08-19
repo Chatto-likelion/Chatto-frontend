@@ -2,11 +2,9 @@ import { useDropzone } from "react-dropzone";
 import * as Icons from "@/assets/svg";
 import useCurrentMode from "@/hooks/useCurrentMode";
 import { postChat, postChat_Bus } from "@/apis/api";
-import { useAuth } from "@/contexts/AuthContext";
 import { useChat } from "@/contexts/ChatContext";
 
 export default function FileUpload() {
-  const { user } = useAuth();
   const { chatListReloadRef, setSelectedChatId } = useChat();
   const mode = useCurrentMode();
   const isPlay = mode === "play";
@@ -16,7 +14,7 @@ export default function FileUpload() {
     try {
       // console.log("보낼 파일:", file);
       // console.log("postChat 요청 시작 - userId:", user?.id || 1);
-      const result = await fetchFn(user?.id || 1, file);
+      const result = await fetchFn(file);
       console.log("파일 업로드 성공:", result);
 
       if (typeof chatListReloadRef?.current === "function") {
