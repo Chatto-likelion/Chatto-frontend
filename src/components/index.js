@@ -10,3 +10,5 @@ export { default as SmallServices } from "./SmallServices";
 export { default as DetailForm } from "./DetailForm";
 export { default as DetailForm_Share } from "./DetailForm_Share";
 export { default as ShareModal } from "./ShareModal";
+export { default as MBTIPieChart } from "./MBTIPieChart";
+export { default as MBTIReportCard } from "./MBTIReportCard";
