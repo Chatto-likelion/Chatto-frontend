@@ -101,34 +101,35 @@ export default function BusinessAnalysisPage() {
         </div>
 
         {/* 중앙 */}
-        <main className="pt-24 pb-24 w-[722px] flex flex-col gap-6">
+        <main className="pt-24 pb-24 pr-24 pl-24 w-[722px] flex flex-col gap-6">
           {/* 상단 분석 정보 */}
+          <h1 className="text-2xl font-bold text-primary">업무 분석</h1>
           <section className="w-full">
-            <h2 className="text-xl font-bold text-secondary-dark mb-4">
-              "멋사 잡담방" 참여도 분석
-            </h2>
-            <p>분석 기간: 25/03/12~25/12/30</p>
-            <p>참여자: 11명</p>
-            <p>대화량: 1,425건</p>
-            <p>방문 응답 속도: 42분</p>
-            <p className="mt-2 text-sm text-gray-500">
-              ※ 본 분석 자료는 발화, 응답, 제안, 정보 공유, 문제 해결 등 다섯
+            <h2 className="text-l text-primary">"멋사 잡담방" 참여도 분석</h2>
+            <div className="pl-3 text-sm ">
+              <p>분석 기간: 25/03/12~25/12/30</p>
+              <p>참여자: 11명</p>
+              <p>대화량: 1,425건</p>
+              <p>방문 응답 속도: 42분</p>
+            </div>
+            <p className="mt-2 text-xs text-gray-500">
+              본 분석 자료는 발화, 응답, 제안, 정보 공유, 문제 해결 등 다섯
               지표를 종합하여 산정되었습니다.
             </p>
           </section>
 
           {/* 탭 영역 */}
-          <div className="flex border-b border-secondary-dark">
+          <div className="flex justify-between border-b-3 border-primary">
             {["항목별 보기", "개인별 보기", "기간별 보기"].map((tab, idx) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(idx)}
                 style={{ height: "39px", minWidth: "128px" }}
-                className={`px-4 text-sm font-medium rounded-t-md border border-secondary-dark 
+                className={`px-4 text-sm text-[#BFBFBF] font-medium rounded-t-md border-2 border-primary 
                   ${
                     activeTab === idx
-                      ? "bg-secondary-dark text-white border-b-white"
-                      : "bg-white text-secondary-dark"
+                      ? "bg-primary-dark text-white border-primary"
+                      : "bg-white text-[#BFBFBF]"
                   }`}
               >
                 {tab}
@@ -137,53 +138,55 @@ export default function BusinessAnalysisPage() {
           </div>
 
           {/* 탭별 콘텐츠 */}
-          {activeTab === 0 &&
-            chartTitles.map((title) => (
-              <ChartSection
-                key={title}
-                title={title}
-                data={barData}
-                type="bar"
-              />
-            ))}
+          <div className="px-10 border border-primary-dark">
+            {activeTab === 0 &&
+              chartTitles.map((title) => (
+                <ChartSection
+                  key={title}
+                  title={title}
+                  data={barData}
+                  type="bar"
+                />
+              ))}
 
-          {activeTab === 1 && <PersonalView profiles={personalProfiles} />}
+            {activeTab === 1 && <PersonalView profiles={personalProfiles} />}
 
-          {activeTab === 2 &&
-            chartTitles.map((title) => (
-              <ChartSection
-                key={title}
-                title={title}
-                data={lineData}
-                type="line"
-              />
-            ))}
+            {activeTab === 2 &&
+              chartTitles.map((title) => (
+                <ChartSection
+                  key={title}
+                  title={title}
+                  data={lineData}
+                  type="line"
+                />
+              ))}
+            {/* AI 종합 인사이트 */}
+            <section className="w-full p-6 bg-white">
+              <h3 className="text-base font-bold mb-2 text-secondary-dark">
+                AI 종합 인사이트
+              </h3>
+              <p className="text-sm text-gray-700 leading-relaxed">
+                본 팀은 전반적으로 활발한 참여를 유지하면서도, 일부
+                참여자(A,B)가 정보 흐름과 문제 해결의 중심을 담당하는 것으로
+                나타났습니다. 다만 일부 구성원(C,D)의 참여 빈도와 주도성은 개선
+                여지가 있습니다.
+              </p>
+            </section>
 
-          {/* AI 종합 인사이트 */}
-          <section className="w-full p-6 border border-secondary-dark rounded-lg bg-white">
-            <h3 className="text-base font-bold mb-2 text-secondary-dark">
-              AI 종합 인사이트
-            </h3>
-            <p className="text-sm text-gray-700 leading-relaxed">
-              본 팀은 전반적으로 활발한 참여를 유지하면서도, 일부 참여자(A,B)가
-              정보 흐름과 문제 해결의 중심을 담당하는 것으로 나타났습니다. 다만
-              일부 구성원(C,D)의 참여 빈도와 주도성은 개선 여지가 있습니다.
-            </p>
-          </section>
-
-          {/* 추천 액션 */}
-          <section className="w-full p-6 border border-secondary-dark rounded-lg bg-white">
-            <h3 className="text-base font-bold mb-2 text-secondary-dark">
-              추천 액션
-            </h3>
-            <ul className="list-disc pl-6 text-sm text-gray-700 leading-relaxed">
-              <li>가이드 역할 분명화</li>
-              <li>주도적 제안과 참여자 지명 역할 분산</li>
-              <li>주간 회의에서 아이디어 공유 기회 확대</li>
-              <li>응답 속도 개선</li>
-              <li>참여율 낮은 인원에게 소규모 업무부터 배정</li>
-            </ul>
-          </section>
+            {/* 추천 액션 */}
+            <section className="w-full p-6 bg-white">
+              <h3 className="text-base font-bold mb-2 text-secondary-dark">
+                추천 액션
+              </h3>
+              <ul className="list-disc pl-6 text-sm text-gray-700 leading-relaxed">
+                <li>가이드 역할 분명화</li>
+                <li>주도적 제안과 참여자 지명 역할 분산</li>
+                <li>주간 회의에서 아이디어 공유 기회 확대</li>
+                <li>응답 속도 개선</li>
+                <li>참여율 낮은 인원에게 소규모 업무부터 배정</li>
+              </ul>
+            </section>
+          </div>
         </main>
 
         {/* 우측 */}
@@ -216,31 +219,31 @@ export default function BusinessAnalysisPage() {
 
 function ChartSection({ title, data, type }) {
   return (
-    <section
-      style={{
-        width: "560.18px",
-        height: "267px",
-        backgroundColor: "#FFFFFF",
-        borderTop: "2px solid var(--color-secondary-dark)",
-        padding: "16px",
-      }}
-      className="rounded-lg"
-    >
-      <h3 className="text-sm font-medium mb-2 text-black">{title}</h3>
+    <section>
+      <div>
+        <h1 className="text-xl text-primary-dark border-t-2 border-secondary-dark inline-block">
+          {title}
+        </h1>
+      </div>
       <ResponsiveContainer width="100%" height={180}>
         {type === "bar" ? (
           <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="name" axisLine={false} tickLine={false} />
-            <YAxis axisLine={false} tickLine={false} />
+            <YAxis hide />
             <Tooltip />
-            <Bar dataKey="value" fill="#6A0DAD" radius={[4, 4, 0, 0]} />
+            <Bar
+              dataKey="value"
+              fill="#6A0DAD"
+              radius={[4, 4, 0, 0]}
+              barSize={36}
+            />
           </BarChart>
         ) : (
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="date" axisLine={false} tickLine={false} />
-            <YAxis axisLine={false} tickLine={false} />
+            <YAxis hide />
             <Tooltip />
             <Line type="monotone" dataKey="A" stroke="#6A0DAD" />
             <Line type="monotone" dataKey="B" stroke="#8B5CF6" />

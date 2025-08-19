@@ -20,7 +20,16 @@ export const signup = async (data) => {
         throw new Error("입력값이 올바르지 않습니다.");
       }
     }
-    console.error("회원가입 에러:", error);
+    // 디버깅 로그
+    console.error("SIGNUP FAILED >>>", {
+      status: err.response?.status,
+      data: err.response?.data,
+      headers: err.response?.headers,
+      url: err.config?.url,
+      method: err.config?.method,
+      baseURL: err.config?.baseURL,
+      payload,
+    });
     throw error;
   }
 };
