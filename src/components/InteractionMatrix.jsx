@@ -2,60 +2,95 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 
-const InteractionMatrix = () => {
+/**
+ * props:
+ *  - nodes: Array<{ id: string|number, label?: string, x?: number, y?: number }>
+ *  - links: Array<{ source: string|number, target: string|number, value?: number }>
+ *
+ * note:
+ *  - x,y가 없는 노드는 초기 원형 배치로 시드함(물리 off일 때도 보기 좋게).
+ *  - 부모 컨테이너 크기를 꽉 채워서 렌더 (부모가 height 지정해야 함).
+ */
+const InteractionMatrix = ({ nodes = [], links = [] }) => {
   const wrapRef = useRef(null);
   const fgRef = useRef(null);
   const [size, setSize] = useState({ w: 640, h: 420 });
 
-  // 컨테이너 리사이즈 대응
+  // 부모 크기 감지
   useEffect(() => {
     if (!wrapRef.current) return;
     const ro = new ResizeObserver(([entry]) => {
       const { width, height } = entry.contentRect;
       setSize({
         w: Math.max(320, Math.floor(width)),
-        h: Math.max(280, Math.floor(height)),
+        h: Math.max(240, Math.floor(height)),
       });
     });
     ro.observe(wrapRef.current);
     return () => ro.disconnect();
   }, []);
 
-  // 더미 데이터 (좌표 고정)
-  const data = useMemo(
-    () => ({
-      nodes: [
-        { id: "수빈", x: -120, y: -10 },
-        { id: "민지", x: 120, y: -10 },
-        { id: "지윤", x: 0, y: -130 },
-        { id: "준서", x: 70, y: 110 },
-        { id: "은지", x: -70, y: 110 },
-      ],
-      links: [
-        { source: "수빈", target: "민지", value: 2 },
-        { source: "민지", target: "수빈", value: 5 }, // 양방향 예시
-        { source: "민지", target: "준서", value: 2 },
-        { source: "준서", target: "지윤", value: 3.2 },
-        { source: "지윤", target: "은지", value: 2 },
-        { source: "은지", target: "수빈", value: 2 },
-      ],
-    }),
-    []
-  );
+  // 원형 초기 배치 (x,y 없는 경우에만 적용; 데이터 불변성 유지 위해 사본 생성)
+  const normalized = useMemo(() => {
+    const ns = (nodes ?? []).map((n, i) => ({
+      ...n,
+      id: String(n.id ?? i),
+      label: n.label ?? String(n.id ?? i),
+    }));
 
-  // 렌더 후 프레이밍 + 좌표 고정
+    const ls = (links ?? []).map((l) => ({
+      ...l,
+      source: String(typeof l.source === "object" ? l.source.id : l.source),
+      target: String(typeof l.target === "object" ? l.target.id : l.target),
+      value: Number(l.value ?? 1),
+    }));
+
+    // 좌표 없는 노드만 원형으로 배치
+    const needSeed = ns.some(
+      (n) => typeof n.x !== "number" || typeof n.y !== "number"
+    );
+    if (needSeed) {
+      const N = ns.length || 1;
+      const R = Math.max(80, Math.min(size.w, size.h) * 0.33);
+      ns.forEach((n, i) => {
+        if (typeof n.x !== "number" || typeof n.y !== "number") {
+          const t = (2 * Math.PI * i) / N;
+          n.x = Math.cos(t) * R;
+          n.y = Math.sin(t) * R;
+        }
+      });
+    }
+    return { nodes: ns, links: ls };
+    // size도 반영 → 초기 배치 반지름이 컨테이너에 반응
+  }, [nodes, links, size.w, size.h]);
+
+  // 시뮬레이션 정지 후 고정 + 화면 맞추기
   const onStop = () => {
-    data.nodes.forEach((n) => {
-      n.fx = n.x;
-      n.fy = n.y;
+    normalized.nodes.forEach((n) => {
+      if (typeof n.x === "number" && typeof n.y === "number") {
+        n.fx = n.x;
+        n.fy = n.y;
+      }
     });
     fgRef.current?.zoomToFit(400, 40);
   };
 
-  // ───────── 화살표 그리기 유틸 (직선 + 화살촉) ─────────
+  // ───────── 유틸: 라운드 박스 ─────────
+  const roundRect = (ctx, x, y, w, h, r) => {
+    const rr = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + rr, y);
+    ctx.arcTo(x + w, y, x + w, y + h, rr);
+    ctx.arcTo(x + w, y + h, x, y + h, rr);
+    ctx.arcTo(x, y + h, x, y, rr);
+    ctx.arcTo(x, y, x + w, y, rr);
+    ctx.closePath();
+  };
+
+  // ───────── 유틸: 화살표 그리기 ─────────
   function drawArrow(ctx, x1, y1, x2, y2, opt) {
     const {
-      color = "#fff",
+      color = "#FFFFFF",
       width = 2,
       headLength = 18,
       headWidth = 12,
@@ -67,17 +102,16 @@ const InteractionMatrix = () => {
       dy = y2 - y1;
     const len = Math.hypot(dx, dy) || 1;
     const ux = dx / len,
-      uy = dy / len; // 단위 방향
+      uy = dy / len; // 방향 단위벡터
     const nx = -uy,
-      ny = ux; // 노멀(좌우)
+      ny = ux; // 법선
 
-    // 평행 이동 + 박스 겹침 방지(시작/끝 트리밍)
+    // 평행 이동 + 노드 박스 겹침 방지 컷
     const sx = x1 + nx * offset + ux * cut;
     const sy = y1 + ny * offset + uy * cut;
     const ex = x2 + nx * offset - ux * cut;
     const ey = y2 + ny * offset - uy * cut;
 
-    // 선
     ctx.lineCap = "round";
     ctx.strokeStyle = color;
     ctx.lineWidth = width;
@@ -98,31 +132,25 @@ const InteractionMatrix = () => {
     ctx.fill();
   }
 
-  // 라운드 박스 유틸
-  const roundRect = (ctx, x, y, w, h, r) => {
-    const rr = Math.min(r, w / 2, h / 2);
-    ctx.beginPath();
-    ctx.moveTo(x + rr, y);
-    ctx.arcTo(x + w, y, x + w, y + h, rr);
-    ctx.arcTo(x + w, y + h, x, y + h, rr);
-    ctx.arcTo(x, y + h, x, y, rr);
-    ctx.arcTo(x, y, x + w, y, rr);
-    ctx.closePath();
-  };
+  // 크기/데이터 바뀔 때 맞춰보기
+  useEffect(() => {
+    fgRef.current?.zoomToFit(400, 40);
+  }, [size.w, size.h, normalized.nodes.length, normalized.links.length]);
 
   return (
-    <div ref={wrapRef} style={{ width: "100%", height: 420 }}>
+    <div ref={wrapRef} style={{ width: "100%", height: "100%" }}>
       <ForceGraph2D
         ref={fgRef}
         width={size.w}
         height={size.h}
         backgroundColor="rgba(0,0,0,0)"
-        graphData={data}
+        graphData={normalized}
+        // 물리 연산 끈 상태(고정 좌표 기반). 좌표 자동 배치 원하면 50~100으로.
         cooldownTicks={0}
         d3AlphaDecay={1}
         d3VelocityDecay={1}
         onEngineStop={onStop}
-        // 기본 링크 대신 커스텀(평행 직선 화살표)
+        // 링크: 커스텀 화살표(양방향이면 평행 오프셋)
         linkCanvasObjectMode={() => "replace"}
         linkCanvasObject={(link, ctx, globalScale) => {
           const s = typeof link.source === "object" ? link.source : null;
@@ -132,42 +160,39 @@ const InteractionMatrix = () => {
           const sid = s.id ?? s;
           const tid = t.id ?? t;
 
-          // 역방향 존재 여부를 즉석에서 검사
-          const hasReverse = data.links.some((l) => {
+          // 역방향 링크 존재 여부
+          const hasReverse = normalized.links.some((l) => {
             const ls = typeof l.source === "object" ? l.source.id : l.source;
             const lt = typeof l.target === "object" ? l.target.id : l.target;
-            return ls === tid && lt === sid;
+            return String(ls) === String(tid) && String(lt) === String(sid);
           });
 
-          // 평행 간격/방향 (항상 2개라고 가정 → ±gap)
-          const gap = 12 / globalScale; // 간격
-          const sign = hasReverse ? (sid < tid ? +1 : -1) : 0;
+          const gap = 12 / globalScale;
+          const sign = hasReverse ? (String(sid) < String(tid) ? +1 : -1) : 0;
           const offset = sign * gap;
 
-          // 두께/화살촉 크기
-          const w = Math.max(2, 1 + (link.value || 1) * 0.9);
+          const thickness = Math.max(2, 1 + (link.value || 1) * 0.9);
           const headLen = 18 / globalScale + (link.value || 1) * 2.5;
           const headWid = 12 / globalScale + (link.value || 1) * 1.2;
 
           drawArrow(ctx, s.x, s.y, t.x, t.y, {
             color: "#FFFFFF",
-            width: w,
+            width: thickness,
             headLength: headLen,
             headWidth: headWid,
             offset,
             cut: 18 / globalScale,
           });
         }}
-        // 노드(피그마 스타일 라운드 박스)
+        // 노드: 라운드 박스 + 중앙 텍스트(자간 흉내)
         nodeCanvasObjectMode={() => "replace"}
         nodeCanvasObject={(node, ctx, globalScale) => {
-          const label = node.id;
+          const label = String(node.label ?? node.id);
 
-          // Figma spec
+          // Figma-ish spec
           const fontPx = 16 / globalScale;
           const lineH = 24 / globalScale;
           const padX = 8 / globalScale;
-          const padY = 2 / globalScale;
           const radius = 6 / globalScale;
           const borderW = 1 / globalScale;
           const letterSpacing = 0.3 / globalScale;
@@ -179,6 +204,7 @@ const InteractionMatrix = () => {
           const x = node.x - w / 2;
           const y = node.y - h / 2;
 
+          // 박스
           ctx.fillStyle = "#462C71"; // Primary Dark
           roundRect(ctx, x, y, w, h, radius);
           ctx.fill();
@@ -199,7 +225,7 @@ const InteractionMatrix = () => {
             cursor += cw + letterSpacing;
           }
         }}
-        // 인터랙션 잠금
+        // 인터랙션 잠금 (필요시 true로)
         enableNodeDrag={false}
         enableZoomInteraction={false}
         enablePanInteraction={false}
