@@ -435,51 +435,51 @@ export default function PlaySomeAnalysisPage() {
             <div className="space-y-10 w-full max-w-[700px] mx-auto">
               <CompareMetric
                 title="평균 답장 시간"
-                leftValue={`${resultData?.spec.reply_A}분`}
-                rightValue={`${resultData?.spec.reply_B}분`}
+                leftValue={`${resultData.spec.reply_A}분`}
+                rightValue={`${resultData.spec.reply_B}분`}
                 leftPct={65}
-                leftDesc={resultData?.spec.reply_A_desc}
-                rightDesc={resultData?.spec.reply_B_desc}
+                leftDesc={resultData.spec.reply_A_desc}
+                rightDesc={resultData.spec.reply_B_desc}
               />
 
               <CompareMetric
                 title="약속 제안 횟수"
-                leftValue={`${resultData?.spec.rec_A}회`}
-                rightValue={`${resultData?.spec.rec_B}회`}
+                leftValue={`${resultData.spec.rec_A}회`}
+                rightValue={`${resultData.spec.rec_B}회`}
                 leftPct={
-                  (resultData?.spec.rec_A /
-                    (resultData?.spec.rec_A + resultData?.spec.rec_B)) *
+                  (resultData.spec.rec_A /
+                    (resultData.spec.rec_A + resultData.spec.rec_B)) *
                   100
                 }
-                leftDesc={resultData?.spec.rec_A_desc}
-                rightDesc={resultData?.spec.rec_B_desc}
-                leftExample={resultData?.spec.rec_A_ex}
-                rightExample={resultData?.spec.rec_A_ex}
+                leftDesc={resultData.spec.rec_A_desc}
+                rightDesc={resultData.spec.rec_B_desc}
+                leftExample={resultData.spec.rec_A_ex}
+                rightExample={resultData.spec.rec_A_ex}
               />
               <CompareMetric
                 title="주제 시작 비율"
-                leftValue={`${resultData?.spec.atti_A}%`}
-                rightValue={`${resultData?.spec.atti_B}%`}
-                leftPct={resultData?.spec.atti_A}
-                leftDesc={resultData?.spec.atti_A_desc}
-                rightDesc={resultData?.spec.atti_B_desc}
-                leftExample={resultData?.spec.atti_A_ex}
-                rightExample={resultData?.spec.atti_A_ex}
+                leftValue={`${resultData.spec.atti_A}%`}
+                rightValue={`${resultData.spec.atti_B}%`}
+                leftPct={resultData.spec.atti_A}
+                leftDesc={resultData.spec.atti_A_desc}
+                rightDesc={resultData.spec.atti_B_desc}
+                leftExample={resultData.spec.atti_A_ex}
+                rightExample={resultData.spec.atti_A_ex}
               />
 
               <CompareMetric
                 title="평균 메시지 길이"
-                leftValue={`${resultData?.spec.len_A}자`}
-                rightValue={`${resultData?.spec.len_B}자`}
+                leftValue={`${resultData.spec.len_A}자`}
+                rightValue={`${resultData.spec.len_B}자`}
                 leftPct={
-                  (resultData?.spec.len_A /
-                    (resultData?.spec.len_A + resultData?.len_B)) *
+                  (resultData.spec.len_A /
+                    (resultData.spec.len_A + resultData.len_B)) *
                   100
                 }
-                leftDesc={resultData?.spec.len_A_desc}
-                rightDesc={resultData?.spec.len_B_desc}
-                leftExample={resultData?.spec.len_A_ex}
-                rightExample={resultData?.spec.len_A_ex}
+                leftDesc={resultData.spec.len_A_desc}
+                rightDesc={resultData.spec.len_B_desc}
+                leftExample={resultData.spec.len_A_ex}
+                rightExample={resultData.spec.len_A_ex}
               />
 
               <div className="text-sm text-secondary leading-6">
