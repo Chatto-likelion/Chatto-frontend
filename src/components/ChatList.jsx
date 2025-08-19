@@ -11,7 +11,7 @@ import { useChat } from "@/contexts/ChatContext";
 import * as Icons from "@/assets/svg";
 import useCurrentMode from "@/hooks/useCurrentMode";
 
-export default function ChatList() {
+export default function ChatList(onDeleted) {
   const mode = useCurrentMode();
   const isPlay = mode === "play";
 
@@ -84,8 +84,10 @@ export default function ChatList() {
       setLoading(true);
       const deleteFn = isPlay ? deleteChat : deleteChat_Bus;
       await deleteFn(chatId);
-      await loadChats();
+      setChats((prev) => prev.filter((c) => c.chat_id !== chatId));
       if (selectedChatId === chatId) setSelectedChatId(null);
+      onDeleted?.(chatId);
+      await loadChats();
     } catch (err) {
       console.error("채팅 삭제 실패:", err);
       setError("채팅 삭제에 실패했습니다.");

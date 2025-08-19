@@ -171,6 +171,7 @@ export const getChatList = async () => {
 
 export const postChemiAnalyze = async (chatId, payload) => {
   try {
+    console.log(payload);
     const response = await instanceWithToken.post(
       `/play/chat/${chatId}/analyze/chem/`,
       payload
@@ -361,6 +362,168 @@ export const deleteMbtiAnalysis = async (resultId) => {
       401: "로그인이 필요합니다. (401)",
       403: "해당 분석을 삭제할 권한이 없습니다. (403)",
       404: "분석 결과을 찾을 수 없습니다. (404)",
+    });
+  }
+};
+
+/**
+ * ✅ 퀴즈
+ */
+//퀴즈 정보 겟
+export const getChemiQuiz = async (result_id) => {
+  try {
+    const response = await instanceWithToken.get(
+      `/play/quiz/chem/${result_id}`
+    );
+
+    if (response.status === 200) {
+      console.log("분석 성공:", response.data);
+      return response.data;
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      401: "로그인이 필요합니다. (401)",
+      404: "채팅 파일을 찾을 수 없습니다. (404)",
+    });
+  }
+};
+
+/**
+ * ✅ 분석 결과 공유
+ */
+//uuid 생성
+export const postUUID = async (type, result_id) => {
+  try {
+    const formData = new FormData();
+    formData.append("type", type);
+
+    const response = await instanceWithToken.post(
+      `/play/chat/uuid/${result_id}`,
+      formData
+    );
+
+    if (response.status === 201) {
+      console.log("분석 성공:", response.data);
+      return response.data.uuid; // { uuid: string }
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      400: "입력값이 잘못되었습니다. (400)",
+      401: "로그인이 필요합니다. (401)",
+      403: "분석 결과를 공유할 권한이 없습니다. (403)",
+      404: "분석 결과를 찾을 수 없습니다. (404)",
+    });
+  }
+};
+
+export const postUUID_Bus = async (type, result_id) => {
+  try {
+    const response = await instanceWithToken.post(
+      `/business/chat/uuid/${result_id}/`,
+      type
+    );
+
+    if (response.status === 201) {
+      console.log("분석 성공:", response.data);
+      return response.data.uuid; // { uuid: string }
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      400: "입력값이 잘못되었습니다. (400)",
+      401: "로그인이 필요합니다. (401)",
+      403: "분석 결과를 공유할 권한이 없습니다. (403)",
+      404: "분석 결과를 찾을 수 없습니다. (404)",
+    });
+  }
+};
+
+//guest 결과 보기
+export const getChemiGuestDetail = async (uuid) => {
+  try {
+    const response = await instance.get(
+      `/play/analysis/chem/guest/${uuid}/detail/`
+    );
+
+    if (response.status === 200) {
+      console.log("분석 성공:", response.data);
+      return response.data;
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      401: "로그인이 필요합니다. (401)",
+      403: "해당 채팅을 분석할 권한이 없습니다. (403)",
+      404: "채팅 파일을 찾을 수 없습니다. (404)",
+    });
+  }
+};
+
+export const getSomeGuestDetail = async (uuid) => {
+  try {
+    const response = await instance.get(
+      `/play/analysis/some/guest/${uuid}/detail/`
+    );
+
+    if (response.status === 200) {
+      console.log("분석 성공:", response.data);
+      return response.data;
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      401: "로그인이 필요합니다. (401)",
+      403: "해당 채팅을 분석할 권한이 없습니다. (403)",
+      404: "채팅 파일을 찾을 수 없습니다. (404)",
+    });
+  }
+};
+
+export const getMbtiGuestDetail = async (uuid) => {
+  try {
+    const response = await instance.get(
+      `/play/analysis/mbti/guest/${uuid}/detail/`
+    );
+
+    if (response.status === 200) {
+      console.log("분석 성공:", response.data);
+      return response.data;
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      401: "로그인이 필요합니다. (401)",
+      403: "해당 채팅을 분석할 권한이 없습니다. (403)",
+      404: "채팅 파일을 찾을 수 없습니다. (404)",
+    });
+  }
+};
+
+export const getContrGuestDetail = async (uuid) => {
+  try {
+    const response = await instance.get(
+      `/business/analysis/contr/guest/${uuid}/detail/`
+    );
+
+    if (response.status === 200) {
+      console.log("분석 성공:", response.data);
+      return response.data;
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      401: "로그인이 필요합니다. (401)",
+      403: "해당 채팅을 분석할 권한이 없습니다. (403)",
+      404: "채팅 파일을 찾을 수 없습니다. (404)",
     });
   }
 };

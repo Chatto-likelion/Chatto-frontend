@@ -1,10 +1,11 @@
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   getChemiAnalysisDetail,
   getChatList,
   postChemiAnalyze,
   deleteChemiAnalysis,
+  postUUID,
 } from "@/apis/api"; // 실제 API 호출 함수
 import {
   Header,
@@ -23,7 +24,28 @@ export default function PlayChemiAnalysisPage() {
   const { setSelectedChatId } = useChat();
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
-  const shareUrl = "https://www.figma.com/file/abc...";
+  const [shareUrl, setShareUrl] = useState(null);
+  const [shareFetching, setShareFetching] = useState(false);
+  const [shareError, setShareError] = useState(null);
+  const makeShareUrl = (uuid) =>
+    `${window.location.origin}/play/chemi/share/${uuid}`; // 라우팅 규칙에 맞게 수정 가능
+
+  const handleOpenShare = async () => {
+    setModalOpen(true); // 모달 먼저 열고 로딩 스피너 보여주고 싶다면
+    if (shareUrl || shareFetching) return; // 이미 발급중/발급완료면 재호출 X
+
+    try {
+      setShareFetching(true);
+      setShareError(null);
+      const uuid = await postUUID("chem", resultId);
+      setShareUrl(makeShareUrl(uuid));
+    } catch (e) {
+      setShareError(e.message || "공유 링크 발급에 실패했습니다.");
+    } finally {
+      setShareFetching(false);
+    }
+  };
+
   const [form, setForm] = useState({
     relationship: "",
     situation: "",
@@ -36,6 +58,22 @@ export default function PlayChemiAnalysisPage() {
   const [hasSourceChat, setHasSourceChat] = useState(null); // true/false/null
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const sourceChatId = resultData?.result?.chat ?? null;
+  const handleChatDeleted = useCallback(
+    (deletedId) => {
+      setChatIds((prev) => {
+        const next = new Set(prev);
+        next.delete(deletedId);
+        // next를 이용해 hasSourceChat을 정확히 재계산
+        setHasSourceChat(sourceChatId ? next.has(sourceChatId) : null);
+        // 소스 채팅 자체가 지워졌다면 선택도 해제
+        if (deletedId === sourceChatId) setSelectedChatId(null);
+        return next;
+      });
+    },
+    [sourceChatId, setSelectedChatId]
+  );
 
   useEffect(() => {
     let alive = true;
@@ -78,33 +116,41 @@ export default function PlayChemiAnalysisPage() {
   }, [resultId]);
 
   const normalize = (s) => (s && s.trim() ? s.trim() : "입력 안 함");
+  const isSameNow = useMemo(() => {
+    if (!resultData?.result) return false;
+    return (
+      resultData.result.relationship === normalize(form.relationship) &&
+      resultData.result.situation === normalize(form.situation) &&
+      resultData.result.analysis_date_start === form.analysis_start &&
+      resultData.result.analysis_date_end === form.analysis_end
+    );
+  }, [resultData?.result, form]);
+
+  // 비활성화 조건 및 사유
+  const disableAnalyze = loading || hasSourceChat === false || isSameNow;
+
+  const disableReason = useMemo(() => {
+    if (loading) return "분석 중입니다...";
+    if (hasSourceChat === false)
+      return "원본 채팅이 삭제되어 재분석할 수 없습니다.";
+    if (isSameNow)
+      return "이전 분석과 동일한 조건입니다. 변경 후 다시 시도해 주세요.";
+    return "";
+  }, [loading, hasSourceChat, isSameNow]);
+
   const handleAnalyze = async () => {
-    if (!hasSourceChat) {
-      window.alert("원본 채팅이 삭제되어 재분석할 수 없습니다.");
-      return;
-    }
-
-    const payload = {
-      ...form,
-      relationship: normalize(form.relationship),
-      situation: normalize(form.situation),
-    };
-
-    const isSame =
-      resultData.result.relationship === payload.relationship &&
-      resultData.result.situation === payload.situation &&
-      resultData.result.analysis_date_start === payload.analysis_start &&
-      resultData.result.analysis_date_end === payload.analysis_end;
-
-    if (isSame) {
-      window.alert(
-        "이전 분석과 동일한 조건입니다. 변경 후 다시 시도해 주세요."
-      );
-      return;
-    }
+    if (!hasSourceChat) return;
+    if (isSameNow) return;
 
     setLoading(true);
     setError(null);
+
+    const payload = {
+      relationship: normalize(form.relationship),
+      situation: normalize(form.situation),
+      analysis_start: form.analysis_start,
+      analysis_end: form.analysis_end,
+    };
 
     try {
       const analyzeResponse = await postChemiAnalyze(
@@ -140,8 +186,9 @@ export default function PlayChemiAnalysisPage() {
     }
   };
 
-  if (loading) return <p>결과를 불러오는 중...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  if (loading) return <p className="mt-44 text-sm">분석 중입니다...</p>;
+  if (error) return <p className="mt-4 text-sm text-red-500">{error}</p>;
+  if (!resultData) return null; // 방어: 혹시 모를 케이스
 
   return (
     <div className="flex flex-col justify-start items-center h-screen text-white bg-primary-dark">
@@ -149,7 +196,7 @@ export default function PlayChemiAnalysisPage() {
       <div className="relative flex-1 w-[1352px] mt-17.5 overflow-hidden flex justify-between items-start">
         {/* 왼쪽 */}
         <div className="gap-5 mt-52.5 w-53.5 flex flex-col items-center justify-center">
-          <ChatList />
+          <ChatList onDeleted={handleChatDeleted} />
           <FileUpload />
         </div>
 
@@ -204,18 +251,35 @@ export default function PlayChemiAnalysisPage() {
               onChange={updateForm}
               isAnalysis={true}
             />
-            <button
-              onClick={() => handleAnalyze()}
-              disabled={loading}
-              className="mt-6 w-18.5 h-6.5 px-1.5 py-1 flex justify-center gap-0.5 items-center hover:bg-secondary-light hover:text-primary-dark text-caption border border-secondary-light rounded-lg"
-            >
-              다시 분석
-              <Icons.Search className="w-2.5 h-2.5" />
-            </button>
+            {/* 다시 분석 버튼 */}
+            <div className="relative group mt-6">
+              <button
+                onClick={handleAnalyze}
+                disabled={disableAnalyze}
+                className={[
+                  "w-18.5 h-6.5 px-1.5 py-1 flex justify-center gap-0.5 items-center text-caption rounded-lg border transition-colors duration-150",
+                  disableAnalyze
+                    ? "border-secondary-light/40 text-secondary-light/40 cursor-not-allowed"
+                    : "border-secondary-light hover:bg-secondary-light hover:text-primary-dark text-secondary-light",
+                ].join(" ")}
+              >
+                다시 분석
+                <Icons.Search className="w-2.5 h-2.5" />
+              </button>
+
+              {/* 비활성화 사유 툴팁: 래퍼(div)에 hover 걸어서 disabled여도 보이도록 */}
+              {disableAnalyze && disableReason && (
+                <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-7 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="whitespace-nowrap text-[10px] leading-none px-2 py-1 rounded bg-primary-dark/80 text-secondary-light border border-secondary-light/30 shadow-sm">
+                    {disableReason}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           <div className="w-full flex justify-between items-center">
             <button
-              onClick={() => setModalOpen(true)}
+              onClick={handleOpenShare}
               disabled={loading}
               className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
             >
@@ -225,6 +289,8 @@ export default function PlayChemiAnalysisPage() {
               open={modalOpen}
               onClose={() => setModalOpen(false)}
               url={shareUrl}
+              loading={shareFetching}
+              error={shareError}
             />
             <button
               onClick={() => {}}

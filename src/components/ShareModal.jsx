@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import useCurrentMode from "@/hooks/useCurrentMode";
 
-export default function ShareModal({ open, onClose, url }) {
+export default function ShareModal({ open, onClose, url, loading, error }) {
   const mode = useCurrentMode();
   const isPlay = mode === "play";
 
@@ -90,26 +90,38 @@ export default function ShareModal({ open, onClose, url }) {
         </h2>
 
         {/* URL row */}
-        <div className="flex items-center gap-3 mb-4">
-          <span
-            className={`shrink-0 text-body1 tracking-wide ${theme.urlLabel}`}
-          >
-            URL
-          </span>
+        {loading ? (
+          <p className="w-full text-center text-sm text-gray-500">
+            공유 링크를 준비 중입니다…
+          </p>
+        ) : error ? (
+          <p className="w-full text-center text-sm text-red-600">{error}</p>
+        ) : url ? (
+          <div className="flex items-center gap-3 mb-4">
+            <span
+              className={`shrink-0 text-body1 tracking-wide ${theme.urlLabel}`}
+            >
+              URL
+            </span>
 
-          <div
-            className={`flex-1 truncate uppercase tracking-wide px-3 py-1 text-body1 rounded-lg border ${theme.urlBoxText} ${theme.urlBoxBg} ${theme.urlBoxBorder}`}
-          >
-            {url}
+            <div
+              className={`flex-1 truncate uppercase tracking-tight px-3 py-1 text-body1 rounded-lg border ${theme.urlBoxText} ${theme.urlBoxBg} ${theme.urlBoxBorder}`}
+            >
+              {url}
+            </div>
+
+            <button
+              onClick={handleCopy}
+              className={`shrink-0 text-body1 tracking-wide px-3 py-1 rounded-lg border transition-colors ${theme.copyBtn}`}
+            >
+              COPY
+            </button>
           </div>
-
-          <button
-            onClick={handleCopy}
-            className={`shrink-0 text-body1 tracking-wide px-3 py-1 rounded-lg border transition-colors ${theme.copyBtn}`}
-          >
-            COPY
-          </button>
-        </div>
+        ) : (
+          <p className="text-sm text-gray-500">
+            공유 링크가 없습니다. 다시 시도해 주세요.
+          </p>
+        )}
 
         {/* round buttons */}
         <div className="mt-6 flex items-center justify-center gap-8">
