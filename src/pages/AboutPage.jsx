@@ -33,7 +33,7 @@ export default function AboutPage() {
             </p>
 
             <p className="mt-8 text-body1 text-gray-700 leading-7">
-              채토는 메신저 대화 데이터를 기반으로,
+              챗토는 메신저 대화 데이터를 기반으로,
               <br />
               심리·관계 분석부터 업무 기여도 평가까지 지원하는 통합 대화 분석
               플랫폼입니다.
@@ -44,7 +44,7 @@ export default function AboutPage() {
               살펴볼 기회는 흔치 않습니다.
             </p>
             <p className="mt-4 text-body1 text-gray-700 leading-7">
-              채토는 우리의 대화를 그냥 흘려보내지 않고,
+              챗토는 우리의 대화를 그냥 흘려보내지 않고,
               <br />
               가치 있는 데이터로 활용하여 다양한 분석을 제공합니다.
             </p>
