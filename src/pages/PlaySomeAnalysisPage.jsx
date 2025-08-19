@@ -289,9 +289,9 @@ export default function PlaySomeAnalysisPage() {
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
-    <div className="flex flex-col justify-start items-center h-screen text-white bg-primary-dark">
+    <div className="flex flex-col items-center min-h-screen text-white bg-primary-dark">
       <Header />
-      <div className="relative flex-1 w-[1352px] mt-17.5 overflow-hidden flex justify-between items-start">
+      <div className="relative w-[1352px] mt-17.5 flex justify-between items-start">
         {/* 왼쪽 */}
         <div className="gap-5 mt-52.5 w-53.5 flex flex-col items-center justify-center">
           <ChatList />
