@@ -34,8 +34,7 @@ export default function PlayMbtiPage() {
     setError(null);
 
     const payload = {
-      analysis_start: convertPeriodToDate(startPeriod, "start"),
-      analysis_end: convertPeriodToDate(endPeriod, "end"),
+      ...form,
     };
 
     try {

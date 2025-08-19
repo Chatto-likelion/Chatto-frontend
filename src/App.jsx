@@ -22,6 +22,7 @@ import SignUpPage from "./pages/SignUpPage";
 import ForgetPasswordPage from "./pages/ForgetPasswordPage";
 import BusinessResultPage from "./pages/BusinessResultPage_test.jsx";
 import ProfileEditPage from "./pages/ProfileEditPage.jsx";
+import PlayChemiSharePage from "./pages/PlayChemiSharePage.jsx";
 
 function App() {
   return (
@@ -35,6 +36,11 @@ function App() {
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/forget" element={<ForgetPasswordPage />} />
+
+        <Route
+          path="/play/chemi/share/:uuid"
+          element={<PlayChemiSharePage />}
+        />
 
         <Route
           path="/play/chemi/result-test"
