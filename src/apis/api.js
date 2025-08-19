@@ -714,3 +714,33 @@ export const updateMe = async (data) => {
     });
   }
 };
+
+/**
+ * 퀴즈 메인 페이지
+ */
+export const getQuizData = async (analysisId) => {
+  try {
+    const response = await instanceWithToken.get(
+      `/play/analysis/${analysisId}/quiz/`
+    );
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      const status = error.response.status;
+
+      if (status === 401) {
+        throw new Error("퀴즈를 보려면 로그인이 필요합니다. (401)");
+      }
+      if (status === 403) {
+        throw new Error("이 퀴즈에 접근할 권한이 없습니다. (403)");
+      }
+      if (status === 404) {
+        throw new Error(
+          "해당 분석 결과를 찾을 수 없어 퀴즈를 생성할 수 없습니다. (404)"
+        );
+      }
+    }
+    console.error("퀴즈 데이터 조회 에러:", error);
+    throw new Error("퀴즈 정보를 불러오는 데 실패했습니다.");
+  }
+};
