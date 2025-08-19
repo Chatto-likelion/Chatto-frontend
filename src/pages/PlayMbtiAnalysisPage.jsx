@@ -18,11 +18,33 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useChat } from "@/contexts/ChatContext";
 import * as Icons from "@/assets/svg/index.js";
+import MbtiPieChart from "@/components/MbtiPieChart";
+import MbtiReportCard from "@/components/MbtiReportCard";
+
+const mbti_stats = [
+  { type: "INFJ", value: 12 },
+  { type: "ENFP", value: 9 },
+  { type: "ISTJ", value: 7 },
+  { type: "ISFJ", value: 6 },
+  { type: "INTJ", value: 6 },
+  { type: "INFP", value: 5 },
+  { type: "ENTP", value: 5 },
+  { type: "ENFJ", value: 5 },
+  { type: "ISTP", value: 4 },
+  { type: "ISFP", value: 4 },
+  { type: "INTP", value: 4 },
+  { type: "ESTJ", value: 3 },
+  { type: "ESFJ", value: 3 },
+  { type: "ESTP", value: 3 },
+  { type: "ESFP", value: 2 },
+  { type: "ENTJ", value: 2 },
+];
 
 export default function PlayMbtiAnalysisPage() {
   const { resultId } = useParams(); // URL 파라미터 추출
   const { setSelectedChatId } = useChat();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState(null);
   const [shareFetching, setShareFetching] = useState(false);
@@ -111,6 +133,69 @@ export default function PlayMbtiAnalysisPage() {
     };
   }, [resultId]);
 
+  const REPORT_TABS = useMemo(() => {
+    const list = Array.isArray(resultData?.spec_personal)
+      ? resultData.spec_personal
+      : [];
+
+    return list.filter(Boolean).map(({ specpersonal_id, name, MBTI }) => ({
+      key: String(specpersonal_id), // TabBar 키로 사용 (문자열 추천)
+      label: name ?? "", // 탭 표시 이름
+      type: (MBTI ?? "").toUpperCase(), // 예: "infj"도 "INFJ"로
+    }));
+  }, [resultData?.spec_personal]);
+
+  useEffect(() => {
+    if (!REPORT_TABS.length) return;
+    // 현재 activeTab이 목록에 없으면 첫 탭으로 세팅
+    if (!REPORT_TABS.some((t) => t.key === activeTab)) {
+      setActiveTab(REPORT_TABS[0].key);
+    }
+  }, [REPORT_TABS, activeTab]);
+
+  const activeSpec = useMemo(() => {
+    const list = Array.isArray(resultData?.spec_personal)
+      ? resultData.spec_personal
+      : [];
+    if (!list.length) return null;
+
+    // activeTab과 specpersonal_id 일치하는 항목 찾기 (문자/숫자 안전 비교)
+    return (
+      list.find((p) => String(p.specpersonal_id) === String(activeTab)) ||
+      list[0]
+    );
+  }, [resultData?.spec_personal, activeTab]);
+
+  const TRAITS = useMemo(() => {
+    const s = resultData?.spec;
+    if (!s) return [];
+
+    const people = Math.max(1, (s.total_I ?? 0) + (s.total_E ?? 0));
+
+    return [
+      {
+        leftLabel: "I",
+        rightLabel: "E",
+        leftPct: (s.total_I / people) * 100,
+      },
+      {
+        leftLabel: "S",
+        rightLabel: "N",
+        leftPct: (s.total_S / people) * 100,
+      },
+      {
+        leftLabel: "T",
+        rightLabel: "F",
+        leftPct: (s.total_T / people) * 100,
+      },
+      {
+        leftLabel: "J",
+        rightLabel: "P",
+        leftPct: (s.total_J / people) * 100,
+      },
+    ];
+  }, [resultData?.spec]);
+
   const isSameNow = useMemo(() => {
     if (!resultData?.result) return false;
     return (
@@ -192,42 +277,55 @@ export default function PlayMbtiAnalysisPage() {
         </div>
 
         {/* 가운데 */}
-        <main className="overflow-y-auto max-h-240 scrollbar-hide pt-28 w-[722px] flex flex-col justify-start items-center">
+        <main className="overflow-y-auto max-h-240 scrollbar-hide pt-28 pb-34 w-[722px] flex flex-col justify-start items-center">
           {/* 결과 출력 */}
           {loading && <p className="mt-44 text-sm">분석 중입니다...</p>}
           {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
-          <div className="w-full flex flex-col items-center gap-6">
-            <div className="w-full flex flex-col gap-4 p-6 text-left">
-              <div className="flex justify-between">
-                <div className="flex flex-col">
-                  <span className="text-st1">MBTI 분석 결과</span>
-                  <span className="text-h2">82점</span>
-                </div>
-                <div className="flex flex-col text-st2 gap-0.5 mt-1">
-                  <p>분석된 메시지 수: 1,342개</p>
-                  <p>참여자 수: 23명</p>
-                  <p>분석 기간: 최근 6개월</p>
-                </div>
-              </div>
-              <div className="text-st2 italic mt-2">
-                한 마디: “웃음과 공감이 폭발하는 안정적 팀워크!”
-              </div>
-            </div>
+          {/* 상단 통계 */}
 
-            <div className="w-full h-350 mb-20 p-4 gap-5 flex flex-col justify-start items-start border border-secondary-light rounded-lg text-body2 whitespace-pre-line">
-              <div>
-                <h1>MBTI 결과 페이지</h1>
-                <p>결과 ID: {resultId}</p>
-                <p>content: {resultData.result.content}</p>
-                <p>is_saved: {resultData.result.is_saved}</p>
-                <p>
-                  analysis_date_start: {resultData.result.analysis_date_start}
-                </p>
-                <p>analysis_date_end: {resultData.result.analysis_date_end}</p>
-                <p>created_at: {resultData.result.created_at}</p>
-                <p>chat: {resultData.result.chat}</p>
+          <div className="w-full mb-15 flex flex-col">
+            <div className="text-h6 pb-6.5">
+              <span>MBTI 통계</span>
+            </div>
+            <div className="pl-5 text-body1 text-left">
+              <p>분석된 메시지 수: {resultData.result.num_chat}개</p>
+              <p>
+                분석 대상: {resultData.spec.total_I + resultData.spec.total_E}명
+              </p>
+              <p>
+                분석 기간: {resultData.result.analysis_date_start} ~{" "}
+                {resultData.result.analysis_date_end}
+              </p>
+            </div>
+          </div>
+
+          {/* MBTI 통계(왼쪽 도넛, 오른쪽 페어바) */}
+          <Section title="MBTI 통계">
+            <div className="w-full pl-10 gap-30 flex items-center">
+              <MbtiPieChart data={mbti_stats} size={170} />
+              <div className="space-y-4">
+                {TRAITS.map((t, idx) => (
+                  <PairBar
+                    key={idx}
+                    leftLabel={t.leftLabel}
+                    rightLabel={t.rightLabel}
+                    left={t.leftPct}
+                  />
+                ))}
               </div>
             </div>
+          </Section>
+
+          {/* 탭 바 */}
+          <div className="mt-[51px] w-full">
+            <TabBar
+              tabs={REPORT_TABS}
+              active={activeTab}
+              onChange={setActiveTab}
+            />
+
+            {/* 리포트 카드 */}
+            {activeSpec && <MbtiReportCard spec={activeSpec} />}
           </div>
         </main>
 
@@ -304,4 +402,75 @@ export default function PlayMbtiAnalysisPage() {
       <Icons.Chatto className="w-18.75 h-29.75 text-primary-light fixed bottom-5 right-12" />
     </div>
   );
+}
+
+function Section({ title, children }) {
+  return (
+    <section className="rounded-lg border border-secondary-light pt-5 px-6 pb-10 w-full">
+      <div className="mb-10 text-h6">
+        <span className="inline-block border-t-2 border-secondary pt-1">
+          {title}
+        </span>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function TabBar({ tabs, active, onChange }) {
+  return (
+    <div className="w-full px-4 flex flex-wrap justify-between gap-8 overflow-x-auto scrollbar-hide">
+      {tabs.map((t) => {
+        const isActive = t.key === active;
+        return (
+          <button
+            key={t.key}
+            onClick={() => onChange(t.key)}
+            className={[
+              "h-9 px-4 rounded-t-md border text-sm transition-colors duration-150",
+              isActive
+                ? "bg-[#EADFAE] text-primary-dark border-[#EADFAE]"
+                : "bg-transparent text-white/90 border-white/30 hover:bg-white/10",
+            ].join(" ")}
+          >
+            {t.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function PairBar({ leftLabel, rightLabel, left }) {
+  const L = clamp(left);
+  const R = 100 - L;
+  return (
+    <div className="w-[256px] grid grid-cols-[18px_1fr_18px] items-center gap-4">
+      <span className="text-body1 text-gray-2">{leftLabel}</span>
+      <div className="w-[203px]">
+        <div
+          className="grid h-[28px]"
+          style={{ gridTemplateColumns: `${L}% ${R}%` }}
+        >
+          <div className="relative bg-secondary-light">
+            <span className="absolute inset-0 flex items-center justify-center text-body1 text-primary-dark">
+              {L}%
+            </span>
+          </div>
+          <div className="relative border border-secondary-light bg-transparent">
+            <span className="absolute inset-0 flex items-center justify-center text-body1">
+              {R ? `${R}%` : ""}
+            </span>
+          </div>
+        </div>
+      </div>
+      <span className="text-body1 text-gray-2">{rightLabel}</span>
+    </div>
+  );
+}
+
+/* utils */
+function clamp(n) {
+  const x = Number(n) || 0;
+  return Math.max(0, Math.min(100, Math.round(x)));
 }
