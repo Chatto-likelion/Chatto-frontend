@@ -27,6 +27,7 @@ import QuizResultPage from "./pages/QuizResultPage.jsx";
 import QuizSolvePage from "./pages/QuizSolvePage.jsx";
 import ProfileEditPage from "./pages/ProfileEditPage.jsx";
 import PlayChemiSharePage from "./pages/PlayChemiSharePage.jsx";
+import QuizPersonalAnswerPage from "./pages/QuizPersonalAnswerPage";
 import PlaySomeSharePage from "./pages/PlaySomeSharePage.jsx";
 import PlayMbtiSharePage from "./pages/PlayMbtiSharePage.jsx";
 import BusinessContrSharePage from "./pages/BusinessContrSharePage.jsx";
@@ -108,6 +109,10 @@ function App() {
           />
           <Route path="/profileedit" element={<ProfileEditPage />} />
         </Route>
+        <Route
+          path="/play/quiz/answer/:resultId"
+          element={<QuizPersonalAnswerPage />}
+        />
       </Routes>
     </BrowserRouter>
   );

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Header } from "@/components";
 import * as Icons from "@/assets/svg";
 import CheckBoxIcon from "@/assets/svg/CheckBox.svg?react";
@@ -40,6 +40,9 @@ export default function QuizPage() {
   const [chatRooms] = useState(dummyChatRooms);
   const [questions] = useState(dummyQuestions);
   const [answers, setAnswers] = useState({});
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const handleSelectOption = (questionId, optionIndex) => {
     setAnswers((prevAnswers) => {
       if (prevAnswers[questionId] === optionIndex) {
@@ -53,6 +56,9 @@ export default function QuizPage() {
       };
     });
   };
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   return (
     <div className="w-full min-h-screen bg-primary-dark text-[#f5f5f5]">
@@ -73,12 +79,18 @@ export default function QuizPage() {
                 className="bg-primary-dark border border-primary-light rounded w-[190px] h-[32px] pl-3 text-body2 w-48"
               />
             </div>
-            <button className="text-button border border-gray-2 rounded w-[110px] h-[32px] ml-3 hover:bg-primary-light hover:text-primary-dark">
+            <button
+              onClick={openModal}
+              className="text-button border border-gray-2 rounded w-[110px] h-[32px] ml-3 hover:bg-primary-light hover:text-primary-dark"
+            >
               결과 제출하기
             </button>
-            <button className="text-button border border-secondary text-secondary rounded w-[110px] h-[32px] hover:bg-secondary-light hover:text-primary-dark">
+            <Link
+              to="/about"
+              className="text-button border border-gray-2 text-gray-2 rounded w-[110px] h-[32px] hover:bg-primary-light hover:text-primary-dark flex justify-center items-center"
+            >
               나도 분석하기
-            </button>
+            </Link>
           </div>
 
           <div className="w-full flex flex-col gap-6">
@@ -110,6 +122,27 @@ export default function QuizPage() {
           </div>
         </main>
       </div>
+      {isModalOpen && (
+        // 배경(Backdrop) - 블러 및 닫기 기능
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50"
+          onClick={closeModal}
+        >
+          {/* 모달 컨텐츠 */}
+          <div
+            className="bg-primary-dark border border-primary-light text-h5 rounded-lg p-10 flex flex-col items-center gap-6"
+            onClick={(e) => e.stopPropagation()} // 모달 내부 클릭 시 닫힘 방지
+          >
+            <p className="text-h6">제출이 완료되었습니다</p>
+            <Link
+              to="/play/quiz/answer/123"
+              className="text-button bg-secondary-light text-primary-dark rounded px-8 py-2 hover:bg-opacity-80"
+            >
+              나의 결과 보러가기
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

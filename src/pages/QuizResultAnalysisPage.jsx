@@ -39,8 +39,10 @@ const dummyQuizSections = [
         id: 2,
         title: "Q2 어쩌고 저쩌고",
         options: [
-          { text: "(1) 가나다라", percentage: 78 },
-          { text: "(2) 가나다라", percentage: 44 },
+          { text: "가나다라", percentage: 78 },
+          { text: "가나다라", percentage: 44 },
+          { text: "가나다라", percentage: 54 },
+          { text: "가나다라", percentage: 29 },
         ],
       },
     ],
@@ -50,6 +52,7 @@ const dummyScores = {
   allScores: [
     { name: "보보", score: 90 },
     { name: "미미", score: 85 },
+    { name: "모모", score: 70 },
   ],
   myScore: 70,
 };
@@ -230,11 +233,21 @@ export default function QuizResultStatisticsPage() {
         {/* 3. 오른쪽 패널 */}
         <aside className="w-[212px] mt-38 ml-[147px] flex-shrink-0 flex flex-col gap-4 pt-6">
           <div className="w-full p-4 border border-primary-light rounded-lg">
-            <h3 className="mb-4 font-bold text-h7">전체 점수 보기</h3>
-            <div className="space-y-2 text-sm">
+            <h3 className="mb-4 text-body1">개인 점수 보기</h3>
+            <div className="space-y-2 text-body2">
               {scores.allScores?.map((s) => (
                 <div key={s.name} className="flex justify-between">
-                  <span>{s.name}</span>
+                  {/* 이름이 '모모'일 경우에만 Link와 hover 효과를 적용 */}
+                  {s.name === "모모" ? (
+                    <Link
+                      to="/play/quiz/result/123"
+                      className="hover:text-[#595959] transition-colors"
+                    >
+                      {s.name}
+                    </Link>
+                  ) : (
+                    <span>{s.name}</span>
+                  )}
                   <span className="text-gray-300">{s.score}</span>
                 </div>
               ))}
