@@ -70,13 +70,31 @@ export const getMe = async () => {
   }
 };
 
+export const putProfile = async (data) => {
+  try {
+    const res = await instanceWithToken.put(`/account/profile/`, data);
+
+    if (res.status === 200) return res.data;
+    throw new Error(`예상치 못한 응답 상태: ${res.status}`);
+  } catch (error) {
+    if (error.response) {
+      const { status } = error.response;
+      if (status === 400) throw new Error("입력값이 잘못되었습니다. (400)");
+      if (status === 401) throw new Error("로그인이 필요합니다. (401)");
+      if (status === 404)
+        throw new Error("유저 정보를 찾을 수 없습니다. (404)");
+    }
+    console.error("유저 정보 수정 에러:", error);
+    throw new Error("유저 정보 수정 중 오류가 발생했습니다.");
+  }
+};
+
 /**
  * ✅ 파일 업로드 및 관리
  */
 
-export const postChat = async (userId, file) => {
+export const postChat = async (file) => {
   const formData = new FormData();
-  formData.append("user_id", userId);
   formData.append("file", file);
 
   try {
@@ -107,9 +125,7 @@ export const postChat = async (userId, file) => {
 
 export const deleteChat = async (chatId) => {
   try {
-    const response = await instanceWithToken.delete(
-      `/play/chat/${chatId}/delete/`
-    );
+    const response = await instanceWithToken.delete(`/play/chat/${chatId}/`);
 
     if (response.status === 204) {
       console.log("채팅 삭제 성공");
@@ -134,6 +150,28 @@ export const deleteChat = async (chatId) => {
 
     console.error("채팅 삭제 에러:", error);
     throw new Error("채팅 삭제 중 문제가 발생했습니다.");
+  }
+};
+
+export const putChat = async (chatId, title) => {
+  try {
+    const res = await instanceWithToken.put(`/play/chat/${chatId}/`, { title });
+
+    if (res.status === 200) return;
+    throw new Error(`예상치 못한 응답 상태: ${res.status}`);
+  } catch (error) {
+    if (error.response) {
+      const { status } = error.response;
+      if (status === 400) throw new Error("입력값이 잘못되었습니다. (400)");
+      if (status === 401) throw new Error("로그인이 필요합니다. (401)");
+      if (status === 403)
+        throw new Error("해당 채팅을 수정할 권한이 없습니다. (403)");
+      if (status === 404) throw new Error("채팅을 찾을 수 없습니다. (404)");
+      if (status === 415)
+        throw new Error("지원하지 않는 Content-Type 입니다. (415)");
+    }
+    console.error("채팅 이름 수정 에러:", error);
+    throw new Error("채팅 이름 수정 중 오류가 발생했습니다.");
   }
 };
 
@@ -460,9 +498,8 @@ export const deleteMbtiAnalysis = async (resultId) => {
  * ✅ 파일 업로드 및 관리
  */
 // 파일 업로드
-export const postChat_Bus = async (userId, file) => {
+export const postChat_Bus = async (file) => {
   const formData = new FormData();
-  formData.append("user_id", userId);
   formData.append("file", file);
 
   try {
@@ -493,10 +530,58 @@ export const postChat_Bus = async (userId, file) => {
 
 // 채팅 삭제
 export const deleteChat_Bus = async (chatId) => {
-  if (response.status === 204) {
-    console.log("채팅 삭제 성공");
-  } else {
-    throw new Error("삭제 실패");
+  try {
+    const response = await instanceWithToken.delete(
+      `/business/chat/${chatId}/delete/`
+    );
+
+    if (response.status === 204) {
+      console.log("채팅 삭제 성공");
+      return;
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
+    }
+  } catch (error) {
+    if (error.response) {
+      const status = error.response.status;
+
+      if (status === 401) {
+        throw new Error("로그인이 필요합니다. (401)");
+      }
+      if (status === 403) {
+        throw new Error("해당 채팅을 삭제할 권한이 없습니다. (403)");
+      }
+      if (status === 404) {
+        throw new Error("채팅 파일을 찾을 수 없습니다. (404)");
+      }
+    }
+
+    console.error("채팅 삭제 에러:", error);
+    throw new Error("채팅 삭제 중 문제가 발생했습니다.");
+  }
+};
+
+export const putChat_Bus = async (chatId, title) => {
+  try {
+    const res = await instanceWithToken.put(`/business/chat/${chatId}/`, {
+      title,
+    });
+
+    if (res.status === 200) return;
+    throw new Error(`예상치 못한 응답 상태: ${res.status}`);
+  } catch (error) {
+    if (error.response) {
+      const { status } = error.response;
+      if (status === 400) throw new Error("입력값이 잘못되었습니다. (400)");
+      if (status === 401) throw new Error("로그인이 필요합니다. (401)");
+      if (status === 403)
+        throw new Error("해당 채팅을 수정할 권한이 없습니다. (403)");
+      if (status === 404) throw new Error("채팅을 찾을 수 없습니다. (404)");
+      if (status === 415)
+        throw new Error("지원하지 않는 Content-Type 입니다. (415)");
+    }
+    console.error("채팅 이름 수정 에러:", error);
+    throw new Error("채팅 이름 수정 중 오류가 발생했습니다.");
   }
 };
 

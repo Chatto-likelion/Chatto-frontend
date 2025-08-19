@@ -1,4 +1,10 @@
-import { Header, FileUpload, DetailForm, SmallServices } from "@/components";
+import {
+  Header,
+  ChatList,
+  FileUpload,
+  DetailForm,
+  SmallServices,
+} from "@/components";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import * as Icons from "@/assets/svg/index.js";
@@ -85,18 +91,19 @@ export default function BusinessAnalysisPage() {
   ];
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-white text-black">
+    <div className="min-h-screen bg-white text-primary-dark">
       <Header />
-      <div className="flex-1 w-300 mt-10 overflow-hidden flex justify-between">
-        {/* 좌측 */}
-        <div className="gap-5 pt-6 w-61.5 mr-10 flex flex-col items-center">
+      <div className="mx-auto w-[1352px] mt-[70px] flex gap-6 items-start">
+        {/* 왼쪽 */}
+        <div className="gap-5 mt-[210px] w-[214px] flex flex-col items-center justify-center">
+          <ChatList />
           <FileUpload />
         </div>
 
         {/* 중앙 */}
-        <main className="flex-1 overflow-y-auto max-h-[80vh] scrollbar-hide pt-10 w-[800px] pr-10 flex flex-col gap-8">
+        <main className="pt-24 pb-24 w-[722px] flex flex-col gap-6">
           {/* 상단 분석 정보 */}
-          <section className="w-full p-6 border border-secondary-dark rounded-lg bg-white">
+          <section className="w-full">
             <h2 className="text-xl font-bold text-secondary-dark mb-4">
               "멋사 잡담방" 참여도 분석
             </h2>
@@ -180,21 +187,24 @@ export default function BusinessAnalysisPage() {
         </main>
 
         {/* 우측 */}
-        <div className="w-47.25 mt-20 flex flex-col items-center gap-4">
-          <DetailForm
-            isAnalysis={true}
-            peopleNum={peopleNum}
-            setPeopleNum={setPeopleNum}
-            relation={relation}
-            setRelation={setRelation}
-            situation={situation}
-            setSituation={setSituation}
-            startPeriod={startPeriod}
-            setStartPeriod={setStartPeriod}
-            endPeriod={endPeriod}
-            setEndPeriod={setEndPeriod}
-          />
-          <div className="w-full h-42 border-2 border-primary-light rounded-lg p-3 pb-5 bg-white">
+        <div className="w-[214px] mt-52.5 flex flex-col items-center justify-start gap-4">
+          <div className="w-full py-4 px-1 border border-secondary-light rounded-lg">
+            <DetailForm
+              isAnalysis
+              relation={relation}
+              setRelation={setRelation}
+              situation={situation}
+              setSituation={setSituation}
+              startPeriod={startPeriod}
+              setStartPeriod={setStartPeriod}
+              endPeriod={endPeriod}
+              setEndPeriod={setEndPeriod}
+            />
+            <button className="mt-6 w-19.75 h-8.5 hover:bg-secondary hover:text-primary-dark px-3 py-2 text-button border border-secondary rounded-lg">
+              다시 분석
+            </button>
+          </div>
+          <div className="w-full h-[170px] p-3.75 border border-secondary-light rounded-lg text-primary-light">
             <SmallServices />
           </div>
         </div>
@@ -211,7 +221,7 @@ function ChartSection({ title, data, type }) {
         width: "560.18px",
         height: "267px",
         backgroundColor: "#FFFFFF",
-        borderTop: "2px solid var(--secondary-dark)",
+        borderTop: "2px solid var(--color-secondary-dark)",
         padding: "16px",
       }}
       className="rounded-lg"
