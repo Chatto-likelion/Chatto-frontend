@@ -317,12 +317,12 @@ export default function PlaySomeAnalysisPage() {
         </div>
 
         {/* 가운데 */}
-        <main className="overflow-y-auto max-h-240 scrollbar-hide pt-28 w-[722px] flex flex-col justify-start items-center gap-8">
+        <main className="overflow-y-auto max-h-240 scrollbar-hide pt-28 pb-34 w-[722px] flex flex-col justify-start items-center gap-8">
           {/* 결과 출력 */}
           {loading && <p className="mt-44 text-sm">분석 중입니다...</p>}
           {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
           {/* 상단 분석 */}
-          <section className="w-full pb-15">
+          <section className="w-full pb-7">
             <div className="w-full">
               <div className="flex justify-between items-start">
                 {/* 왼쪽: 타이틀 + 점수 */}

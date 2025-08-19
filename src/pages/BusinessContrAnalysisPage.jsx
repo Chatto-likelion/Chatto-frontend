@@ -37,7 +37,7 @@ export default function BusinessContrAnalysisPage() {
     try {
       setShareFetching(true);
       setShareError(null);
-      const uuid = await postUUID_Bus("contr", resultId);
+      const uuid = await postUUID_Bus("contrib", resultId);
       setShareUrl(makeShareUrl(uuid));
     } catch (e) {
       setShareError(e.message || "공유 링크 발급에 실패했습니다.");
