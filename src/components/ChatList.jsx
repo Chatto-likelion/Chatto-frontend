@@ -1,17 +1,17 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   getChatList,
   deleteChat,
+  putChat,
   getChatList_Bus,
   deleteChat_Bus,
+  putChat_Bus,
 } from "@/apis/api";
-import { useAuth } from "../contexts/AuthContext.jsx";
 import { useChat } from "@/contexts/ChatContext";
 import * as Icons from "@/assets/svg";
 import useCurrentMode from "@/hooks/useCurrentMode";
 
-export default function ChatList() {
-  const { user } = useAuth();
+export default function ChatList(onDeleted) {
   const mode = useCurrentMode();
   const isPlay = mode === "play";
 
@@ -21,7 +21,10 @@ export default function ChatList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ 의존성 맞춘 안전한 로더
+  const [editingId, setEditingId] = useState(null);
+  const [editingValue, setEditingValue] = useState("");
+  const editBoxRef = useRef(null);
+
   const loadChats = useCallback(async () => {
     try {
       setLoading(true);
@@ -38,14 +41,13 @@ export default function ChatList() {
     } finally {
       setLoading(false);
     }
-  }, [isPlay /*, user?.id ← 필요시 모드 외 조건 추가*/]);
+  }, [isPlay]);
 
   // 최초 및 모드 변경시 로드
   useEffect(() => {
     loadChats();
   }, [loadChats]);
 
-  // ✅ ref에 함수 주입 (마운트/의존성 변경시 갱신)
   useEffect(() => {
     if (chatListReloadRef) {
       chatListReloadRef.current = loadChats;
@@ -58,13 +60,34 @@ export default function ChatList() {
     }
   }, [chatListReloadRef, loadChats]);
 
+  useEffect(() => {
+    if (editingId == null) return;
+
+    const handleOutside = (e) => {
+      const box = editBoxRef.current;
+      if (box && !box.contains(e.target)) {
+        cancelEdit(); // 👉 바깥 클릭 시 편집 취소
+      }
+    };
+
+    // 캡처 단계에서 먼저 실행되게 true
+    document.addEventListener("mousedown", handleOutside, true);
+    document.addEventListener("touchstart", handleOutside, true);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside, true);
+      document.removeEventListener("touchstart", handleOutside, true);
+    };
+  }, [editingId]);
+
   const handleDelete = async (chatId) => {
     try {
       setLoading(true);
       const deleteFn = isPlay ? deleteChat : deleteChat_Bus;
       await deleteFn(chatId);
-      await loadChats();
+      setChats((prev) => prev.filter((c) => c.chat_id !== chatId));
       if (selectedChatId === chatId) setSelectedChatId(null);
+      onDeleted?.(chatId);
+      await loadChats();
     } catch (err) {
       console.error("채팅 삭제 실패:", err);
       setError("채팅 삭제에 실패했습니다.");
@@ -75,6 +98,35 @@ export default function ChatList() {
 
   const handleSelect = (chatId) => {
     setSelectedChatId((prevId) => (prevId === chatId ? null : chatId));
+  };
+
+  const startEdit = (chat) => {
+    setEditingId(chat.chat_id);
+    setEditingValue(chat.title || "");
+  };
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditingValue("");
+  };
+  const saveEdit = async (chat, title) => {
+    if (!title) return; // 빈 제목은 무시 (원하면 경고)
+    // 낙관적 업데이트
+    const prev = chats;
+    setChats((old) =>
+      old.map((c) => (c.chat_id === chat.chat_id ? { ...c, title } : c))
+    );
+    try {
+      const fn = isPlay ? putChat : putChat_Bus;
+      await fn(chat.chat_id, title);
+      //await loadChats();
+      window.location.reload();
+    } catch (e) {
+      console.error("제목 수정 실패:", e);
+      setChats(prev);
+      setError("제목 수정에 실패했습니다.");
+    } finally {
+      cancelEdit();
+    }
   };
 
   if (loading && chats.length === 0) {
@@ -105,59 +157,164 @@ export default function ChatList() {
         >
           업로드된 채팅
         </p>
-        <div className="w-full h-55.75 overflow-y-auto scrollbar-hide gap-0.5 flex flex-col items-center">
-          {[...chats]
-            .sort((a, b) => new Date(b.uploaded_at) - new Date(a.uploaded_at))
-            // .slice(0, 5)
-            .map((chat, idx) => {
-              const isSelected = selectedChatId === chat.chat_id;
-              const uploadedDate = new Date(chat.uploaded_at);
-              const now = new Date();
-              const diffDays = Math.floor(
-                (now - uploadedDate) / (1000 * 60 * 60 * 24)
+        {/* 업로드된 채팅 리스트 */}
+        <div className="w-full h-50 overflow-y-auto scrollbar-hide flex flex-col items-center">
+          {(() => {
+            const MS_DAY = 1000 * 60 * 60 * 24;
+
+            const atMidnight = (d) => {
+              const x = new Date(d);
+              x.setHours(0, 0, 0, 0);
+              return x;
+            };
+
+            const now0 = atMidnight(new Date());
+
+            // 정렬
+            const sorted = [...chats].sort(
+              (a, b) => new Date(b.uploaded_at) - new Date(a.uploaded_at)
+            );
+
+            // 선택된 채팅 분리
+            const selected =
+              sorted.find((c) => c.chat_id === selectedChatId) || null;
+            const rest = selected
+              ? sorted.filter((c) => c.chat_id !== selected.chat_id)
+              : sorted;
+
+            // 카테고리 분류
+            const today = [];
+            const recent = []; // 1~7일
+            const old = []; // 8일+
+
+            rest.forEach((chat) => {
+              const up0 = atMidnight(new Date(chat.uploaded_at));
+              const diffDays = Math.floor((now0 - up0) / MS_DAY);
+              if (diffDays === 0) today.push(chat);
+              else if (diffDays <= 7) recent.push(chat);
+              else old.push(chat);
+            });
+
+            const toDotYMD_KST = (d) => {
+              const parts = new Intl.DateTimeFormat("ko-KR", {
+                timeZone: "Asia/Seoul",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+              }).formatToParts(new Date(d));
+              const y = parts.find((p) => p.type === "year").value;
+              const m = parts.find((p) => p.type === "month").value;
+              const day = parts.find((p) => p.type === "day").value;
+              return `${y}.${m}.${day}.`;
+            };
+
+            const Item = ({ chat, isSelected }) => {
+              const isEditingThis = editingId === chat.chat_id;
+              const [isComposing, setIsComposing] = useState(false);
+              const inputRef = useRef(null);
+
+              const onKeyDown = (e) => {
+                // IME 조합 중이면 단축키 무시
+                // @ts-ignore
+                if (isComposing || e.nativeEvent?.isComposing) return;
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  const title = (inputRef.current?.value || "").trim();
+                  if (!title) return;
+                  saveEdit(chat, title); // 아래 참고
+                }
+                if (e.key === "Escape") {
+                  e.preventDefault();
+                  cancelEdit();
+                }
+              };
+
+              const CommonInner = (
+                <>
+                  <div className="flex items-center gap-0.75">
+                    {isEditingThis ? (
+                      <input
+                        ref={inputRef}
+                        defaultValue={chat.title || ""}
+                        onClick={(e) => e.stopPropagation()}
+                        onCompositionStart={() => setIsComposing(true)}
+                        onCompositionEnd={() => setIsComposing(false)}
+                        onKeyDown={onKeyDown}
+                        autoFocus
+                        maxLength={10}
+                        className="w-30 bg-transparent border-b border-primary-dark focus:outline-none"
+                        placeholder="제목 입력"
+                        // value / onChange 없음!  ← 중요
+                      />
+                    ) : (
+                      <span
+                        className={
+                          isPlay ? "cursor-text" : "text-gray-7 cursor-text"
+                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startEdit(chat);
+                        }}
+                        title={chat.title || "제목 없음"}
+                      >
+                        {(chat.title ?? "제목 없음").slice(0, 10)}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-0.5">
+                    <Icons.Person
+                      className={`w-5.25 h-5.25 p-0.75 ${
+                        isSelected
+                          ? "text-primary-dark"
+                          : isPlay
+                          ? "text-secondary-light"
+                          : "text-gray-6 opacity-80"
+                      }`}
+                    />
+                    <span>{chat.people_num}</span>
+                  </div>
+                </>
               );
 
               return (
-                <div
-                  key={chat.chat_id}
-                  className="w-47.5 flex flex-col justify-center items-center"
-                >
+                <div className="w-47.5 mb-2 flex flex-col justify-center items-center">
                   <div className="w-full gap-0.75 flex justify-between items-center">
-                    <button
-                      onClick={() => handleSelect(chat.chat_id)}
-                      className={`w-45 h-7.25 text-body2 flex justify-between items-center px-3 py-2 rounded hover:bg-${
-                        isPlay ? "gray-5" : "gray-2"
-                      } ${
-                        isSelected
-                          ? isPlay
-                            ? "bg-secondary-light text-primary-dark"
-                            : "bg-primary-light text-primary-dark"
-                          : isPlay
-                          ? "border border-secondary text-secondary-light opacity-80"
-                          : "border border-primary text-gray-6 opacity-80"
-                      }`}
-                    >
-                      <div className="flex items-center gap-0.75">
-                        <span className={isPlay ? "" : "text-gray-7"}>
-                          {chat.title?.slice(0, 12) || "제목 없음"}
-                        </span>
-                        {isSelected && (
-                          <Icons.ArrowDown className="w-2 h-2 text-primary-dark" />
-                        )}
+                    {isEditingThis ? (
+                      <div
+                        ref={editBoxRef}
+                        className={[
+                          "w-45 h-7.25 text-body2 flex justify-between items-center px-3 py-2 rounded",
+                          isSelected
+                            ? isPlay
+                              ? "bg-secondary-light text-primary-dark"
+                              : "bg-primary-light text-primary-dark"
+                            : isPlay
+                            ? "border border-secondary text-secondary-light opacity-80"
+                            : "border border-primary text-gray-6 opacity-80",
+                        ].join(" ")}
+                      >
+                        {CommonInner}
                       </div>
-                      <div className="flex items-center gap-0.5">
-                        <Icons.Person
-                          className={`w-5.25 h-5.25 p-0.75 ${
-                            isSelected
-                              ? "text-primary-dark"
-                              : isPlay
-                              ? "text-secondary-light"
-                              : "text-gray-6 opacity-80"
-                          }`}
-                        />
-                        <span>{chat.people_num}</span>
-                      </div>
-                    </button>
+                    ) : (
+                      <button
+                        onClick={() => handleSelect(chat.chat_id)}
+                        className={[
+                          "w-45 h-7.25 text-body2 flex justify-between items-center px-3 py-2 rounded",
+                          isPlay ? "hover:bg-gray-6" : "hover:bg-gray-3",
+                          isSelected
+                            ? isPlay
+                              ? "bg-secondary-light text-primary-dark"
+                              : "bg-primary-light text-primary-dark"
+                            : isPlay
+                            ? "border border-secondary text-secondary-light opacity-80"
+                            : "border border-primary text-gray-6 opacity-80",
+                        ].join(" ")}
+                      >
+                        {CommonInner}
+                      </button>
+                    )}
+
                     <Icons.X
                       className={`w-2 h-2 ${
                         isPlay ? "text-primary-light" : "text-primary"
@@ -165,33 +322,40 @@ export default function ChatList() {
                       onClick={() => handleDelete(chat.chat_id)}
                     />
                   </div>
-                  <div
-                    className={`pr-3 w-full ${
-                      isPlay ? "text-secondary-dark" : "text-primary"
-                    } text-overline text-right ${
-                      isSelected ? "opacity-100 mb-3.5" : "opacity-60"
-                    }`}
-                  >
-                    {isSelected ? (
-                      <>
-                        업로드 날짜:{" "}
-                        {uploadedDate.toLocaleDateString("ko-KR", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                        })}
-                      </>
-                    ) : (
-                      <>
-                        {diffDays === 0
-                          ? "오늘 업로드"
-                          : `${diffDays}일 전 업로드`}
-                      </>
-                    )}
-                  </div>
+
+                  {isSelected && (
+                    <div className="pr-3 w-full text-secondary-dark text-overline text-right opacity-100">
+                      업로드 날짜: {toDotYMD_KST(chat.uploaded_at)}
+                    </div>
+                  )}
                 </div>
               );
-            })}
+            };
+
+            const Section = ({ title, items }) =>
+              items.length ? (
+                <div className="w-full flex flex-col items-center">
+                  <div className="w-47.5 text-secondary-dark text-overline text-left mb-1">
+                    {title}
+                  </div>
+                  {items.map((chat) => (
+                    <Item key={chat.chat_id} chat={chat} isSelected={false} />
+                  ))}
+                </div>
+              ) : null;
+
+            return (
+              <>
+                {/* ✅ 선택된 채팅 최상단 */}
+                {selected && <Item chat={selected} isSelected />}
+
+                {/* 섹션: 오늘 / 최근 / 오래전 */}
+                <Section title="오늘 업로드" items={today} />
+                <Section title="최근 업로드" items={recent} />
+                <Section title="오래전 업로드" items={old} />
+              </>
+            );
+          })()}
         </div>
       </div>
     </div>

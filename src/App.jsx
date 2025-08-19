@@ -25,6 +25,8 @@ import QuizPage from "./pages/QuizPage.jsx";
 import QuizResultAnalysisPage from "./pages/QuizResultAnalysisPage";
 import QuizResultPage from "./pages/QuizResultPage.jsx";
 import QuizSolvePage from "./pages/QuizSolvePage.jsx";
+import ProfileEditPage from "./pages/ProfileEditPage.jsx";
+import PlayChemiSharePage from "./pages/PlayChemiSharePage.jsx";
 
 function App() {
   return (
@@ -33,13 +35,16 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/play" element={<PlayPage />} />
-        <Route path="/play/chemi" element={<PlayChemiPage />} />
         <Route path="/business" element={<BusinessPage />} />
-        <Route path="/business/contr" element={<BusinessContrPage />} />
 
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/forget" element={<ForgetPasswordPage />} />
+
+        <Route
+          path="/play/chemi/share/:uuid"
+          element={<PlayChemiSharePage />}
+        />
 
         <Route
           path="/play/chemi/result-test"
@@ -51,6 +56,7 @@ function App() {
         />
 
         <Route element={<RequireAuth />}>
+          <Route path="/play/chemi" element={<PlayChemiPage />} />
           <Route
             path="/play/chemi/:resultId"
             element={<PlayChemiAnalysisPage />}
@@ -68,12 +74,14 @@ function App() {
           />
           <Route path="/play/mypage" element={<PlayMyPage />} />
 
+          <Route path="/business/contr" element={<BusinessContrPage />} />
           <Route
             path="/business/contr/:resultId"
             element={<BusinessContrAnalysisPage />}
           />
 
           <Route path="/business/mypage" element={<BusinessMyPage />} />
+
           <Route path="/credit" element={<CreditsPage />} />
           <Route path="/result/:analysisId" element={<ResultPage />} />
           <Route path="/play/quiz/:analysisId" element={<QuizPage />} />
@@ -89,6 +97,7 @@ function App() {
             path="/play/quiz/solve/:analysisId"
             element={<QuizSolvePage />}
           />
+          <Route path="/profileedit" element={<ProfileEditPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

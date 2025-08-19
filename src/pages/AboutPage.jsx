@@ -33,7 +33,7 @@ export default function AboutPage() {
             </p>
 
             <p className="mt-8 text-body1 text-gray-700 leading-7">
-              채토는 메신저 대화 데이터를 기반으로,
+              챗토는 메신저 대화 데이터를 기반으로,
               <br />
               심리·관계 분석부터 업무 기여도 평가까지 지원하는 통합 대화 분석
               플랫폼입니다.
@@ -44,7 +44,7 @@ export default function AboutPage() {
               살펴볼 기회는 흔치 않습니다.
             </p>
             <p className="mt-4 text-body1 text-gray-700 leading-7">
-              채토는 우리의 대화를 그냥 흘려보내지 않고,
+              챗토는 우리의 대화를 그냥 흘려보내지 않고,
               <br />
               가치 있는 데이터로 활용하여 다양한 분석을 제공합니다.
             </p>
@@ -81,10 +81,14 @@ export default function AboutPage() {
           {/* Tab Content */}
           {isPlay ? <PlaySection /> : <BusinessSection />}
 
+          <p className="mt-30 text-h6 text-center ">
+            자, 이제 직접 사용해보세요!
+          </p>
+
           {/* CTA Card */}
-          <div className="mt-24">
+          <div className="mt-8 flex justify-center">
             <div
-              className={`w-full rounded-2xl px-10 py-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-lg
+              className={`w-170 rounded-2xl px-10 py-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-lg
               ${
                 isPlay
                   ? "bg-primary-dark text-white"
@@ -114,7 +118,7 @@ export default function AboutPage() {
               </div>
               <button
                 onClick={goCTA}
-                className={`shrink-0 px-6 h-10 rounded-md bg-white text-primary-dark text-button hover:bg-primary-light hover:text-primary-dark transition-colors cursor-pointer
+                className={`shrink-0 px-3 py-1.5 rounded-md bg-white text-primary-dark text-button hover:bg-primary-light hover:text-primary-dark transition-colors cursor-pointer
                   ${!isPlay && "border-2 border-primary-dark"}`}
               >
                 지금 시작하기
@@ -123,6 +127,7 @@ export default function AboutPage() {
           </div>
         </section>
       </main>
+      <Icons.Chatto className="w-18.75 h-29.75 text-primary-dark fixed bottom-5 right-12" />
     </div>
   );
 }
@@ -131,7 +136,7 @@ export default function AboutPage() {
 
 function PlaySection() {
   return (
-    <>
+    <div className="flex flex-col items-center">
       {/* 1행: 좌 이미지 / 우 설명 */}
       <div className="mt-24 grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
         <img
@@ -165,13 +170,13 @@ function PlaySection() {
           className="order-1 md:order-2 w-full rounded-lg shadow-md"
         />
       </div>
-    </>
+    </div>
   );
 }
 
 function BusinessSection() {
   return (
-    <>
+    <div className="flex flex-col items-center">
       {/* 1행: 좌 이미지 / 우 설명 */}
       <div className="mt-24 grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
         <img
@@ -205,6 +210,6 @@ function BusinessSection() {
           className="order-1 md:order-2 w-full rounded-lg shadow-md"
         />
       </div>
-    </>
+    </div>
   );
 }

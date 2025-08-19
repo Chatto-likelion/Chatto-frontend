@@ -16,26 +16,18 @@ export default function BusinessContrPage() {
   const navigate = useNavigate();
 
   const [analysisResult, setAnalysisResult] = useState();
-  const [relation, setRelation] = useState("동아리 부원");
-  const [situation, setSituation] = useState("일상대화");
-  const [startPeriod, setStartPeriod] = useState("처음부터");
-  const [endPeriod, setEndPeriod] = useState("끝까지");
+  const [form, setForm] = useState({
+    project_type: "",
+    team_type: "입력 안 함",
+    analysis_start: "처음부터",
+    analysis_end: "끝까지",
+  });
+  const updateForm = (patch) => setForm((prev) => ({ ...prev, ...patch }));
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const convertPeriodToDate = (label, type) => {
-    const now = new Date();
-    switch (label) {
-      case "처음부터":
-        return new Date(now.getFullYear() - 1, 0, 1).toISOString(); // 1년 전 기준
-      default:
-        return type === "end"
-          ? now.toISOString()
-          : new Date(now.getFullYear() - 1, 0, 1).toISOString();
-    }
-  };
-
+  const normalize = (s) => (s && s.trim() ? s.trim() : "입력 안 함");
   const handleAnalyze = async () => {
     if (!selectedChatId) {
       alert("먼저 채팅을 선택하세요.");
@@ -46,14 +38,12 @@ export default function BusinessContrPage() {
     setError(null);
     setAnalysisResult(null);
 
-    const payload = {
-      project_type: "dummy",
-      team_type: "dummy",
-      analysis_start: convertPeriodToDate(startPeriod, "start"),
-      analysis_end: convertPeriodToDate(endPeriod, "end"),
-    };
-
     try {
+      const payload = {
+        ...form,
+        project_type: normalize(form.project_type),
+      };
+
       const analyzeResponse = await postContrAnalyze(selectedChatId, payload);
       const resultId = analyzeResponse.result_id;
 
@@ -145,15 +135,10 @@ export default function BusinessContrPage() {
                   </p>
                 </div>
                 <DetailForm
+                  type={1} // 1=contr
+                  value={form}
+                  onChange={updateForm}
                   isAnalysis={false}
-                  relation={relation}
-                  setRelation={setRelation}
-                  situation={situation}
-                  setSituation={setSituation}
-                  startPeriod={startPeriod}
-                  setStartPeriod={setStartPeriod}
-                  endPeriod={endPeriod}
-                  setEndPeriod={setEndPeriod}
                 />
               </div>
 
