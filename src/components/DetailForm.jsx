@@ -1,5 +1,13 @@
 // src/components/DetailForm/index.jsx
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  Children,
+  cloneElement,
+  isValidElement,
+} from "react";
 import useCurrentMode from "@/hooks/useCurrentMode";
 
 // 서비스 타입 상수
@@ -52,6 +60,25 @@ function Row({
   rightWrapClass = "pr-3.25",
   narrow = false,
 }) {
+  const enhancedChildren = Children.map(children, (child) => {
+    if (!isValidElement(child)) return child;
+
+    const value = child.props?.value;
+    const placeholderText = child.props?.placeholder ?? "입력 안 함";
+
+    const isPlaceholder =
+      value === placeholderText ||
+      (typeof value === "string" && value.trim() === placeholderText);
+
+    if (!isPlaceholder) return child;
+
+    const mergedClassName = [child.props.className, "text-white/50"]
+      .filter(Boolean)
+      .join(" ");
+
+    return cloneElement(child, { className: mergedClassName });
+  });
+
   return (
     <div className={`${ui.text} flex flex-col gap-3`}>
       <div className={`w-full ${ui.gap} flex justify-end items-center`}>
@@ -59,7 +86,7 @@ function Row({
         <div
           className={`${ui.w} ${rightWrapClass} flex justify-end items-center`}
         >
-          {children}
+          {enhancedChildren}
         </div>
       </div>
     </div>
@@ -156,7 +183,6 @@ function DateInline({ ui, value, onChange, placeholder, quick }) {
   const isSpecial = value === "처음부터" || value === "끝까지";
   const isPlay = !!ui?.isPlay;
 
-  // ✅ 테마 색상 프리셋
   const textColor = isPlay ? "text-white" : "text-primary-dark";
   const mutedTextColor = isPlay ? "text-white/50" : "text-primary-dark/50";
   const modalBgColor = isPlay ? "bg-primary-dark" : "bg-white";
@@ -189,39 +215,6 @@ function DateInline({ ui, value, onChange, placeholder, quick }) {
     const [Y, M, D] = ymd.split("-");
     const yy = Y.slice(2);
     return `${yy}.${M}.${D}`;
-  };
-
-  const parseYYMMDD = (txt) => {
-    if (!txt) return "";
-    const cleaned = String(txt).trim().replace(/[^\d]/g, "");
-    if (/^\d{6}$/.test(cleaned)) {
-      const yy = cleaned.slice(0, 2);
-      const mm = cleaned.slice(2, 4);
-      const dd = cleaned.slice(4, 6);
-      const yyyy = String(2000 + Number(yy));
-      if (
-        Number(mm) >= 1 &&
-        Number(mm) <= 12 &&
-        Number(dd) >= 1 &&
-        Number(dd) <= 31
-      ) {
-        return `${yyyy}-${mm}-${dd}`;
-      }
-    }
-    const m = txt.match(/^(\d{2})[.\-\/](\d{2})[.\-\/](\d{2})$/);
-    if (m) {
-      const [, yy, mm, dd] = m;
-      const yyyy = String(2000 + Number(yy));
-      if (
-        Number(mm) >= 1 &&
-        Number(mm) <= 12 &&
-        Number(dd) >= 1 &&
-        Number(dd) <= 31
-      ) {
-        return `${yyyy}-${mm}-${dd}`;
-      }
-    }
-    return "";
   };
 
   const display = isSpecial ? value : formatYYMMDD(normalize(value));
