@@ -373,7 +373,7 @@ export const deleteMbtiAnalysis = async (resultId) => {
 export const getChemiQuiz = async (result_id) => {
   try {
     const response = await instanceWithToken.get(
-      `/play/quiz/chem/${result_id}`
+      `/play/quiz/chem/${result_id}/`
     );
 
     if (response.status === 200) {
@@ -400,7 +400,7 @@ export const postUUID = async (type, result_id) => {
     formData.append("type", type);
 
     const response = await instanceWithToken.post(
-      `/play/chat/uuid/${result_id}`,
+      `/play/chat/uuid/${result_id}/`,
       formData
     );
 
@@ -422,9 +422,12 @@ export const postUUID = async (type, result_id) => {
 
 export const postUUID_Bus = async (type, result_id) => {
   try {
+    const formData = new FormData();
+    formData.append("type", type);
+
     const response = await instanceWithToken.post(
       `/business/chat/uuid/${result_id}/`,
-      type
+      formData
     );
 
     if (response.status === 201) {
@@ -509,9 +512,7 @@ export const getMbtiGuestDetail = async (uuid) => {
 
 export const getContrGuestDetail = async (uuid) => {
   try {
-    const response = await instance.get(
-      `/business/analysis/contr/guest/${uuid}/detail/`
-    );
+    const response = await instance.get(`/business/analysis/${uuid}/detail/`);
 
     if (response.status === 200) {
       console.log("분석 성공:", response.data);
@@ -689,28 +690,6 @@ export const deleteContrAnalysis = async (resultId) => {
       401: "로그인이 필요합니다. (401)",
       403: "해당 분석을 삭제할 권한이 없습니다. (403)",
       404: "분석 파일을 찾을 수 없습니다. (404)",
-    });
-  }
-};
-
-/**
- * ✅ 사용자 정보 관리
- */
-export const updateMe = async (data) => {
-  try {
-    const response = await instanceWithToken.put("/me", data);
-    if (response.status === 200) {
-      console.log("사용자 정보 수정 성공");
-      return response.data;
-    } else {
-      console.log("사용자 정보 수정 에러:", response);
-    }
-  } catch (error) {
-    throwMapped(error, {
-      400: "입력값이 잘못되었습니다. (400)",
-      401: "로그인이 필요합니다. (401)",
-      403: "수정할 권한이 없습니다. (403)",
-      404: "사용자 정보를 찾을 수 없습니다. (404)",
     });
   }
 };

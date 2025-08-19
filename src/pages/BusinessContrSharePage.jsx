@@ -102,7 +102,7 @@ export default function BusinessContrSharePage() {
             <div className="w-full h-350 mb-20 p-4 gap-5 flex flex-col justify-start items-start border border-primary rounded-lg text-body2 text-black whitespace-pre-line">
               <div>
                 <h1>업무 참여도 분석 결과 페이지</h1>
-                <p>결과 ID: {resultId}</p>
+                <p>결과 ID: {resultData.result.resultId}</p>
                 <p>content: {resultData.result.content}</p>
                 <p>is_saved: {resultData.result.is_saved}</p>
                 <p>project_type: {resultData.result.project_type}</p>
@@ -120,16 +120,16 @@ export default function BusinessContrSharePage() {
 
         {/* 오른쪽 */}
         <div className="w-[214px] mt-52.5 flex flex-col items-center justify-start gap-1.5">
-          <div className="w-full flex justify-between items-center">
+          <div className="w-full flex justify-center items-center">
             <button
               onClick={() => navigate("/about/")}
               disabled={loading}
-              className="w-50 h-8 hover:bg-primary hover:text-white cursor-pointer px-0.25 py-1 text-button border-2 border-primary rounded-lg"
+              className="w-40 h-8 hover:bg-primary hover:text-white cursor-pointer px-0.25 py-1 text-button border-2 border-primary rounded-lg"
             >
               나도 분석해보기
             </button>
           </div>
-          <div className="w-full h-[170px] mt-2 p-3.75 pb-4.5 border border-primary-dark rounded-lg text-primary-dark">
+          <div className="w-full h-[116px] mt-2 p-3.75 pb-4.5 border border-primary-dark rounded-lg text-primary-dark">
             <SmallServices />
           </div>
         </div>
