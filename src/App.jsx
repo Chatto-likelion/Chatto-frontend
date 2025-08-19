@@ -27,6 +27,7 @@ import QuizResultPage from "./pages/QuizResultPage.jsx";
 import QuizSolvePage from "./pages/QuizSolvePage.jsx";
 import ProfileEditPage from "./pages/ProfileEditPage.jsx";
 import PlayChemiSharePage from "./pages/PlayChemiSharePage.jsx";
+import QuizPersonalAnswerPage from "./pages/QuizPersonalAnswerPage";
 
 function App() {
   return (
@@ -99,6 +100,10 @@ function App() {
           />
           <Route path="/profileedit" element={<ProfileEditPage />} />
         </Route>
+        <Route
+          path="/play/quiz/answer/:resultId"
+          element={<QuizPersonalAnswerPage />}
+        />
       </Routes>
     </BrowserRouter>
   );

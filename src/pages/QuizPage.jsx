@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  Header,
-  FileUpload,
-  ChatList,
-  DetailForm,
-  SmallServices,
-} from "@/components";
+import { Header, FileUpload, ChatList, SmallServices } from "@/components";
 import { getQuizData } from "@/apis/api";
 import { Link } from "react-router-dom";
 
@@ -111,7 +105,7 @@ export default function QuizPage() {
               >
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-h7">{q.title}</h2>
-                  <span className="text-button text-[#d9d9d9]">수정/삭제</span>
+                  <span className="text-button text-[#d9d9d9]">수정</span>
                 </div>
                 <div className="space-y-1">
                   {q.options.map((option, index) => (
@@ -120,9 +114,6 @@ export default function QuizPage() {
                       className="flex items-center justify-between text-body2 rounded-md"
                     >
                       <span>{option}</span>
-                      <button className="text-body1 text-[#bfbfbf] hover:text-white">
-                        X
-                      </button>
                     </div>
                   ))}
                 </div>
@@ -139,17 +130,6 @@ export default function QuizPage() {
         {/* 오른쪽 세부정보 패널 */}
         <aside className="w-53 flex flex-col mt-53 gap-4">
           <div className="w-full p-4 flex flex-col items-center border border-primary-light rounded-lg">
-            <DetailForm
-              isAnalysis={true}
-              relation={relation}
-              setRelation={setRelation}
-              situation={situation}
-              setSituation={setSituation}
-              startPeriod={startPeriod}
-              setStartPeriod={setStartPeriod}
-              endPeriod={endPeriod}
-              setEndPeriod={setEndPeriod}
-            />
             <button className="mt-6 w-[79px] h-[34px] flex justify-center items-center text-button border border-secondary rounded-lg hover:bg-secondary hover:text-primary-dark">
               다시 분석
             </button>
