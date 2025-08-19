@@ -28,6 +28,9 @@ import QuizSolvePage from "./pages/QuizSolvePage.jsx";
 import ProfileEditPage from "./pages/ProfileEditPage.jsx";
 import PlayChemiSharePage from "./pages/PlayChemiSharePage.jsx";
 import QuizPersonalAnswerPage from "./pages/QuizPersonalAnswerPage";
+import PlaySomeSharePage from "./pages/PlaySomeSharePage.jsx";
+import PlayMbtiSharePage from "./pages/PlayMbtiSharePage.jsx";
+import BusinessContrSharePage from "./pages/BusinessContrSharePage.jsx";
 
 function App() {
   return (
@@ -45,6 +48,12 @@ function App() {
         <Route
           path="/play/chemi/share/:uuid"
           element={<PlayChemiSharePage />}
+        />
+        <Route path="/play/some/share/:uuid" element={<PlaySomeSharePage />} />
+        <Route path="/play/mbti/share/:uuid" element={<PlayMbtiSharePage />} />
+        <Route
+          path="/business/contr/share/:uuid"
+          element={<BusinessContrSharePage />}
         />
 
         <Route

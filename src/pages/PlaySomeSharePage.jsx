@@ -1,11 +1,11 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getChemiGuestDetail } from "@/apis/api"; // 실제 API 호출 함수
+import { getSomeGuestDetail } from "@/apis/api"; // 실제 API 호출 함수
 import { Header, SmallServices, DetailForm_Share } from "@/components";
 import { useNavigate } from "react-router-dom";
 import * as Icons from "@/assets/svg/index.js";
 
-export default function PlayChemiSharePage() {
+export default function PlaySomeSharePage() {
   const { uuid } = useParams(); // URL 파라미터 추출
   const navigate = useNavigate();
   const [resultData, setResultData] = useState(null);
@@ -14,7 +14,7 @@ export default function PlayChemiSharePage() {
     people_num: 0,
     is_quized: false,
     relationship: "",
-    situation: "",
+    age: "입력 안 함",
     analysis_start: "처음부터",
     analysis_end: "끝까지",
   });
@@ -32,7 +32,7 @@ export default function PlayChemiSharePage() {
 
     (async () => {
       try {
-        const detail = await getChemiGuestDetail(uuid);
+        const detail = await getSomeGuestDetail(uuid);
         if (!alive) return;
 
         setResultData(detail);
@@ -41,7 +41,7 @@ export default function PlayChemiSharePage() {
           people_num: detail.result.people_num,
           is_quized: detail.result.is_quized,
           relationship: detail.result.relationship,
-          situation: detail.result.situation,
+          age: detail.result.age,
           analysis_start: detail.result.analysis_date_start,
           analysis_end: detail.result.analysis_date_end,
         });
@@ -77,7 +77,7 @@ export default function PlayChemiSharePage() {
         <div className="gap-5 mt-52.5 w-53.5 flex flex-col items-center justify-center">
           <div className="w-full py-4 px-1 flex flex-col justify-center items-center border border-secondary-light rounded-lg">
             <DetailForm_Share
-              type={1} // 1=chemi, 2=some, 3=mbti
+              type={2} // 1=chemi, 2=some, 3=mbti
               value={form}
               isAnalysis={true}
             />
