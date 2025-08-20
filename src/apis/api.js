@@ -704,22 +704,94 @@ export const getQuizData = async (analysisId) => {
     );
     return response.data;
   } catch (error) {
-    if (error.response) {
-      const status = error.response.status;
+    throwMapped(error, {
+      401: "로그인이 필요합니다. (401)",
+      403: "이 퀴즈에 접근할 권한이 없습니다. (403)",
+      404: "해당 분석 결과를 찾을 수 없어 퀴즈를 생성할 수 없습니다. (404)",
+    });
+  }
+};
 
-      if (status === 401) {
-        throw new Error("퀴즈를 보려면 로그인이 필요합니다. (401)");
-      }
-      if (status === 403) {
-        throw new Error("이 퀴즈에 접근할 권한이 없습니다. (403)");
-      }
-      if (status === 404) {
-        throw new Error(
-          "해당 분석 결과를 찾을 수 없어 퀴즈를 생성할 수 없습니다. (404)"
-        );
-      }
+/**
+ * 크레딧
+ */
+//크레딧 충전
+export const postCreditPurchase = async (data) => {
+  try {
+    const response = await instanceWithToken.post("/account/credit/purchase/", {
+      amount: data.amount,
+      payment: data.amount,
+    });
+
+    if (response.status === 201) {
+      console.log("크레딧 충전 성공:", response.data);
+      return response.data; // { chat_id_play_chem: integer }
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
     }
-    console.error("퀴즈 데이터 조회 에러:", error);
-    throw new Error("퀴즈 정보를 불러오는 데 실패했습니다.");
+  } catch (error) {
+    throwMapped(error, {
+      400: "입력값이 잘못되었습니다. (400)",
+      401: "로그인이 필요합니다. (401)",
+    });
+  }
+};
+
+//크레딧 충전내역 조회
+export const getCreditPurchaseList = async () => {
+  try {
+    const response = await instanceWithToken.get("/account/credit/purchase/");
+
+    if (response.status === 200) {
+      console.log("크레딧 충전 내역:", response.data);
+      return response.data;
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      401: "로그인이 필요합니다. (401)",
+    });
+  }
+};
+
+//크레딧 사용
+export const postCreditUsage = async (data) => {
+  try {
+    const response = await instanceWithToken.post("/account/credit/purchase/", {
+      amount: data.amount,
+      usage: data.usage,
+      purpose: data.purpose,
+    });
+
+    if (response.status === 201) {
+      console.log("크레딧 사용 성공:", response.data);
+      return response.data; // { chat_id_play_chem: integer }
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      400: "입력값이 잘못되었습니다. (400)",
+      401: "로그인이 필요합니다. (401)",
+    });
+  }
+};
+
+//크레딧 사용내역 조회
+export const getCreditUsageList = async () => {
+  try {
+    const response = await instanceWithToken.get("/account/credit/usage/");
+
+    if (response.status === 200) {
+      console.log("크레딧 사용 내역:", response.data);
+      return response.data;
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      401: "로그인이 필요합니다. (401)",
+    });
   }
 };
