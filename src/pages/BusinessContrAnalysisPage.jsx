@@ -18,6 +18,16 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useChat } from "@/contexts/ChatContext";
 import * as Icons from "@/assets/svg/index.js";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 
 export default function BusinessContrAnalysisPage() {
   const { resultId } = useParams(); // URL 파라미터 추출
@@ -27,12 +37,13 @@ export default function BusinessContrAnalysisPage() {
   const [shareUrl, setShareUrl] = useState(null);
   const [shareFetching, setShareFetching] = useState(false);
   const [shareError, setShareError] = useState(null);
+
   const makeShareUrl = (uuid) =>
-    `${window.location.origin}/business/contr/share/${uuid}`; // 라우팅 규칙에 맞게 수정 가능
+    `${window.location.origin}/business/contr/share/${uuid}`;
 
   const handleOpenShare = async () => {
-    setModalOpen(true); // 모달 먼저 열고 로딩 스피너 보여주고 싶다면
-    if (shareUrl || shareFetching) return; // 이미 발급중/발급완료면 재호출 X
+    setModalOpen(true);
+    if (shareUrl || shareFetching) return;
 
     try {
       setShareFetching(true);
@@ -53,21 +64,22 @@ export default function BusinessContrAnalysisPage() {
     analysis_end: "끝까지",
   });
   const updateForm = (patch) => setForm((prev) => ({ ...prev, ...patch }));
+
   const [resultData, setResultData] = useState(null);
-  const [chatIds, setChatIds] = useState(() => new Set()); // 채팅 id 집합
-  const [hasSourceChat, setHasSourceChat] = useState(null); // true/false/null
+  const [chatIds, setChatIds] = useState(() => new Set());
+  const [hasSourceChat, setHasSourceChat] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState(0);
 
   const sourceChatId = resultData?.result?.chat ?? null;
+
   const handleChatDeleted = useCallback(
     (deletedId) => {
       setChatIds((prev) => {
         const next = new Set(prev);
         next.delete(deletedId);
-        // next를 이용해 hasSourceChat을 정확히 재계산
         setHasSourceChat(sourceChatId ? next.has(sourceChatId) : null);
-        // 소스 채팅 자체가 지워졌다면 선택도 해제
         if (deletedId === sourceChatId) setSelectedChatId(null);
         return next;
       });
@@ -85,7 +97,6 @@ export default function BusinessContrAnalysisPage() {
           getContrAnalysisDetail(resultId),
           getChatList_Bus(),
         ]);
-
         if (!alive) return;
 
         const chatId = detail.result.chat;
@@ -100,7 +111,6 @@ export default function BusinessContrAnalysisPage() {
 
         const ids = new Set((chats || []).map((c) => c.chat_id));
         setChatIds(ids);
-
         setHasSourceChat(ids.has(chatId));
       } catch (err) {
         if (!alive) return;
@@ -116,6 +126,7 @@ export default function BusinessContrAnalysisPage() {
   }, [resultId]);
 
   const normalize = (s) => (s && s.trim() ? s.trim() : "입력 안 함");
+
   const isSameNow = useMemo(() => {
     if (!resultData?.result) return false;
     return (
@@ -126,7 +137,6 @@ export default function BusinessContrAnalysisPage() {
     );
   }, [resultData?.result, form]);
 
-  // 비활성화 조건 및 사유
   const disableAnalyze = loading || hasSourceChat === false || isSameNow;
 
   const disableReason = useMemo(() => {
@@ -160,16 +170,7 @@ export default function BusinessContrAnalysisPage() {
       const newResultId = analyzeResponse.result_id;
       navigate(`/business/contr/${newResultId}`);
     } catch (err) {
-      const status = err.response?.status;
-      const data = err.response?.data;
-      console.error("analyze failed:", status, data);
-      setError(
-        data
-          ? typeof data === "string"
-            ? data
-            : JSON.stringify(data)
-          : err.message || "분석에 실패했습니다."
-      );
+      setError(err.message || "분석에 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -188,12 +189,12 @@ export default function BusinessContrAnalysisPage() {
 
   if (loading) return <p className="mt-44 text-sm">분석 중입니다...</p>;
   if (error) return <p className="mt-4 text-sm text-red-500">{error}</p>;
-  if (!resultData) return null; // 방어: 혹시 모를 케이스
+  if (!resultData) return null;
 
   return (
-    <div className="flex flex-col justify-start items-center h-screen bg-white text-primary-dark">
+    <div className="flex flex-col justify-start items-center h-screen bg-white text-primary-dark ">
       <Header />
-      <div className="relative flex-1 w-[1352px] mt-17.5 overflow-hidden flex justify-between items-start">
+      <div className="relative flex-1 w-[1352px] flex justify-between items-start pt-[72px]">
         {/* 왼쪽 */}
         <div className="gap-5 mt-52.5 w-53.5 flex flex-col items-center justify-center">
           <ChatList onDeleted={handleChatDeleted} />
@@ -201,47 +202,278 @@ export default function BusinessContrAnalysisPage() {
         </div>
 
         {/* 가운데 */}
-        <main className="overflow-y-auto max-h-240 scrollbar-hide pt-28 w-[722px] flex flex-col justify-start items-center">
-          {/* 결과 출력 */}
-          {loading && (
-            <p className="mt-44 text-sm text-primary-dark">분석 중입니다...</p>
-          )}
-          {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
-          <div className="w-full flex flex-col items-center gap-6">
-            <div className="w-full flex flex-col gap-4 p-6 text-left">
-              <div className="flex justify-between">
-                <div className="flex flex-col">
-                  <span className="text-st1 text-primary-dark">
-                    업무 참여도 분석
-                  </span>
-                  <span className="text-h2 text-primary-dark">82점</span>
-                </div>
-                <div className="flex flex-col text-st2 text-black gap-0.5 mt-1">
-                  <p>분석된 메시지 수: 1,342개</p>
-                  <p>참여자 수: 23명</p>
-                  <p>분석 기간: 최근 6개월</p>
-                </div>
-              </div>
-              <div className="text-st2 text-primary-dark italic mt-2">
-                한 마디: “웃음과 공감이 폭발하는 안정적 팀워크!”
-              </div>
-            </div>
+        <main className="overflow-y-auto scrollbar-hide pt-28 w-[722px] h-[calc(100vh-72px)] flex flex-col justify-start items-start">
+          {/* 종합 케미 점수 */}
+          <div className="w-full flex flex-col items-start gap-8">
+            <p className="text-h6 text-bold text-primary">업무 분석</p>
 
-            <div className="w-full h-350 mb-20 p-4 gap-5 flex flex-col justify-start items-start border border-primary rounded-lg text-body2 text-black whitespace-pre-line">
+            <div className="flex flex-col gap-1.5 mt-1">
               <div>
-                <h1>업무 참여도 분석 결과 페이지</h1>
-                <p>결과 ID: {resultId}</p>
-                <p>content: {resultData.result.content}</p>
-                <p>is_saved: {resultData.result.is_saved}</p>
-                <p>project_type: {resultData.result.project_type}</p>
-                <p>team_type: {resultData.result.team_type}</p>
-                <p>
-                  analysis_date_start: {resultData.result.analysis_date_start}
+                <p className="text-h9 text-primary pb-2">
+                  "{resultData.result.title}" 참여도 분석
                 </p>
-                <p>analysis_date_end: {resultData.result.analysis_date_end}</p>
-                <p>created_at: {resultData.result.created_at}</p>
-                <p>chat: {resultData.result.chat}</p>
+                <div className="text-body1 text-[#262626] pl-3">
+                  <p>
+                    분석 기간 : {resultData.result.analysis_date_start} ~{" "}
+                    {resultData.result.analysis_date_end}
+                  </p>
+                  <p>참여자 : {resultData.result.people_num}</p>
+                  <p>대화 총량 : {resultData.spec.total_talks}</p>
+                  <p>팀장 : {resultData.spec.leader}</p>
+                  <p>평균 응답 속도 : {resultData.spec.avg_resp}</p>
+                </div>
               </div>
+              <p className="text-caption text-[#8C8C8C] pl-3 mt-2">
+                본 분석은 정보 공유, 문제 해결, 협력 태도, 응답 성실도 등 4가지
+                지표를 종합하여 산출되었습니다.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex justify-between border-secondary-dark w-full mt-10">
+            {["항목별 보기", "개인별 보기", "기간별 보기"].map((tab, idx) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(idx)}
+                style={{ height: "39px" }}
+                className={`w-[128px] h-[39px] text-st1 rounded-t-md border-3 border-primary  
+                  ${
+                    activeTab === idx
+                      ? "bg-primary-dark text-[#FFFFFF] border-primary"
+                      : "bg-white text-[#BFBFBF]"
+                  }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* 탭별 컨텐츠 */}
+          <div className="w-full mb-20 p-4 gap-5 flex flex-col justify-start items-start border border-t-4 border-primary text-body2 text-black">
+            <div className="w-full mt-6">
+              {/* 항목별 보기 */}
+              {activeTab === 0 && (
+                <section className="w-full bg-white p-4">
+                  {!resultData?.spec_personal ||
+                  resultData.spec_personal.length <= 1 ? (
+                    <div className="w-full flex justify-center items-center h-40">
+                      <p className="text-sm text-gray-500">
+                        분석은 2명 이상의 참여자가 있을 때 제공됩니다.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-20 w-full">
+                      {/* 참여도 */}
+                      <div>
+                        <p className="relative inline-block text-h7 text-primary-dark mb-5">
+                          종합 참여 점수
+                          <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
+                        </p>
+                        <div className="w-full overflow-x-auto border-3 border-primary rounded-lg">
+                          <div
+                            style={{
+                              minWidth: `${
+                                resultData.spec_personal.length * 80
+                              }px`,
+                              height: "240px",
+                            }}
+                          >
+                            <ResponsiveContainer width="100%" height="100%">
+                              <BarChart
+                                data={[...resultData.spec_personal].sort(
+                                  (a, b) => a.rank - b.rank
+                                )}
+                                margin={{
+                                  top: 10,
+                                  right: 10,
+                                  left: 0,
+                                  bottom: 30,
+                                }} // ✅ bottom 여백 추가
+                              >
+                                <CartesianGrid
+                                  vertical={false}
+                                  horizontal={false}
+                                />
+                                <XAxis
+                                  dataKey="name"
+                                  axisLine
+                                  tickLine={false}
+                                />
+                                <YAxis hide />
+                                <Tooltip />
+                                <Bar dataKey="participation" fill="#4C1E95" />
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 정보 공유 */}
+                      <div>
+                        <p className="relative inline-block text-h7 text-primary-dark mb-5">
+                          정보 공유
+                          <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
+                        </p>
+                        <div className="w-full overflow-x-auto border-3 border-primary rounded-lg">
+                          <div
+                            style={{
+                              minWidth: `${
+                                resultData.spec_personal.length * 80
+                              }px`,
+                              height: "240px",
+                            }}
+                          >
+                            <ResponsiveContainer width="100%" height="100%">
+                              <BarChart
+                                data={[...resultData.spec_personal].sort(
+                                  (a, b) => a.rank - b.rank
+                                )}
+                                margin={{
+                                  top: 10,
+                                  right: 10,
+                                  left: 0,
+                                  bottom: 30,
+                                }} // ✅ bottom 여백 추가
+                              >
+                                <CartesianGrid
+                                  vertical={false}
+                                  horizontal={false}
+                                />
+                                <XAxis
+                                  dataKey="name"
+                                  axisLine
+                                  tickLine={false}
+                                />
+                                <YAxis hide />
+                                <Tooltip />
+                                <Bar dataKey="infoshare" fill="#4C1E95" />
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 문제 해결 */}
+                      <div>
+                        <p className="relative inline-block text-h7 text-primary-dark mb-5">
+                          문제 해결 참여
+                          <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
+                        </p>
+                        <div className="w-full overflow-x-auto border-3 border-primary rounded-lg">
+                          <div
+                            style={{
+                              minWidth: `${
+                                resultData.spec_personal.length * 80
+                              }px`,
+                              height: "240px",
+                            }}
+                          >
+                            <ResponsiveContainer width="100%" height="100%">
+                              <BarChart
+                                data={[...resultData.spec_personal].sort(
+                                  (a, b) => a.rank - b.rank
+                                )}
+                                margin={{
+                                  top: 10,
+                                  right: 10,
+                                  left: 0,
+                                  bottom: 30,
+                                }} // ✅ bottom 여백 추가
+                              >
+                                <CartesianGrid
+                                  vertical={false}
+                                  horizontal={false}
+                                />
+                                <XAxis
+                                  dataKey="name"
+                                  axisLine
+                                  tickLine={false}
+                                />
+                                <YAxis hide />
+                                <Tooltip />
+                                <Bar dataKey="probsolve" fill="#4C1E95D" />
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 응답 속도 */}
+                      <div>
+                        <p className="relative inline-block text-h7 text-primary-dark mb-5">
+                          응답 속도
+                          <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
+                        </p>
+                        <div className="w-full overflow-x-auto border-3 border-primary rounded-lg">
+                          <div
+                            style={{
+                              minWidth: `${
+                                resultData.spec_personal.length * 80
+                              }px`,
+                              height: "240px",
+                            }}
+                          >
+                            <ResponsiveContainer width="100%" height="100%">
+                              <BarChart
+                                data={[...resultData.spec_personal].sort(
+                                  (a, b) => a.rank - b.rank
+                                )}
+                                margin={{
+                                  top: 10,
+                                  right: 10,
+                                  left: 0,
+                                  bottom: 30,
+                                }} // ✅ bottom 여백 추가
+                              >
+                                <CartesianGrid
+                                  vertical={false}
+                                  horizontal={false}
+                                />
+                                <XAxis
+                                  dataKey="name"
+                                  axisLine
+                                  tickLine={false}
+                                />
+                                <YAxis hide />
+                                <Tooltip />
+                                <Bar dataKey="resptime" fill="#6A0DAD" />
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </section>
+              )}
+              <div className="mb-5 mt-10">
+                <p className="relative inline-block text-h7 text-primary-dark mb-5">
+                  AI 종합 인사이트
+                  <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
+                </p>
+                <p>{resultData.spec.insights}</p>
+              </div>
+              <div className="mb-40">
+                <p className="relative inline-block text-h7 text-primary-dark mb-5">
+                  추천 액션
+                  <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
+                </p>
+                <p>{resultData.spec.recommendation}</p>
+              </div>
+
+              {activeTab === 1 && (
+                <section>
+                  <h2 className="text-h6 mb-2">개인별 참여 점수</h2>
+                  <p>여기에 개인별 보기 내용을 넣으면 됩니다.</p>
+                </section>
+              )}
+
+              {activeTab === 2 && (
+                <section>
+                  <h2 className="text-h6 mb-2">기간별 참여 점수</h2>
+                  <p>여기에 기간별 보기 내용을 넣으면 됩니다.</p>
+                </section>
+              )}
             </div>
           </div>
         </main>
@@ -250,12 +482,11 @@ export default function BusinessContrAnalysisPage() {
         <div className="w-[214px] mt-52.5 flex flex-col items-center justify-start gap-1.5">
           <div className="w-full py-4 px-1 flex flex-col justify-center items-center border border-primary rounded-lg  bg-white">
             <DetailForm
-              type={1} // 1=contr
+              type={1}
               value={form}
               onChange={updateForm}
               isAnalysis={true}
             />
-            {/* 다시 분석 버튼 */}
             <div className="relative group mt-6">
               <button
                 onClick={handleAnalyze}
@@ -270,8 +501,6 @@ export default function BusinessContrAnalysisPage() {
                 다시 분석
                 <Icons.Search className="w-2.5 h-2.5" />
               </button>
-
-              {/* 비활성화 사유 툴팁: 래퍼(div)에 hover 걸어서 disabled여도 보이도록 */}
               {disableAnalyze && disableReason && (
                 <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-7 opacity-0 group-hover:opacity-100 transition-opacity">
                   <div className="whitespace-nowrap text-[10px] leading-none px-2 py-1 rounded bg-primary-dark/80 text-secondary-light border border-secondary-light/30 shadow-sm">
