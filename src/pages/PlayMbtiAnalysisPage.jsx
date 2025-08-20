@@ -6,6 +6,7 @@ import {
   postMbtiAnalyze,
   deleteMbtiAnalysis,
   postUUID,
+  postCreditUsage,
 } from "@/apis/api"; // 실제 API 호출 함수
 import {
   Header,
@@ -16,8 +17,10 @@ import {
   ShareModal,
   MbtiPieChart,
   MbtiReportCard,
+  CreditWall,
 } from "@/components";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import { useChat } from "@/contexts/ChatContext";
 import * as Icons from "@/assets/svg/index.js";
 
@@ -42,6 +45,7 @@ const mbti_stats = [
 
 export default function PlayMbtiAnalysisPage() {
   const { resultId } = useParams(); // URL 파라미터 추출
+  const { user } = useAuth();
   const { setSelectedChatId } = useChat();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(null);
@@ -262,6 +266,26 @@ export default function PlayMbtiAnalysisPage() {
     }
   };
 
+  const [isRevealed, setIsRevealed] = useState(false);
+  const analysisCost = resultData.spec.total_I + resultData.spec.total_E; // 이 분석 결과를 보는 데 필요한 크레딧
+  const handleReveal = () => {
+    if (user.credit >= analysisCost) {
+      postCreditUsage({
+        amount: analysisCost,
+        usage: "Play MBTI 분석",
+        purpose: "분석 결과 보기",
+      })
+        .then(() => {
+          setIsRevealed(true);
+        })
+        .catch((error) => {
+          alert("크레딧 소모에 실패했습니다.");
+        });
+    } else {
+      alert("크레딧이 부족합니다. 크레딧 충전 후 이용해주세요.");
+    }
+  };
+
   if (loading) return <p className="mt-44 text-sm">분석 중입니다...</p>;
   if (error) return <p className="mt-4 text-sm text-red-500">{error}</p>;
   if (!resultData) return null; // 방어: 혹시 모를 케이스
@@ -325,7 +349,14 @@ export default function PlayMbtiAnalysisPage() {
             />
 
             {/* 리포트 카드 */}
-            {activeSpec && <MbtiReportCard spec={activeSpec} />}
+            {activeSpec && (
+              <div className="relative w-full">
+                <MbtiReportCard spec={activeSpec} />
+                {!isRevealed && (
+                  <CreditWall onClick={handleReveal} cost={analysisCost} />
+                )}
+              </div>
+            )}
           </div>
         </main>
 
