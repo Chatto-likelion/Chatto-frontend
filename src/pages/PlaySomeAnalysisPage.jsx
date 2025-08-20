@@ -6,6 +6,7 @@ import {
   postSomeAnalyze,
   deleteSomeAnalysis,
   postUUID,
+  postCreditUsage,
 } from "@/apis/api";
 import {
   Header,
@@ -14,130 +15,16 @@ import {
   SmallServices,
   DetailForm,
   ShareModal,
+  CreditWall,
 } from "@/components";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { useChat } from "@/contexts/ChatContext";
 import * as Icons from "@/assets/svg/index.js";
 
-function Section({ title, children }) {
-  return (
-    <section className="rounded-lg p-5 sm:p-6 w-full border border-secondary-light">
-      <h2 className="relative mb-6 inline-block text-primary-light text-2xl font-light tracking-wide">
-        <span className="absolute left-0 -top-1 h-0.5 w-full bg-secondary" />
-        {title}
-      </h2>
-      {children}
-    </section>
-  );
-}
-
-function MeterBar({ value = 0 }) {
-  const v = Math.max(0, Math.min(100, value));
-  return (
-    <div className="relative h-5 w-full  overflow-hidden border border-secondary">
-      {/* 채워지는 부분 */}
-      <div
-        className="h-full flex items-center justify-center bg-secondary-light"
-        style={{ width: `${v}%` }}
-      >
-        <span className="text-sm text-primary-dark font-medium">{v}%</span>
-      </div>
-    </div>
-  );
-}
-
-function AnalysisGauge({ title, left, right, value, desc, example }) {
-  return (
-    <div className="space-y-3 w-full pr-10 pl-10">
-      <h3 className="text-lg font-semibold text-white/90">{title}</h3>
-
-      <div className="flex items-center gap-3">
-        <span className="text-sm text-white/80">{left}</span>
-        <div className="flex-1">
-          <MeterBar value={value} />
-        </div>
-        <span className="text-sm text-white/80">{right}</span>
-      </div>
-
-      {desc && (
-        <p className="text-sm text-white/80 leading-6 whitespace-pre-line">
-          {desc}
-        </p>
-      )}
-
-      {example && (
-        <div className="text-sm text-white/80 leading-6">
-          <p className="text-white/70">예시 대화 A:</p>
-          <p className="mt-1">“{example}”</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function DualBar({ leftPct = 50 }) {
-  const l = Math.max(0, Math.min(100, leftPct));
-  const r = 100 - l;
-  return (
-    <div className="relative h-5 w-full   border">
-      <div className="flex h-full w-full">
-        <div className="h-full" style={{ width: `${l}%` }} />
-        <div className="h-full bg-secondary-light" style={{ width: `${r}%` }} />
-      </div>
-    </div>
-  );
-}
-
-function CompareMetric({
-  title,
-  leftName = "철수",
-  rightName = "영희",
-  leftValue,
-  rightValue,
-  leftPct, // 0~100
-  leftDesc,
-  rightDesc,
-  leftExample,
-  rightExample,
-}) {
-  return (
-    <div className="space-y-2 w-ful pl-5 pr-5">
-      <h3 className="text-xl font-normal text-secondary">{title}</h3>
-
-      <div className="flex items-center pl-5 pr-5">
-        <span className="text-sm text-white/70">{leftName}</span>
-        <div className="flex-1 mx-3">
-          <div className="relative">
-            <DualBar leftPct={leftPct} />
-            <div className="absolute inset-0 flex items-center justify-between px-3 pointer-events-none">
-              <span className="text-sm text-secondary">{leftValue}</span>
-              <span className="text-sm text-primary-dark">{rightValue}</span>
-            </div>
-          </div>
-        </div>
-        <span className="text-sm text-white/70">{rightName}</span>
-      </div>
-
-      <div className="grid grid-cols-2 gap-8 mt-1 pl-15 pr-15">
-        <div className="text-sm text-white/80 leading-6 whitespace-pre-line">
-          {leftDesc && <p>{leftDesc}</p>}
-          {leftExample && (
-            <p className="mt-1 text-white/70">예시: “{leftExample}”</p>
-          )}
-        </div>
-        <div className="text-sm text-right text-white/80 leading-6 whitespace-pre-line">
-          {rightDesc && <p>{rightDesc}</p>}
-          {rightExample && (
-            <p className="mt-1 text-white/70">예시: “{rightExample}”</p>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function PlaySomeAnalysisPage() {
   const { resultId } = useParams(); // URL 파라미터 추출
+  const { user } = useAuth();
   const { setSelectedChatId } = useChat();
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
@@ -303,11 +190,31 @@ export default function PlaySomeAnalysisPage() {
     }
   };
 
+  const [isRevealed, setIsRevealed] = useState(false);
+  const analysisCost = 1; // 이 분석 결과를 보는 데 필요한 크레딧
+  const handleReveal = () => {
+    if (user.credit >= analysisCost) {
+      postCreditUsage({
+        amount: analysisCost,
+        usage: "Play 썸 판독기",
+        purpose: "분석 결과 보기",
+      })
+        .then(() => {
+          setIsRevealed(true);
+        })
+        .catch((error) => {
+          alert("크레딧 소모에 실패했습니다.");
+        });
+    } else {
+      alert("크레딧이 부족합니다. 크레딧 충전 후 이용해주세요.");
+    }
+  };
+
   if (loading) return <p>결과를 불러오는 중...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
-    <div className="min-h-screen overflow-hidden flex flex-col items-center text-white bg-primary-dark">
+    <div className="flex flex-col justify-start items-center h-screen text-white bg-primary-dark">
       <Header />
       <div className="relative flex-1 w-[1352px] overflow-hidden mt-17.5 flex justify-between items-start">
         {/* 왼쪽 */}
@@ -432,7 +339,10 @@ export default function PlaySomeAnalysisPage() {
 
           {/* 섹션 3: 대화 패턴 */}
           <Section title="대화 패턴 분석">
-            <div className="space-y-10 w-full max-w-[700px] mx-auto">
+            {!isRevealed && (
+              <CreditWall onClick={handleReveal} cost={analysisCost} />
+            )}
+            <div className="relative space-y-10 w-full max-w-[700px] mx-auto">
               <CompareMetric
                 title="평균 답장 시간"
                 leftValue={`${resultData.spec.reply_A}분`}
@@ -495,14 +405,11 @@ export default function PlaySomeAnalysisPage() {
               <p className="text-sm text-white/80 leading-7">
                 {resultData.spec.chatto_counsel}
               </p>
-              <p className="text-sm text-white/80 leading-7">
-                {resultData.spec.chatto_counsel_tips}
-              </p>
 
               <div className="mt-2 space-y-3">
                 <p className="text-base font-semibold text-secondary">Tip</p>
                 <p className="text-sm text-white/80 leading-7 space-y-2">
-                  {resultData.spec.result}
+                  {resultData.spec.chatto_counsel_tips}
                 </p>
               </div>
             </div>
@@ -580,6 +487,123 @@ export default function PlaySomeAnalysisPage() {
         </div>
       </div>
       <Icons.Chatto className="w-18.75 h-29.75 text-primary-light fixed bottom-5 right-12" />
+    </div>
+  );
+}
+
+function Section({ title, children }) {
+  return (
+    <section className="relative rounded-lg p-5 sm:p-6 w-full border border-secondary-light">
+      <h2 className="relative mb-6 inline-block text-primary-light text-2xl font-light tracking-wide">
+        <span className="absolute left-0 -top-1 h-0.5 w-full bg-secondary" />
+        {title}
+      </h2>
+      {children}
+    </section>
+  );
+}
+
+function MeterBar({ value = 0 }) {
+  const v = Math.max(0, Math.min(100, value));
+  return (
+    <div className="relative h-5 w-full  overflow-hidden border border-secondary">
+      {/* 채워지는 부분 */}
+      <div
+        className="h-full flex items-center justify-center bg-secondary-light"
+        style={{ width: `${v}%` }}
+      >
+        <span className="text-sm text-primary-dark font-medium">{v}%</span>
+      </div>
+    </div>
+  );
+}
+
+function AnalysisGauge({ title, left, right, value, desc, example }) {
+  return (
+    <div className="space-y-3 w-full pr-10 pl-10">
+      <h3 className="text-lg font-semibold text-white/90">{title}</h3>
+
+      <div className="flex items-center gap-3">
+        <span className="text-sm text-white/80">{left}</span>
+        <div className="flex-1">
+          <MeterBar value={value} />
+        </div>
+        <span className="text-sm text-white/80">{right}</span>
+      </div>
+
+      {desc && (
+        <p className="text-sm text-white/80 leading-6 whitespace-pre-line">
+          {desc}
+        </p>
+      )}
+
+      {example && (
+        <div className="text-sm text-white/80 leading-6">
+          <p className="text-white/70">예시 대화 A:</p>
+          <p className="mt-1">“{example}”</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DualBar({ leftPct = 50 }) {
+  const l = Math.max(0, Math.min(100, leftPct));
+  const r = 100 - l;
+  return (
+    <div className="relative h-5 w-full   border">
+      <div className="flex h-full w-full">
+        <div className="h-full" style={{ width: `${l}%` }} />
+        <div className="h-full bg-secondary-light" style={{ width: `${r}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function CompareMetric({
+  title,
+  leftName = "철수",
+  rightName = "영희",
+  leftValue,
+  rightValue,
+  leftPct, // 0~100
+  leftDesc,
+  rightDesc,
+  leftExample,
+  rightExample,
+}) {
+  return (
+    <div className="space-y-2 w-ful pl-5 pr-5">
+      <h3 className="text-xl font-normal text-secondary">{title}</h3>
+
+      <div className="flex items-center pl-5 pr-5">
+        <span className="text-sm text-white/70">{leftName}</span>
+        <div className="flex-1 mx-3">
+          <div className="relative">
+            <DualBar leftPct={leftPct} />
+            <div className="absolute inset-0 flex items-center justify-between px-3 pointer-events-none">
+              <span className="text-sm text-secondary">{leftValue}</span>
+              <span className="text-sm text-primary-dark">{rightValue}</span>
+            </div>
+          </div>
+        </div>
+        <span className="text-sm text-white/70">{rightName}</span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-8 mt-1 pl-15 pr-15">
+        <div className="text-sm text-white/80 leading-6 whitespace-pre-line">
+          {leftDesc && <p>{leftDesc}</p>}
+          {leftExample && (
+            <p className="mt-1 text-white/70">예시: “{leftExample}”</p>
+          )}
+        </div>
+        <div className="text-sm text-right text-white/80 leading-6 whitespace-pre-line">
+          {rightDesc && <p>{rightDesc}</p>}
+          {rightExample && (
+            <p className="mt-1 text-white/70">예시: “{rightExample}”</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
