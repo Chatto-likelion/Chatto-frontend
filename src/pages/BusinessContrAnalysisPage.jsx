@@ -27,7 +27,30 @@ import {
   CartesianGrid,
   ResponsiveContainer,
   Legend,
+  LineChart,
+  Line,
 } from "recharts";
+
+// 점수를 텍스트로 변환하는 헬퍼 함수
+const getMetricText = (score) => {
+  if (score === null || score === undefined) return "분석 불가";
+  if (score >= 90) {
+    return "매우 높음";
+  }
+  if (score >= 70) {
+    return "매우 적극적";
+  }
+  if (score >= 50) {
+    return "적극적";
+  }
+  if (score >= 30) {
+    return "평균 수준";
+  }
+  if (score >= 1) {
+    return "노력 필요";
+  }
+  return "데이터 없음";
+};
 
 export default function BusinessContrAnalysisPage() {
   const { resultId } = useParams(); // URL 파라미터 추출
@@ -186,6 +209,76 @@ export default function BusinessContrAnalysisPage() {
       setLoading(false);
     }
   };
+
+  // ✅ 데이터 가공 훅 수정 (map 후 filter)
+  const participationPeriodData = useMemo(() => {
+    if (!resultData?.spec_period || resultData.spec_period.length === 0)
+      return [];
+    const periods = [
+      "pediod_1",
+      "period_2",
+      "period_3",
+      "period_4",
+      "period_5",
+      "period_6",
+    ];
+    const data = periods.map((period) => {
+      const periodData = { name: `기간 ${period.slice(-1)}` };
+      resultData.spec_period.forEach((p) => {
+        if (p.analysis === "종합 참여 점수") {
+          periodData[p.name] = p[period];
+        }
+      });
+      return periodData;
+    });
+    return data.filter((item) => Object.keys(item).length > 1);
+  }, [resultData]);
+
+  const infoSharePeriodData = useMemo(() => {
+    if (!resultData?.spec_period || resultData.spec_period.length === 0)
+      return [];
+    const periods = [
+      "pediod_1",
+      "period_2",
+      "period_3",
+      "period_4",
+      "period_5",
+      "period_6",
+    ];
+    const data = periods.map((period) => {
+      const periodData = { name: `기간 ${period.slice(-1)}` };
+      resultData.spec_period.forEach((p) => {
+        if (p.analysis === "정보 공유") {
+          periodData[p.name] = p[period];
+        }
+      });
+      return periodData;
+    });
+    return data.filter((item) => Object.keys(item).length > 1);
+  }, [resultData]);
+
+  const probsolvePeriodData = useMemo(() => {
+    if (!resultData?.spec_period || resultData.spec_period.length === 0)
+      return [];
+    const periods = [
+      "pediod_1",
+      "period_2",
+      "period_3",
+      "period_4",
+      "period_5",
+      "period_6",
+    ];
+    const data = periods.map((period) => {
+      const periodData = { name: `기간 ${period.slice(-1)}` };
+      resultData.spec_period.forEach((p) => {
+        if (p.analysis === "문제 해결 참여") {
+          periodData[p.name] = p[period];
+        }
+      });
+      return periodData;
+    });
+    return data.filter((item) => Object.keys(item).length > 1);
+  }, [resultData]);
 
   if (loading) return <p className="mt-44 text-sm">분석 중입니다...</p>;
   if (error) return <p className="mt-4 text-sm text-red-500">{error}</p>;
@@ -446,6 +539,152 @@ export default function BusinessContrAnalysisPage() {
                   )}
                 </section>
               )}
+
+              {activeTab === 1 && (
+                <section>
+                  <div>
+                    <p className="relative inline-block text-h7 text-primary-dark mb-5">
+                      개인별 기여도 프로파일
+                      <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
+                    </p>
+                    {/* `spec_personal` 배열을 map 함수로 순회하여 각 사람의 프로필을 렌더링 */}
+                    {resultData.spec_personal.map((person) => (
+                      <div key={person.specpersonal_id} className="mb-10 p-4 ">
+                        {/* 이름(제목)과 총 기여 점수 */}
+                        <p className="text-h7 font-bold text-primary-dark mb-3">
+                          {person.name} 총 기여 점수: {person.participation}점
+                        </p>
+
+                        <div className="flex justify-between items-start ml-4">
+                          {/* 세부 지표 목록 */}
+                          <div className="flex flex-col gap-2">
+                            <p>정보 공유</p>
+                            <p>문제 해결 참여</p>
+                            <p>주도적 제안</p>
+                            <p>응답 속도</p>
+                          </div>
+
+                          {/* 세부 지표 점수 (텍스트) */}
+                          <div className="flex flex-col gap-2">
+                            <p className="font-bold text-[#262626]">
+                              {getMetricText(person.infoshare)}
+                            </p>
+                            <p className="font-bold text-[#262626]">
+                              {getMetricText(person.probsolve)}
+                            </p>
+                            <p className="font-bold text-[#262626]">
+                              {getMetricText(null)}{" "}
+                              {/* ✅ 주도적 제안 데이터가 없으므로 null로 처리 */}
+                            </p>
+                            <p className="font-bold text-[#262626]">
+                              {getMetricText(person.resptime)}
+                            </p>
+                          </div>
+
+                          {/* 진행 상태 표시 */}
+                          <div className="text-body2 text-primary">
+                            {person.type}
+                          </div>
+                        </div>
+
+                        {/* AI 분석 */}
+                        <div className="mt-4 pt-4 ml-4">
+                          <p className="text-body2 text-primary-dark">
+                            <span className="font-bold">분석:</span> A는 주도적
+                            역할을 수행하며 핵심 정보와 아이디어를 자주
+                            제공합니다.
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {activeTab === 2 && (
+                <section>
+                  <p className="relative inline-block text-h7 text-primary-dark mb-5">
+                    종합 참여 점수
+                    <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
+                  </p>
+                  <div className="w-full overflow-x-auto border-3 border-primary rounded-lg mb-10">
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart data={participationPeriodData}>
+                        <CartesianGrid vertical={false} horizontal={false} />
+                        <XAxis dataKey="name" />
+                        <YAxis hide />
+                        <Tooltip />
+                        <Legend />
+                        {/* spec_personal 배열을 순회하며 각 사람에 대한 라인을 추가 */}
+                        {resultData.spec_personal.map((person) => (
+                          <Line
+                            key={person.name}
+                            type="monotone"
+                            dataKey={person.name} // periodChartData 객체 내의 각 사람의 이름을 데이터 키로 사용
+                            stroke={`#${Math.floor(
+                              Math.random() * 16777215
+                            ).toString(16)}`} // 임시 색상
+                          />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* 정보 공유 */}
+                  <div>
+                    <p className="relative inline-block text-h7 text-primary-dark mb-5">
+                      정보 공유
+                      <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
+                    </p>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart data={infoSharePeriodData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        {resultData.spec_personal.map((p) => (
+                          <Line
+                            key={p.name}
+                            type="monotone"
+                            dataKey={p.name}
+                            stroke={`#${((Math.random() * 0xffffff) << 0)
+                              .toString(16)
+                              .padStart(6, "0")}`}
+                          />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* 문제 해결 참여 */}
+                  <div>
+                    <p className="relative inline-block text-h7 text-primary-dark mb-5">
+                      문제 해결 참여
+                      <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
+                    </p>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart data={probsolvePeriodData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        {resultData.spec_personal.map((p) => (
+                          <Line
+                            key={p.name}
+                            type="monotone"
+                            dataKey={p.name}
+                            stroke={`#${((Math.random() * 0xffffff) << 0)
+                              .toString(16)
+                              .padStart(6, "0")}`}
+                          />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </section>
+              )}
               <div className="mb-5 mt-10">
                 <p className="relative inline-block text-h7 text-primary-dark mb-5">
                   AI 종합 인사이트
@@ -460,20 +699,6 @@ export default function BusinessContrAnalysisPage() {
                 </p>
                 <p>{resultData.spec.recommendation}</p>
               </div>
-
-              {activeTab === 1 && (
-                <section>
-                  <h2 className="text-h6 mb-2">개인별 참여 점수</h2>
-                  <p>여기에 개인별 보기 내용을 넣으면 됩니다.</p>
-                </section>
-              )}
-
-              {activeTab === 2 && (
-                <section>
-                  <h2 className="text-h6 mb-2">기간별 참여 점수</h2>
-                  <p>여기에 기간별 보기 내용을 넣으면 됩니다.</p>
-                </section>
-              )}
             </div>
           </div>
         </main>
