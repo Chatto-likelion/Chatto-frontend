@@ -39,7 +39,7 @@ const businessServices = [
     type: "img",
     src: ChattoBusiness,
     alt: "Chatto Business",
-    route: "/business/more",
+    route: "/business/communication",
   },
   {
     title: "더 많은 분석",
