@@ -169,6 +169,9 @@ export const getChatList = async () => {
   }
 };
 
+/**
+ * ✅ 채팅 분석
+ */
 export const postChemiAnalyze = async (chatId, payload) => {
   try {
     console.log(payload);
