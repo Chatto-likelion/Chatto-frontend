@@ -720,7 +720,7 @@ export const postCreditPurchase = async (data) => {
   try {
     const response = await instanceWithToken.post("/account/credit/purchase/", {
       amount: data.amount,
-      payment: data.amount,
+      payment: data.payment,
     });
 
     if (response.status === 201) {

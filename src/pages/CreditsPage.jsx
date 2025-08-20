@@ -70,6 +70,10 @@ function UsageTable({ rows }) {
     );
   }
 
+  const sortedRows = [...rows].sort((a, b) => {
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+
   return (
     <div className="mt-4">
       <table className="w-full text-left">
@@ -81,7 +85,7 @@ function UsageTable({ rows }) {
           </tr>
         </thead>
         <tbody>
-          {rows.map((r) => (
+          {sortedRows.map((r) => (
             <tr key={r.usage_id} className="text-[13px] text-white/90">
               <td className="py-2.5 px-2">
                 {r.usage} ({r.purpose})
@@ -98,7 +102,7 @@ function UsageTable({ rows }) {
 
 /* 구매내역 테이블 */
 function PurchaseTable({ rows }) {
-  const format = useKSTDateFormat(); // 훅 호출
+  const format = useKSTDateFormat();
 
   if (!rows || rows.length === 0) {
     return (
@@ -107,6 +111,12 @@ function PurchaseTable({ rows }) {
       </div>
     );
   }
+
+  // 최신순으로 정렬
+  const sortedRows = [...rows].sort((a, b) => {
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+
   return (
     <div className="mt-4">
       <table className="w-full text-left">
@@ -118,7 +128,8 @@ function PurchaseTable({ rows }) {
           </tr>
         </thead>
         <tbody>
-          {rows.map((r) => (
+          {/* 정렬된 배열을 map */}
+          {sortedRows.map((r) => (
             <tr key={r.purchase_id} className="text-[13px] text-white/90">
               <td className="py-2.5 px-2">{r.amount}C</td>
               <td className="py-2.5 px-2">{r.payment.toLocaleString()}₩</td>
