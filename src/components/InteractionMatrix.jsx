@@ -3,13 +3,23 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 
-// 1. props로 nodes와 links를 받도록 수정
+// 라운드 박스 유틸
+const roundRect = (ctx, x, y, w, h, r) => {
+  const rr = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + rr, y);
+  ctx.arcTo(x + w, y, x + w, y + h, rr);
+  ctx.arcTo(x + w, y + h, x, y + h, rr);
+  ctx.arcTo(x, y + h, x, y, rr);
+  ctx.arcTo(x, y, x + w, y, rr);
+  ctx.closePath();
+};
+
 const InteractionMatrix = ({ nodes, links }) => {
   const wrapRef = useRef(null);
   const fgRef = useRef(null);
   const [size, setSize] = useState({ w: 640, h: 420 });
 
-  // 컨테이너 리사이즈 대응
   useEffect(() => {
     if (!wrapRef.current) return;
     const ro = new ResizeObserver(([entry]) => {
@@ -23,8 +33,6 @@ const InteractionMatrix = ({ nodes, links }) => {
     return () => ro.disconnect();
   }, []);
 
-  // 2. 전달받은 props를 사용해서 data 객체 생성
-  // 더미 데이터 대신 외부에서 받은 nodes와 links를 사용합니다.
   const data = useMemo(
     () => ({
       nodes: nodes,
@@ -33,75 +41,19 @@ const InteractionMatrix = ({ nodes, links }) => {
     [nodes, links]
   );
 
-  // 렌더 후 프레이밍 + 좌표 고정
-  // 이 부분은 원래 코드가 좌표 고정을 위해 더미 데이터의 x,y를 사용했지만,
-  // 이제는 props로 받은 데이터에 x,y가 없으므로 이 로직은 작동하지 않을 수 있습니다.
-  // 새로운 데이터의 좌표를 적절히 설정하거나, Force-Graph가 자체적으로 계산하도록 해야 합니다.
   const onStop = () => {
-    if (!data.nodes || !data.nodes.some((n) => n.fx != null)) {
-      // 좌표가 고정되지 않았을 경우에만 줌
-      fgRef.current?.zoomToFit(400, 40);
-    }
+    fgRef.current?.zoomToFit(400, 40);
   };
 
-  // ───────── 화살표 그리기 유틸 (직선 + 화살촉) ─────────
-  // ... (이 부분은 수정이 필요 없습니다. 원래 코드를 유지하세요.)
-  function drawArrow(ctx, x1, y1, x2, y2, opt) {
-    const {
-      color = "#fff",
-      width = 2,
-      headLength = 18,
-      headWidth = 12,
-      offset = 0,
-      cut = 18,
-    } = opt;
-
-    const dx = x2 - x1,
-      dy = y2 - y1;
-    const len = Math.hypot(dx, dy) || 1;
-    const ux = dx / len,
-      uy = dy / len; // 단위 방향
-    const nx = -uy,
-      ny = ux; // 노멀(좌우)
-
-    // 평행 이동 + 박스 겹침 방지(시작/끝 트리밍)
-    const sx = x1 + nx * offset + ux * cut;
-    const sy = y1 + ny * offset + uy * cut;
-    const ex = x2 + nx * offset - ux * cut;
-    const ey = y2 + ny * offset - uy * cut;
-
-    // 선
-    ctx.lineCap = "round";
-    ctx.strokeStyle = color;
-    ctx.lineWidth = width;
-    ctx.beginPath();
-    ctx.moveTo(sx, sy);
-    ctx.lineTo(ex, ey);
-    ctx.stroke();
-
-    // 화살촉
-    const hx = ex - ux * headLength;
-    const hy = ey - uy * headLength;
-    ctx.beginPath();
-    ctx.moveTo(ex, ey);
-    ctx.lineTo(hx + ny * (headWidth / 2), hy - nx * (headWidth / 2));
-    ctx.lineTo(hx - ny * (headWidth / 2), hy + nx * (headWidth / 2));
-    ctx.closePath();
-    ctx.fillStyle = color;
-    ctx.fill();
-  }
-
-  // 라운드 박스 유틸
-  // ... (이 부분은 수정이 필요 없습니다. 원래 코드를 유지하세요.)
-  const roundRect = (ctx, x, y, w, h, r) => {
-    const rr = Math.min(r, w / 2, h / 2);
-    ctx.beginPath();
-    ctx.moveTo(x + rr, y);
-    ctx.arcTo(x + w, y, x + w, y + h, rr);
-    ctx.arcTo(x + w, y + h, x, y + h, rr);
-    ctx.arcTo(x, y + h, x, y, rr);
-    ctx.arcTo(x, y, x + w, y, rr);
-    ctx.closePath();
+  const getLinkStyle = (value) => {
+    const color = "#FFFFFF";
+    const minWidth = 1.2;
+    const maxWidth = 3;
+    const width = minWidth + (value / 100) * (maxWidth - minWidth);
+    return {
+      color: color,
+      width: Math.max(1, width),
+    };
   };
 
   return (
@@ -111,56 +63,25 @@ const InteractionMatrix = ({ nodes, links }) => {
         width={size.w}
         height={size.h}
         backgroundColor="rgba(0,0,0,0)"
-        graphData={data} // 수정된 data 사용
+        graphData={data}
         cooldownTicks={0}
         d3AlphaDecay={1}
         d3VelocityDecay={1}
+        d3Forces={[
+          // 노드 간 반발력 조절 (음수 값이 반발력)
+          // strength 값을 조절하여 노드 간의 간격을 넓힙니다.
+          fgRef.current?.d3Force("charge").strength(-250),
+          // 링크를 더 짧게 만들고 싶다면 link force의 distance를 조절할 수 있습니다.
+          // fgRef.current?.d3Force('link').distance(40),
+        ]}
         onEngineStop={onStop}
-        // 기본 링크 대신 커스텀(평행 직선 화살표)
-        linkCanvasObjectMode={() => "replace"}
-        linkCanvasObject={(link, ctx, globalScale) => {
-          const s = typeof link.source === "object" ? link.source : null;
-          const t = typeof link.target === "object" ? link.target : null;
-          if (!s || !t) return;
-
-          const sid = s.id ?? s;
-          const tid = t.id ?? t;
-
-          // 역방향 존재 여부를 즉석에서 검사
-          // data 대신 props로 받은 links를 사용하도록 수정
-          const hasReverse = links.some((l) => {
-            const ls = typeof l.source === "object" ? l.source.id : l.source;
-            const lt = typeof l.target === "object" ? l.target.id : l.target;
-            return ls === tid && lt === sid;
-          });
-
-          // 평행 간격/방향 (항상 2개라고 가정 → ±gap)
-          const gap = 12 / globalScale; // 간격
-          const sign = hasReverse ? (sid < tid ? +1 : -1) : 0;
-          const offset = sign * gap;
-
-          // 두께/화살촉 크기
-          const w = Math.max(2, 1 + (link.value || 1) * 0.9);
-          const headLen = 18 / globalScale + (link.value || 1) * 2.5;
-          const headWid = 12 / globalScale + (link.value || 1) * 1.2;
-
-          drawArrow(ctx, s.x, s.y, t.x, t.y, {
-            color: "#FFFFFF",
-            width: w,
-            headLength: headLen,
-            headWidth: headWid,
-            offset,
-            cut: 18 / globalScale,
-          });
-        }}
-        // 노드(피그마 스타일 라운드 박스)
+        // 링크와 노드 렌더링 순서를 바꿔서 화살표가 항상 위에 오도록 함
         nodeCanvasObjectMode={() => "replace"}
+        linkCanvasObjectMode={() => "replace"}
         nodeCanvasObject={(node, ctx, globalScale) => {
-          // label을 node.id 대신 node.label로 사용
           const label = node.label;
-          if (!label) return; // label이 없으면 그리지 않음
+          if (!label) return;
 
-          // Figma spec
           const fontPx = 16 / globalScale;
           const lineH = 24 / globalScale;
           const padX = 8 / globalScale;
@@ -176,14 +97,13 @@ const InteractionMatrix = ({ nodes, links }) => {
           const x = node.x - w / 2;
           const y = node.y - h / 2;
 
-          ctx.fillStyle = "#462C71"; // Primary Dark
+          ctx.fillStyle = "#462C71";
           roundRect(ctx, x, y, w, h, radius);
           ctx.fill();
           ctx.lineWidth = borderW;
-          ctx.strokeStyle = "#6937B9"; // Primary
+          ctx.strokeStyle = "#6937B9";
           ctx.stroke();
 
-          // 텍스트(자간 흉내)
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
           ctx.fillStyle = "#FFFFFF";
@@ -196,7 +116,71 @@ const InteractionMatrix = ({ nodes, links }) => {
             cursor += cw + letterSpacing;
           }
         }}
-        // 인터랙션 잠금
+        linkCanvasObject={(link, ctx, globalScale) => {
+          const s = link.source;
+          const t = link.target;
+          const style = getLinkStyle(link.value);
+
+          // 역방향 링크가 있는지 확인
+          const hasReverse = links.some((l) => {
+            const ls = typeof l.source === "object" ? l.source.id : l.source;
+            const lt = typeof l.target === "object" ? l.target.id : l.target;
+            return ls === t.id && lt === s.id;
+          });
+
+          // 링크의 방향과 거리를 계산
+          const dx = t.x - s.x;
+          const dy = t.y - s.y;
+          const angle = Math.atan2(dy, dx);
+
+          // 역방향 링크가 있으면 평행 이동 적용
+          const gap = 12; // 평행 간격
+          const sign = hasReverse ? (s.id < t.id ? +1 : -1) : 0;
+          const offset = sign * gap;
+
+          const offsetX = offset * Math.cos(angle + Math.PI / 2);
+          const offsetY = offset * Math.sin(angle + Math.PI / 2);
+
+          const startX_offset = s.x + offsetX;
+          const startY_offset = s.y + offsetY;
+          const endX_offset = t.x + offsetX;
+          const endY_offset = t.y + offsetY;
+
+          // 노드의 크기를 고려하여 화살표가 노드 테두리에서 시작하고 끝나도록 조정
+          const nodeRadius = 40;
+
+          const startX = s.x + Math.cos(angle) * (nodeRadius / globalScale);
+          const startY = s.y + Math.sin(angle) * (nodeRadius / globalScale);
+          const endX = t.x - Math.cos(angle) * (nodeRadius / globalScale);
+          const endY = t.y - Math.sin(angle) * (nodeRadius / globalScale);
+
+          // 화살표 머리 길이와 너비
+          const headLength = 10;
+          const headWidth = 8;
+
+          // 링크 스타일 설정
+          ctx.lineWidth = style.width / globalScale;
+          ctx.strokeStyle = style.color;
+          ctx.beginPath();
+          ctx.moveTo(startX, startY);
+          ctx.lineTo(endX, endY);
+          ctx.stroke();
+
+          // 화살표 머리 그리기 (삼각형)
+          ctx.fillStyle = style.color;
+          ctx.beginPath();
+          ctx.moveTo(endX, endY);
+          ctx.lineTo(
+            endX - headLength * Math.cos(angle - Math.PI / 6),
+            endY - headLength * Math.sin(angle - Math.PI / 6)
+          );
+          ctx.lineTo(
+            endX - headLength * Math.cos(angle + Math.PI / 6),
+            endY - headLength * Math.sin(angle + Math.PI / 6)
+          );
+          ctx.closePath();
+          ctx.fill();
+        }}
         enableNodeDrag={false}
         enableZoomInteraction={false}
         enablePanInteraction={false}

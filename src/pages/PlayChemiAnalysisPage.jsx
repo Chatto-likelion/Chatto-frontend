@@ -201,7 +201,8 @@ export default function PlayChemiAnalysisPage() {
   // ───────────────── InteractionMatrix용 그래프 데이터 (tablesize + name_i) ─────────────────
   const graphData = useMemo(() => {
     const spec = resultData?.spec;
-    if (!spec) return null;
+    const specTable = resultData?.spec_table;
+    if (!spec || !specTable) return null;
 
     const size = Number(spec.tablesize ?? 0);
     const named = Array.from({ length: Math.max(0, size) }, (_, i) => {
@@ -227,18 +228,23 @@ export default function PlayChemiAnalysisPage() {
     const cols = spec.column ?? [];
     const vals = spec.interaction ?? [];
     const m = Math.min(rows.length, cols.length, vals.length);
-    const links = [];
-    for (let i = 0; i < m; i++) {
-      const s = idxMap.get(Number(rows[i]));
-      const t = idxMap.get(Number(cols[i]));
-      const v = Number(vals[i] ?? 1);
-      if (s == null || t == null || s === t) continue;
-      links.push({
-        source: String(s),
-        target: String(t),
-        value: v > 0 ? v : 1,
-      });
-    }
+    const links = specTable
+      .map((item) => {
+        const s = idxMap.get(Number(item.row));
+        const t = idxMap.get(Number(item.column));
+        const v = Number(item.interaction ?? 1);
+        if (s == null || t == null || s === t || v <= 0) {
+          return null;
+        }
+        return {
+          source: String(s),
+          target: String(t),
+          value: v,
+        };
+      })
+      .filter(Boolean); // null 값을 제거하여 유효한 링크만 남깁니다.
+
+    console.log("Generated Links:", links);
 
     return { nodes, links };
   }, [resultData]);
@@ -362,11 +368,11 @@ export default function PlayChemiAnalysisPage() {
         </div>
 
         {/* 가운데 */}
-        <main className="overflow-y-auto max-h-240 scrollbar-hide pt-28 w-[722px] flex flex-col justify-start items-center">
+        <main className="overflow-y-auto scrollbar-hide pt-28 w-[722px] h-[calc(100vh-72px)] flex flex-col justify-start items-start">
           {loading && <p className="mt-44 text-sm">분석 중입니다...</p>}
           {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
 
-          <div className="w-full flex flex-col items-center gap-8">
+          <div className="w-full flex flex-col items-start gap-8">
             {/* 종합 케미 점수 */}
             <div className="w-full flex flex-col gap-4 p-2 text-left">
               <div className="flex justify-between">
@@ -438,7 +444,7 @@ export default function PlayChemiAnalysisPage() {
                   <div className="flex flex-col gap-5 text-st2">
                     {/* TOP1 */}
                     <div className="flex justify-row gap-20">
-                      <p className="text-body1 text-[#F5F5F5]">
+                      <p className="w-100 text-body1 text-[#F5F5F5]">
                         TOP1 {resultData.spec.top1_A} & {resultData.spec.top1_B}{" "}
                         – {resultData.spec.top1_score}점
                       </p>
@@ -449,7 +455,7 @@ export default function PlayChemiAnalysisPage() {
 
                     {/* TOP2 */}
                     <div className="flex justify-row gap-20">
-                      <p className="text-body1 text-[#F5F5F5]">
+                      <p className="w-100 text-body1 text-[#F5F5F5]">
                         TOP2 {resultData.spec.top2_A} & {resultData.spec.top2_B}{" "}
                         – {resultData.spec.top2_score}점
                       </p>
@@ -460,7 +466,7 @@ export default function PlayChemiAnalysisPage() {
 
                     {/* TOP3 */}
                     <div className="flex justify-row gap-20">
-                      <p className="text-body1 text-[#F5F5F5]">
+                      <p className="w-150 text-body1 text-[#F5F5F5]">
                         TOP3 {resultData.spec.top3_A} & {resultData.spec.top3_B}{" "}
                         – {resultData.spec.top3_score}점
                       </p>
@@ -496,9 +502,17 @@ export default function PlayChemiAnalysisPage() {
                     <p className="mb-2 text-body2 text-[#F5F5F5]">{toneLine}</p>
                     <div>
                       <p className="text-secondary text-st1 mb-2">예시 대화</p>
-                      <p className="pl-5 text-body2 text-[#F5F5F5]">
-                        {resultData.spec.tone_ex}
-                      </p>
+                      <div className="space-y-2">
+                        <p className="pl-5 text-body2 text-[#F5F5F5]">
+                          {resultData.spec.tone_ex1}
+                        </p>
+                        <p className="pl-5 text-body2 text-[#F5F5F5]">
+                          {resultData.spec.tone_ex2}
+                        </p>
+                        <p className="pl-5 text-body2 text-[#F5F5F5]">
+                          {resultData.spec.tone_ex3}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
