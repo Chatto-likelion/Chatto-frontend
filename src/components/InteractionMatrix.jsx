@@ -1,8 +1,10 @@
 // src/components/InteractionMatrix.jsx
+
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 
-const InteractionMatrix = () => {
+// 1. props로 nodes와 links를 받도록 수정
+const InteractionMatrix = ({ nodes, links }) => {
   const wrapRef = useRef(null);
   const fgRef = useRef(null);
   const [size, setSize] = useState({ w: 640, h: 420 });
@@ -21,38 +23,29 @@ const InteractionMatrix = () => {
     return () => ro.disconnect();
   }, []);
 
-  // 더미 데이터 (좌표 고정)
+  // 2. 전달받은 props를 사용해서 data 객체 생성
+  // 더미 데이터 대신 외부에서 받은 nodes와 links를 사용합니다.
   const data = useMemo(
     () => ({
-      nodes: [
-        { id: "수빈", x: -120, y: -10 },
-        { id: "민지", x: 120, y: -10 },
-        { id: "지윤", x: 0, y: -130 },
-        { id: "준서", x: 70, y: 110 },
-        { id: "은지", x: -70, y: 110 },
-      ],
-      links: [
-        { source: "수빈", target: "민지", value: 2 },
-        { source: "민지", target: "수빈", value: 5 }, // 양방향 예시
-        { source: "민지", target: "준서", value: 2 },
-        { source: "준서", target: "지윤", value: 3.2 },
-        { source: "지윤", target: "은지", value: 2 },
-        { source: "은지", target: "수빈", value: 2 },
-      ],
+      nodes: nodes,
+      links: links,
     }),
-    []
+    [nodes, links]
   );
 
   // 렌더 후 프레이밍 + 좌표 고정
+  // 이 부분은 원래 코드가 좌표 고정을 위해 더미 데이터의 x,y를 사용했지만,
+  // 이제는 props로 받은 데이터에 x,y가 없으므로 이 로직은 작동하지 않을 수 있습니다.
+  // 새로운 데이터의 좌표를 적절히 설정하거나, Force-Graph가 자체적으로 계산하도록 해야 합니다.
   const onStop = () => {
-    data.nodes.forEach((n) => {
-      n.fx = n.x;
-      n.fy = n.y;
-    });
-    fgRef.current?.zoomToFit(400, 40);
+    if (!data.nodes || !data.nodes.some((n) => n.fx != null)) {
+      // 좌표가 고정되지 않았을 경우에만 줌
+      fgRef.current?.zoomToFit(400, 40);
+    }
   };
 
   // ───────── 화살표 그리기 유틸 (직선 + 화살촉) ─────────
+  // ... (이 부분은 수정이 필요 없습니다. 원래 코드를 유지하세요.)
   function drawArrow(ctx, x1, y1, x2, y2, opt) {
     const {
       color = "#fff",
@@ -99,6 +92,7 @@ const InteractionMatrix = () => {
   }
 
   // 라운드 박스 유틸
+  // ... (이 부분은 수정이 필요 없습니다. 원래 코드를 유지하세요.)
   const roundRect = (ctx, x, y, w, h, r) => {
     const rr = Math.min(r, w / 2, h / 2);
     ctx.beginPath();
@@ -117,7 +111,7 @@ const InteractionMatrix = () => {
         width={size.w}
         height={size.h}
         backgroundColor="rgba(0,0,0,0)"
-        graphData={data}
+        graphData={data} // 수정된 data 사용
         cooldownTicks={0}
         d3AlphaDecay={1}
         d3VelocityDecay={1}
@@ -133,7 +127,8 @@ const InteractionMatrix = () => {
           const tid = t.id ?? t;
 
           // 역방향 존재 여부를 즉석에서 검사
-          const hasReverse = data.links.some((l) => {
+          // data 대신 props로 받은 links를 사용하도록 수정
+          const hasReverse = links.some((l) => {
             const ls = typeof l.source === "object" ? l.source.id : l.source;
             const lt = typeof l.target === "object" ? l.target.id : l.target;
             return ls === tid && lt === sid;
@@ -161,7 +156,9 @@ const InteractionMatrix = () => {
         // 노드(피그마 스타일 라운드 박스)
         nodeCanvasObjectMode={() => "replace"}
         nodeCanvasObject={(node, ctx, globalScale) => {
-          const label = node.id;
+          // label을 node.id 대신 node.label로 사용
+          const label = node.label;
+          if (!label) return; // label이 없으면 그리지 않음
 
           // Figma spec
           const fontPx = 16 / globalScale;

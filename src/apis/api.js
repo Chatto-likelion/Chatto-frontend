@@ -723,7 +723,7 @@ export const postCreditPurchase = async (data) => {
   try {
     const response = await instanceWithToken.post("/account/credit/purchase/", {
       amount: data.amount,
-      payment: data.amount,
+      payment: data.payment,
     });
 
     if (response.status === 201) {
@@ -761,7 +761,7 @@ export const getCreditPurchaseList = async () => {
 //크레딧 사용
 export const postCreditUsage = async (data) => {
   try {
-    const response = await instanceWithToken.post("/account/credit/purchase/", {
+    const response = await instanceWithToken.post("/account/credit/usage/", {
       amount: data.amount,
       usage: data.usage,
       purpose: data.purpose,
@@ -769,7 +769,7 @@ export const postCreditUsage = async (data) => {
 
     if (response.status === 201) {
       console.log("크레딧 사용 성공:", response.data);
-      return response.data; // { chat_id_play_chem: integer }
+      return response.data;
     } else {
       throw new Error("알 수 없는 응답 상태입니다.");
     }
