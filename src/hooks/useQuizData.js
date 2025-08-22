@@ -24,6 +24,7 @@ export function useQuizData(analysisId) {
   const [details, setDetails] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [hoveredDeleteId, setHoveredDeleteId] = useState(null);
 
   useEffect(() => {
     setLoading(true);
