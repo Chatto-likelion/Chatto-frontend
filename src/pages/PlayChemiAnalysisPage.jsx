@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import {
   getChemiAnalysisDetail,
   getChatList,
@@ -50,7 +50,75 @@ export default function PlayChemiAnalysisPage() {
   const { setSelectedChatId } = useChat();
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
-  const shareUrl = "https://www.figma.com/file/abc...";
+  const [shareUrl, setShareUrl] = useState(null);
+  const [shareFetching, setShareFetching] = useState(false);
+  const [shareError, setShareError] = useState(null);
+
+  const [shareUUID, setShareUUID] = useState(null);
+
+  const makeShareUrl = (uuid) =>
+    `${window.location.origin}/play/chemi/share/${uuid}`;
+
+  const normalizeUuid = (v) => (typeof v === "string" ? v : v?.uuid ?? null);
+
+  const ensureUuid = useCallback(async () => {
+    if (!resultId) return null;
+    if (shareUUID) return shareUUID;
+
+    let uuid = null;
+    try {
+      const got = await getUUID("chem", resultId);
+      uuid = normalizeUuid(got);
+    } catch (err) {
+      const msg = err?.message ?? "";
+      const status = err?.status ?? err?.response?.status;
+      // 404만 무시하고 나머지는 그대로 throw
+      if (!(status === 404 || /404/.test(msg))) {
+        throw err;
+      }
+    }
+    if (!uuid) {
+      const created = await postUUID("chem", resultId);
+      uuid = normalizeUuid(created);
+    }
+    if (!uuid) throw new Error("UUID를 생성/확인하지 못했습니다.");
+
+    setShareUUID(uuid);
+    return uuid;
+  }, [resultId, shareUUID]);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const uuid = await ensureUuid();
+        if (alive) setShareUUID(uuid);
+      } catch {
+        // uuid 확보 실패는 공유/퀴즈 이동에만 영향, 화면은 계속 보여줌
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [ensureUuid]);
+
+  const handleOpenShare = async () => {
+    setModalOpen(true); // 모달 먼저 오픈 (스피너 등 표시용)
+    if (shareUrl || shareFetching) return; // 중복호출 방지
+
+    try {
+      setShareFetching(true);
+      setShareError(null);
+
+      const uuid = (await ensureUuid()) || shareUUID;
+      setShareUrl(makeShareUrl(uuid));
+    } catch (e) {
+      setShareError(e?.message || "공유 링크 발급에 실패했습니다.");
+    } finally {
+      setShareFetching(false);
+    }
+  };
+
   const [form, setForm] = useState({
     relationship: "",
     situation: "",
@@ -169,7 +237,7 @@ export default function PlayChemiAnalysisPage() {
   const handleQuiz = async () => {
     try {
       await postQuiz10(1, resultId);
-      navigate(`/play/chemi/quiz/${resultId}`);
+      navigate(`/play/quiz/${resultId}/${shareUUID}`);
     } catch (err) {
       setError(err.message || "퀴즈 생성에 실패했습니다.");
     } finally {
@@ -669,7 +737,7 @@ export default function PlayChemiAnalysisPage() {
             ) : (
               <button
                 onClick={() => {
-                  navigate(`/play/chemi/quiz/${resultId}`);
+                  navigate(`/play/quiz/${resultId}/${shareUUID}`);
                 }}
                 disabled={loading}
                 className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
