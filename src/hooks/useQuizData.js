@@ -11,6 +11,9 @@ import {
   getQuizResultPersonal,
   deleteQuizResultPersonal,
   getUUIDType,
+  getChemiAnalysisDetail,
+  getSomeAnalysisDetail,
+  getMbtiAnalysisDetail,
 } from "@/apis/api";
 
 const slugToType = (slug) =>
@@ -24,6 +27,8 @@ export default function useQuizData(resultId, uuid) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [resultData, setResultData] = useState({});
+
   // 공유 정보
   const [shareType, setShareType] = useState(null); // "chem" | "some" | "mbti" | null
   const [typeNum, setTypeNum] = useState(null); // 1 | 2 | 3 | null
@@ -34,7 +39,6 @@ export default function useQuizData(resultId, uuid) {
     (async () => {
       try {
         setError(null);
-        // uuid가 없으면 에러
         if (!uuid) throw new Error("공유 링크 정보(uuid)가 없습니다.");
         const slug = await getUUIDType(uuid); // "chem" | "some" | "mbti"
         const num = slugToType(slug);
@@ -52,6 +56,35 @@ export default function useQuizData(resultId, uuid) {
       alive = false;
     };
   }, [uuid]);
+
+  // ───────── 타입별 분석 상세 → resultData 세팅 ─────────
+  useEffect(() => {
+    if (!resultId || !typeNum) return;
+    let alive = true;
+
+    (async () => {
+      try {
+        let detail;
+        if (typeNum === 1) {
+          detail = await getChemiAnalysisDetail(resultId);
+        } else if (typeNum === 2) {
+          detail = await getSomeAnalysisDetail(resultId);
+        } else if (typeNum === 3) {
+          detail = await getMbtiAnalysisDetail(resultId);
+        }
+
+        if (!alive) return;
+        const r = detail?.result ?? detail ?? {};
+        setResultData(r);
+      } catch (e) {
+        console.error("분석 상세 조회 실패:", e);
+      }
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, [resultId, typeNum]);
 
   // 문제 normalize
   const normalizeQuestions = useCallback((arr) => {
@@ -89,7 +122,6 @@ export default function useQuizData(resultId, uuid) {
   }, [typeNum, resultId, normalizeQuestions]);
 
   useEffect(() => {
-    // 타입이 확정된 이후에만 fetch
     if (typeNum) refetch();
   }, [typeNum, refetch]);
 
@@ -137,14 +169,12 @@ export default function useQuizData(resultId, uuid) {
 
   // ─────────────── 액션들 (생성/수정/삭제) ───────────────
 
-  // 1개 추가
   const addOne = useCallback(async () => {
     if (!resultId || !typeNum) return;
     await postQuiz1(typeNum, resultId);
     await refetch();
   }, [typeNum, resultId, refetch]);
 
-  // UI → API payload 변환기
   const toUpdatePayload = useCallback(
     (q) => ({
       question: q.title ?? "",
@@ -157,7 +187,6 @@ export default function useQuizData(resultId, uuid) {
     []
   );
 
-  // 문제 수정
   const updateOne = useCallback(
     async (questionIndex, uiModel) => {
       if (!resultId || !typeNum) return;
@@ -167,7 +196,6 @@ export default function useQuizData(resultId, uuid) {
     [typeNum, resultId, toUpdatePayload, refetch]
   );
 
-  // 문제 삭제 (단일)
   const deleteOne = useCallback(
     async (questionIndex) => {
       if (!resultId || !typeNum) return;
@@ -177,7 +205,6 @@ export default function useQuizData(resultId, uuid) {
     [typeNum, resultId, refetch]
   );
 
-  // 전체 삭제
   const deleteAll = useCallback(async () => {
     if (!resultId || !typeNum) return;
     await deleteQuiz10(typeNum, resultId);
@@ -193,8 +220,9 @@ export default function useQuizData(resultId, uuid) {
     questions, // correctNames 포함
     loading,
     error,
+    resultData,
 
-    // 타입 정보 (uuid는 반환 X)
+    // 타입 정보
     type: typeNum, // 1 | 2 | 3
     shareType, // "chem" | "some" | "mbti"
 
@@ -205,10 +233,10 @@ export default function useQuizData(resultId, uuid) {
     removePersonal,
 
     // 액션
-    addOne, // 1개 추가
-    updateOne, // 문제 수정
-    deleteOne, // 문제 삭제(단일)
-    deleteAll, // 전체 삭제
-    toUpdatePayload, // UI→API 변환 헬퍼
+    addOne,
+    updateOne,
+    deleteOne,
+    deleteAll,
+    toUpdatePayload,
   };
 }

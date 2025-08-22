@@ -120,7 +120,7 @@ function DateDisplay({ ui, value, placeholder }) {
     ? "border-secondary-light"
     : "border-primary-light";
 
-  const isSpecial = value === "처음부터" || value === "끝까지";
+  const isSpecial = !value || value === "처음부터" || value === "끝까지";
 
   const normalize = (val) => {
     if (!val || val === "처음부터" || val === "끝까지") return "";

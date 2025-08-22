@@ -6,6 +6,9 @@ import {
   postQuizGuestName,
   postQuizGuestSubmit,
   getQuizGuestSubmit,
+  getChemiGuestDetail,
+  getSomeGuestDetail,
+  getMbtiGuestDetail,
 } from "@/apis/api";
 
 export default function useQuizGuest(uuid) {
@@ -20,6 +23,7 @@ export default function useQuizGuest(uuid) {
     []
   );
 
+  const [resultData, setResultData] = useState({});
   // 문제
   const [questions, setQuestions] = useState([]);
 
@@ -43,7 +47,7 @@ export default function useQuizGuest(uuid) {
     };
   }, []);
 
-  // ── 타입 확보(숫자/슬러그 동시 세팅). 의존성: uuid만!
+  // ── 타입 확보
   const ensureType = useCallback(async () => {
     if (!uuid) throw new Error("유효하지 않은 공유 링크입니다.");
     const slug = await getUUIDType(uuid); // "chem" | "chemi" | "some" | "mbti"
@@ -59,7 +63,36 @@ export default function useQuizGuest(uuid) {
     return { shareType: slug, type: t };
   }, [uuid, slugToType]);
 
-  // ── 문제 정규화
+  // ───────── 타입별 분석 상세 → resultData 세팅 ─────────
+  useEffect(() => {
+    if (!uuid || !type) return;
+    let alive = true;
+
+    (async () => {
+      try {
+        let detail;
+        if (type === 1) {
+          detail = await getChemiGuestDetail(uuid);
+        } else if (type === 2) {
+          detail = await getSomeGuestDetail(uuid);
+        } else if (type === 3) {
+          detail = await getMbtiGuestDetail(uuid);
+        }
+
+        if (!alive) return;
+        const r = detail?.result ?? detail ?? {};
+        setResultData(r);
+      } catch (e) {
+        console.error("분석 상세 조회 실패:", e);
+      }
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, [uuid, type]);
+
+  // ── 문제 정규화 (questionIndex는 1-based로 유지)
   const normalizeQuestions = useCallback((payload) => {
     const arr = Array.isArray(payload)
       ? payload
@@ -67,8 +100,9 @@ export default function useQuizGuest(uuid) {
       ? payload.questions
       : [];
     return arr.map((q, idx) => ({
-      id: q?.question_id ?? q?.id ?? idx,
-      title: q?.question ?? q?.title ?? "",
+      id: q?.question_index + 1, // UI에서 선택 키로 사용
+      questionIndex: q?.question_index,
+      title: q?.question ?? "",
       options: [
         q?.choice1 ?? "",
         q?.choice2 ?? "",
@@ -85,7 +119,10 @@ export default function useQuizGuest(uuid) {
     setError(null);
     try {
       const { type: t } = await ensureType();
+      // 응답 배열 형태:
+      // [{ question_index(0~), question(string), choice~ }, ...]
       const data = await getQuizGuest(t, uuid); // t는 숫자형(1|2|3)
+      console.log("getQuizGuest: ", data);
       const qs = normalizeQuestions(data);
       if (!mountedRef.current) return;
       setQuestions(qs);
@@ -113,7 +150,7 @@ export default function useQuizGuest(uuid) {
     (async () => {
       await refetchQuestions();
     })();
-  }, [uuid]); // refetchQuestions를 의존성에 넣지 않음(무한루프 방지)
+  }, [uuid]); // refetchQuestions 의존성 제외(무한루프 방지)
 
   // ── 게스트 이름 등록
   const startGuest = useCallback(
@@ -155,63 +192,60 @@ export default function useQuizGuest(uuid) {
       setError(null);
       try {
         const { type: t } = await ensureType();
-        const res = await getQuizGuestSubmit(t, uuid, effectiveQp);
 
-        const r = res?.result ?? res?.details ?? {};
-        const det = {
-          relationship: r?.relationship ?? "-",
-          situation: r?.situation ?? "-",
-          period:
-            r?.analysis_date_start && r?.analysis_date_end
-              ? `${r.analysis_date_start} ~ ${r.analysis_date_end}`
-              : "-",
-        };
-        const own = {
-          name: res?.owner?.name ?? res?.name ?? "-",
-          score:
-            typeof res?.owner?.score === "number"
-              ? res.owner.score
-              : typeof res?.score === "number"
-              ? res.score
-              : 0,
-        };
-        const makeQuestion = (q, idx) => ({
-          id: q?.question_id ?? q?.id ?? idx,
-          title: q?.question ?? q?.title ?? "",
-          options: [
-            q?.choice1 ?? "",
-            q?.choice2 ?? "",
-            q?.choice3 ?? "",
-            q?.choice4 ?? "",
-          ],
-          correctOptionIndex:
-            typeof q?.answer === "number"
-              ? q.answer - 1
-              : q?.correctIndex ?? -1,
-          userSelectedOptionIndex:
-            typeof q?.selected === "number"
-              ? q.selected - 1
-              : typeof q?.my_choice === "number"
-              ? q.my_choice - 1
-              : -1,
+        // 아직 문제를 못 받았으면 먼저 가져옴(결과-문항 매칭 필요)
+        if ((questions ?? []).length === 0) {
+          await refetchQuestions();
+        }
+
+        // 응답 배열 형태:
+        // [{ QPD_id, response(1~4), result(bool), answer(1~4), QP, question(1~N) }, ...]
+        const arr = await getQuizGuestSubmit(t, uuid, effectiveQp);
+        console.log("arr: ", arr);
+
+        // question(1-based) → 응답 객체 맵
+        const byQuestionNumber = new Map(
+          (Array.isArray(arr) ? arr : []).map((r) => [Number(r.question), r])
+        );
+
+        const builtQuestions = (questions ?? []).map((q, idx) => {
+          const qNum =
+            (typeof q.questionIndex === "number" && q.questionIndex) || idx; // 1-based fallback
+          const r = byQuestionNumber.get(Number(qNum + 1));
+
+          const selected = Number.isFinite(r?.response)
+            ? Number(r.response) - 1
+            : -1; // 0-based
+          const correctIdx = Number.isFinite(r?.answer)
+            ? Number(r.answer) - 1
+            : -1; // 0-based
+
+          return {
+            id: q.id,
+            title: q.title ?? "",
+            options: Array.isArray(q.options) ? q.options : ["", "", "", ""],
+            userSelectedOptionIndex: selected,
+            correctOptionIndex: correctIdx, // 이제 항상 정답 하이라이트 가능
+          };
         });
-        const rawQs = Array.isArray(res?.questions)
-          ? res.questions
-          : Array.isArray(res?.data)
-          ? res.data
-          : [];
-        const sec = [
-          {
-            sectionTitle: "내 정답 결과",
-            questions: rawQs.map(makeQuestion),
-          },
-        ];
+
+        // 점수(정답 개수 비율)
+        const total = (Array.isArray(arr) ? arr.length : 0) || 0;
+        const correct = (Array.isArray(arr) ? arr : []).filter(
+          (r) => r?.result === true
+        ).length;
+        const score = total ? Math.round((correct / total) * 100) : 0;
 
         if (!mountedRef.current) return;
         setQpId(effectiveQp);
-        setDetails(det);
-        setOwner(own);
-        setSections(sec);
+        setDetails({ relationship: "-", situation: "-", period: "-" }); // 메타가 없으므로 기본값
+        setOwner((prev) => ({
+          name: prev?.name ?? "-", // 이름을 따로 안 주면 기본값
+          score,
+        }));
+        setSections([
+          { sectionTitle: "내 정답 결과", questions: builtQuestions },
+        ]);
       } catch (e) {
         if (mountedRef.current)
           setError(e?.message || "개인 결과를 불러오지 못했습니다.");
@@ -219,7 +253,7 @@ export default function useQuizGuest(uuid) {
         if (mountedRef.current) setResultLoading(false);
       }
     },
-    [uuid, qpId, ensureType]
+    [uuid, qpId, ensureType, questions, refetchQuestions]
   );
 
   // ── 제출 + 개인결과 연계 조회
@@ -229,7 +263,7 @@ export default function useQuizGuest(uuid) {
       if (!qpId)
         throw new Error("게스트 세션이 없습니다. 먼저 이름을 등록하세요.");
 
-      // 1) 정답 배열 구성: 서버가 내려준 문제 순서대로, 0-based → 1-based
+      // 1) 정답 배열 구성: 서버가 내려준 문제 순서대로, 1-based
       const data = (questions ?? []).map((q) => {
         const sel = answersMap?.[q.id];
         if (!Number.isInteger(sel))
@@ -264,6 +298,7 @@ export default function useQuizGuest(uuid) {
     // 타입
     type, // 1|2|3
     shareType, // "chem" | "chemi" | "some" | "mbti"
+    resultData,
 
     // 문제(풀이)
     questions,

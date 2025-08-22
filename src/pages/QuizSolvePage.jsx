@@ -1,8 +1,7 @@
 // src/pages/QuizSolvePage.jsx
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Header } from "@/components";
-// import * as Icons from "@/assets/svg"; // 현재 미사용이면 제거해도 됩니다.
+import { Header, DetailForm_Share } from "@/components";
 import CheckBoxIcon from "@/assets/svg/CheckBox.svg?react";
 import CheckBoxCheckIcon from "@/assets/svg/CheckBoxCheck.svg?react";
 import useQuizGuest from "@/hooks/useQuizGuest";
@@ -13,21 +12,25 @@ export default function QuizSolvePage() {
   const {
     loading,
     error,
+    type,
+    resultData,
     questions,
-    // 필요시 타입 정보 사용 가능
-    // type, shareType,
     qpId,
     started,
     startLoading,
-    startGuest, // ← 이름을 인자로 전달해야 함
+    startGuest, // startGuest(name)
     submitting,
-    submitGuest,
+    submitGuest, // submitGuest(answersMap)
   } = useQuizGuest(uuid);
 
-  // 로컬: 선택 답변 관리(서버 전송은 현재 스펙상 필요 없음)
+  console.log(questions);
   const [answers, setAnswers] = useState({});
   const [guestName, setGuestName] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // 첫 클릭에서 이름 등록 후, 재렌더가 끝난 다음 자동 제출하기 위한 플래그/버퍼
+  const [pendingAutoSubmit, setPendingAutoSubmit] = useState(false);
+  const pendingAnswersRef = useRef(null);
 
   const handleSelectOption = (questionId, optionIndex) => {
     setAnswers((prev) => {
@@ -42,29 +45,53 @@ export default function QuizSolvePage() {
 
   const handleSubmit = async () => {
     try {
-      if (!started && !startLoading) {
-        const id = await startGuest(guestName);
-        if (!id) return; // 실패 시 중단
+      // 아직 시작 전이면: 이름 등록만 하고, 제출은 re-render 이후 effect에서 자동 수행
+      if (!started) {
+        const name = guestName.trim();
+        if (!name) return; // 이름 없으면 아무 것도 하지 않음 (버튼 disabled에도 걸려있음)
+        pendingAnswersRef.current = answers; // 현재 답변 저장
+        setPendingAutoSubmit(true); // 자동 제출 예약
+        await startGuest(name); // qpId 설정 → re-render 유도
+        return; // 여기선 submitGuest 호출하지 않음!
       }
+
+      // 이미 시작된 상태면 바로 제출
       await submitGuest(answers);
-      // 성공 모달 오픈
       setIsModalOpen(true);
     } catch {
-      // 훅이 error 상태를 관리하므로 여기선 별도 처리 생략
+      // 훅에서 error 상태 관리하므로 별도 처리 생략
     }
   };
 
+  // 이름 등록이 끝나 qpId/started가 세팅되면 자동으로 제출 수행
+  useEffect(() => {
+    if (!pendingAutoSubmit) return;
+    if (!started || !qpId) return;
+
+    (async () => {
+      try {
+        await submitGuest(pendingAnswersRef.current || {});
+        setIsModalOpen(true);
+      } finally {
+        setPendingAutoSubmit(false); // 중복 방지
+        pendingAnswersRef.current = null;
+      }
+    })();
+  }, [pendingAutoSubmit, started, qpId, submitGuest]);
+
   const closeModal = () => setIsModalOpen(false);
 
-  // 결과 페이지 링크(QP_id 확보 후 사용)
   const resultLink = useMemo(() => {
     return qpId ? `/play/quiz/answer/${uuid}/${qpId}` : "#";
+    // 모달은 제출 성공 후에만 열리므로, 열릴 땐 qpId가 존재
   }, [qpId, uuid]);
 
   const disableSubmit =
-    startLoading || submitting || (!started && guestName.trim().length === 0); // 처음 시작이면 이름 필요
+    startLoading ||
+    submitting ||
+    pendingAutoSubmit ||
+    (!started && guestName.trim().length === 0); // 처음엔 이름 필수
 
-  // 로딩/에러 처리(간단)
   if (loading) {
     return (
       <div className="w-full min-h-screen bg-primary-dark text-[#f5f5f5]">
@@ -87,14 +114,25 @@ export default function QuizSolvePage() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-primary-dark text-[#f5f5f5]">
+    <div className="flex flex-col justify-start items-center h-screen text-white bg-primary-dark">
       <Header />
-      <div className="w-full max-w-[1400px] mx-auto pt-18 flex justify-center items-start gap-10">
-        {/* 2. 가운데 퀴즈 본문 */}
-        <main className="w-[700px] flex-shrink-0 flex flex-col items-center pt-6 mt-16 max-h-[calc(100vh-72px)] overflow-y-auto scrollbar-hide">
-          <h1 className="text-h3 w-full mb-4">Quiz</h1>
+      <div className="w-full max-w-[1400px] overflow-hidden mt-18 flex justify-center items-start gap-10">
+        {/*왼쪽*/}
+        <aside className="w-[222px] flex-shrink-0 mt-53 mr-10">
+          <div className="w-full py-4 px-1 flex flex-col justify-center items-center border border-secondary-light rounded-lg">
+            <DetailForm_Share
+              type={type}
+              value={resultData}
+              isAnalysis={true}
+            />
+          </div>
+        </aside>
 
-          <div className="flex justify-end items-center w-full mb-4 gap-2">
+        {/*가운데*/}
+        <main className="w-[717px] flex-shrink-0 flex flex-col items-start mt-16 pt-6 max-h-[calc(100vh-72px)] overflow-y-auto scrollbar-hide">
+          <h1 className="text-h3 w-[700px] mb-4">Quiz</h1>
+
+          <div className="flex justify-end items-center w-[700px] mb-4 gap-2">
             <div className="flex items-center gap-2">
               <label htmlFor="quiz-name" className="text-sm text-gray-2">
                 이름
@@ -114,7 +152,9 @@ export default function QuizSolvePage() {
               disabled={disableSubmit}
               className="text-button border border-gray-2 rounded w-[110px] h-[32px] ml-3 hover:bg-primary-light hover:text-primary-dark disabled:opacity-50"
             >
-              {submitting || startLoading ? "제출 중..." : "결과 제출하기"}
+              {submitting || startLoading || pendingAutoSubmit
+                ? "제출 중..."
+                : "결과 제출하기"}
             </button>
 
             <Link
@@ -125,7 +165,7 @@ export default function QuizSolvePage() {
             </Link>
           </div>
 
-          <div className="w-full flex flex-col gap-6">
+          <div className="w-[700px] flex flex-col gap-6">
             {questions.map((q) => (
               <div
                 key={q.id}
@@ -153,6 +193,8 @@ export default function QuizSolvePage() {
             ))}
           </div>
         </main>
+
+        {/*오른쪽*/}
       </div>
 
       {/* 제출 완료 모달 */}

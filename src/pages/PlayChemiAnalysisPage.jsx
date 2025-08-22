@@ -8,7 +8,7 @@ import {
   deleteChemiAnalysis,
   postQuiz10,
   postUUID,
-  getUUID, // ✅ 사용
+  getUUID,
 } from "@/apis/api";
 import {
   Header,

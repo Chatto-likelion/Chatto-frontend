@@ -1,7 +1,7 @@
 // src/pages/QuizResultAnalysisPage.jsx
 import { useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Header } from "@/components";
+import { Header, DetailForm_Share } from "@/components";
 import * as Icons from "@/assets/svg";
 import useQuizData from "@/hooks/useQuizData";
 
@@ -12,25 +12,12 @@ export default function QuizResultAnalysisPage() {
     type, // 1|2|3
     shareType, // "chem" | "some" | "mbti" | null
     questions, // [{ questionId, questionIndex, title, options[4], answer(1~4), counts[4], ...}]
-    overview, // 분석 메타(관계/상황/기간 등)
     scores, // [{ QP_id, name, score }]
     loading,
     error,
+    resultData,
     refetch, // 필요 시 재조회에 사용 가능
   } = useQuizData(resultId, uuid);
-
-  // ── 세부 정보(왼쪽 패널)
-  const details = useMemo(() => {
-    const r = overview?.result;
-    return {
-      relationship: r?.relationship ?? "-",
-      situation: r?.situation ?? "-",
-      period:
-        r?.analysis_date_start && r?.analysis_date_end
-          ? `${r.analysis_date_start} ~ ${r.analysis_date_end}`
-          : "-",
-    };
-  }, [overview]);
 
   // ── 통계(평균/문항수/참여자수)
   const stats = useMemo(() => {
@@ -113,26 +100,26 @@ export default function QuizResultAnalysisPage() {
       <Header />
       <div className="w-full max-w-[1400px] mx-auto pt-18 flex justify-center items-start gap-5">
         {/* 왼쪽 패널 */}
-        <aside className="w-[212px] mt-38 mr-41 flex-shrink-0 flex flex-col gap-4 pt-6">
-          <div className="w-full p-4 border border-primary-light rounded-lg">
-            <h3 className="mb-4 font-bold text-h7">세부 정보</h3>
-            <div className="space-y-2 text-body1">
-              <div className="flex justify-between">
-                <span>참여자 관계</span>
-                <span className="text-gray-4">{details.relationship} ˅</span>
-              </div>
-              <div className="flex justify-between">
-                <span>대화 상황</span>
-                <span className="text-[#f5f5f5]">{details.situation} ˅</span>
-              </div>
-              <div className="flex justify-between">
-                <span>분석 기간</span>
-                <span className="text-gray-4">{details.period} ˅</span>
-              </div>
+        <aside className="w-[222px] flex-shrink-0 mt-53 mr-10">
+          <div className="w-full py-4 px-1 flex flex-col justify-center items-center border border-secondary-light rounded-lg">
+            <DetailForm_Share
+              type={type}
+              value={resultData}
+              isAnalysis={true}
+            />
+            <div className="mt-5">
+              <button
+                onClick={() =>
+                  navigate(
+                    `/play/${type == 1 ? "chemi" : shareType}/${resultId}`
+                  )
+                }
+                disabled={loading}
+                className="w-30 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border border-secondary rounded-lg"
+              >
+                분석 보기
+              </button>
             </div>
-            <button className="w-full mt-6 py-1.5 text-body2 border border-secondary rounded text-secondary hover:bg-secondary hover:text-primary-dark">
-              다시 분석
-            </button>
           </div>
         </aside>
 
