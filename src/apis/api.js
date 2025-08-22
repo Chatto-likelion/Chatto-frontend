@@ -700,6 +700,116 @@ export const deleteContrAnalysis = async (resultId) => {
 /**
  * 퀴즈 메인 페이지
  */
+//퀴즈 최초 생성 (10개)
+export const postChemiQuiz10 = async (resultId) => {
+  try {
+    const response = await instanceWithToken.post(
+      `/play/quiz/chem/${resultId}/`
+    );
+    if (response.status === 201) {
+      console.log("퀴즈 생성 성공");
+      return response.data; //quiz_id
+    } else {
+      throw new Error("알 수 없는 응답 상태");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      400: "입력값이 잘못되었습니다. (400)",
+      401: "로그인이 필요합니다. (401)",
+      403: "이 퀴즈에 접근할 권한이 없습니다. (403)",
+      404: "해당 분석 결과를 찾을 수 없어 퀴즈를 생성할 수 없습니다. (404)",
+    });
+  }
+};
+
+//퀴즈 추가 (1개)
+export const postChemiQuiz1 = async (resultId) => {
+  try {
+    const response = await instanceWithToken.post(
+      `/play/quiz/chem/${resultId}/add/`
+    );
+    if (response.status === 200) {
+      console.log("퀴즈 생성 성공");
+      return;
+    } else {
+      throw new Error("알 수 없는 응답 상태");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      400: "입력값이 잘못되었습니다. (400)",
+      401: "로그인이 필요합니다. (401)",
+      403: "이 퀴즈에 접근할 권한이 없습니다. (403)",
+      404: "해당 분석 결과를 찾을 수 없어 퀴즈를 생성할 수 없습니다. (404)",
+    });
+  }
+};
+
+//퀴즈 문제 수정
+export const putChemiQuiz = async (resultId, questionId, payload) => {
+  try {
+    const response = await instanceWithToken.put(
+      `/play/quiz/chem/${resultId}/modify/${questionId}`,
+      payload
+    );
+    if (response.status === 200) {
+      console.log("퀴즈 생성 성공");
+      return;
+    } else {
+      throw new Error("알 수 없는 응답 상태");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      400: "입력값이 잘못되었습니다. (400)",
+      401: "로그인이 필요합니다. (401)",
+      403: "이 퀴즈에 접근할 권한이 없습니다. (403)",
+      404: "해당 분석 결과를 찾을 수 없어 퀴즈를 생성할 수 없습니다. (404)",
+    });
+  }
+};
+
+//퀴즈 문제 삭제
+export const deleteChemiQuiz = async (resultId, questionId) => {
+  try {
+    const response = await instanceWithToken.delete(
+      `/play/quiz/chem/${resultId}/modify/${questionId}`
+    );
+    if (response.status === 200) {
+      console.log("퀴즈 생성 성공");
+      return;
+    } else {
+      throw new Error("알 수 없는 응답 상태");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      401: "로그인이 필요합니다. (401)",
+      403: "이 퀴즈에 접근할 권한이 없습니다. (403)",
+      404: "해당 분석 결과를 찾을 수 없어 퀴즈를 생성할 수 없습니다. (404)",
+    });
+  }
+};
+
+//퀴즈 전체 삭제
+export const delelteChemiQuiz = async (resultId) => {
+  try {
+    const response = await instanceWithToken.delete(
+      `/play/quiz/chem/${resultId}/`
+    );
+    if (response.status === 204) {
+      console.log("퀴즈 삭제 성공");
+      return;
+    } else {
+      throw new Error("알 수 없는 응답 상태");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      401: "로그인이 필요합니다. (401)",
+      403: "이 퀴즈에 접근할 권한이 없습니다. (403)",
+      404: "해당 분석 결과를 찾을 수 없어 퀴즈를 생성할 수 없습니다. (404)",
+    });
+  }
+};
+
+//
 export const getQuizData = async (analysisId) => {
   try {
     const response = await instanceWithToken.get(

@@ -21,9 +21,9 @@ import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
 import ForgetPasswordPage from "./pages/ForgetPasswordPage";
 import BusinessResultPage from "./pages/BusinessResultPage_test.jsx";
-import QuizPage from "./pages/QuizPage.jsx";
-import QuizResultAnalysisPage from "./pages/QuizResultAnalysisPage";
-import QuizResultPage from "./pages/QuizResultPage.jsx";
+import QuizChemiPage from "./pages/QuizChemiPage.jsx";
+import QuizChemiResultAnalysisPage from "./pages/QuizChemiResultAnalysisPage.jsx";
+import QuizChemiResultPage from "./pages/QuizChemiResultPage.jsx";
 import QuizSolvePage from "./pages/QuizSolvePage.jsx";
 import ProfileEditPage from "./pages/ProfileEditPage.jsx";
 import PlayChemiSharePage from "./pages/PlayChemiSharePage.jsx";
@@ -94,14 +94,17 @@ function App() {
 
           <Route path="/credit" element={<CreditsPage />} />
           <Route path="/result/:analysisId" element={<ResultPage />} />
-          <Route path="/play/quiz/:analysisId" element={<QuizPage />} />
           <Route
-            path="/play/quiz/result/analysis/:analysisId"
-            element={<QuizResultAnalysisPage />}
+            path="/play/chemi/quiz/:analysisId"
+            element={<QuizChemiPage />}
           />
           <Route
-            path="/play/quiz/result/:analysisId" // 이 줄을 추가하세요.
-            element={<QuizResultPage />}
+            path="/play/chemi/quiz/result/analysis/:analysisId"
+            element={<QuizChemiResultAnalysisPage />}
+          />
+          <Route
+            path="/play/chemi/quiz/result/:analysisId" // 이 줄을 추가하세요.
+            element={<QuizChemiResultPage />}
           />
           <Route
             path="/play/quiz/solve/:analysisId"
