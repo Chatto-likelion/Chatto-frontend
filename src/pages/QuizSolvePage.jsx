@@ -4,6 +4,7 @@ import { Header } from "@/components";
 import * as Icons from "@/assets/svg";
 import CheckBoxIcon from "@/assets/svg/CheckBox.svg?react";
 import CheckBoxCheckIcon from "@/assets/svg/CheckBoxCheck.svg?react";
+import { useQuizSolve } from "@/hooks/useQuizSolve";
 
 export default function QuizSolvePage() {
   const { quizId } = useParams();

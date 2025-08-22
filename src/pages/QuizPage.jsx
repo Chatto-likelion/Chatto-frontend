@@ -1,14 +1,19 @@
 import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { Header, FileUpload, ChatList, SmallServices } from "@/components";
-import { useQuizData } from "../hooks/useQuizData"; // 올바른 경로로 수정 필요할 수 있음
+import {
+  Header,
+  FileUpload,
+  ChatList,
+  SmallServices,
+  DetailForm_Share,
+} from "@/components";
+import { useQuizData } from "../hooks/useQuizData";
 
 export default function QuizPage() {
   const { analysisId } = useParams();
   const navigate = useNavigate();
 
-  const { questions, setQuestions, relation, situation, loading, error } =
-    useQuizData(analysisId);
+  const { questions, details, loading, error } = useQuizData(analysisId);
 
   const [editingQuestionId, setEditingQuestionId] = useState(null);
 
@@ -54,8 +59,6 @@ export default function QuizPage() {
     setEditingQuestionId(newQuestionId);
   };
 
-  // 🔴 위에서 삭제하라고 한 useEffect 블록이 이 자리에서 없어져야 합니다.
-
   // 로딩 및 에러 처리
   if (loading) {
     return (
@@ -77,7 +80,6 @@ export default function QuizPage() {
       </div>
     );
   }
-
   // 컴포넌트의 메인 return 문
   return (
     <div className="w-full min-h-screen bg-primary-dark text-[#f5f5f5]">
@@ -85,10 +87,7 @@ export default function QuizPage() {
       <div className="w-full max-w-[1400px] mx-auto pt-18 flex justify-center items-start">
         {/* 왼쪽 패널 */}
         <aside className="w-[222px] flex-shrink-0 mt-53 mr-10 ">
-          <div className="flex flex-col gap-5">
-            <ChatList />
-            <FileUpload />
-          </div>
+          <div className="flex flex-col gap-5"></div>
         </aside>
 
         {/* 가운데 + 오른쪽 패널 컨테이너 */}
