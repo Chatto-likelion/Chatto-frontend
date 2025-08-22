@@ -366,7 +366,7 @@ export default function PlayChemiAnalysisPage() {
                 <div className="flex flex-col">
                   <span className="text-st1">종합 케미 점수</span>
                   <p className="text-st1">
-                    <span className="text-h2 text-[#f5f5f5]">
+                    <span className="text-h2 text-[#F5F5F5]">
                       {resultData.spec.score_main}
                     </span>{" "}
                     점
