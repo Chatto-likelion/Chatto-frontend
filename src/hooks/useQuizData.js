@@ -13,7 +13,11 @@ const dummyQuestions = [
     options: ["옵션A", "옵션B", "옵션C", "옵션D"],
   },
 ];
-const dummyDetails = { relationship: "동아리 부원", situation: "일상대화" };
+const dummyDetails = {
+  title: "대화분석",
+  relationship: "동아리 부원",
+  situation: "일상대화",
+};
 
 export function useQuizData(analysisId) {
   const [questions, setQuestions] = useState([]);
