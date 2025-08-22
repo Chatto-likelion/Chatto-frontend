@@ -6,6 +6,8 @@ import {
   postChemiAnalyze,
   deleteChemiAnalysis,
   postQuiz10,
+  postUUID,
+  getUUID,
 } from "@/apis/api";
 import {
   Header,

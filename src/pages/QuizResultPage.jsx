@@ -1,7 +1,7 @@
 // src/pages/QuizResultPage.jsx
 import { useMemo, useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Header } from "@/components";
+import { Header, DetailForm_Share } from "@/components";
 import CheckBoxIcon from "@/assets/svg/CheckBox.svg?react";
 import CheckBoxCheckIcon from "@/assets/svg/CheckBoxCheck.svg?react"; // (개인 선택 표시 시 사용 가능)
 import CheckCircleIcon from "@/assets/svg/CheckCircle.svg?react";
@@ -18,6 +18,8 @@ export default function QuizResultPage() {
     questions,
     scores,
     overview,
+    type,
+    resultData,
     fetchPersonal, // 개인별 상세(정답/선지 선택) 불러오기
   } = useQuizData(resultId, uuid);
 
@@ -69,26 +71,26 @@ export default function QuizResultPage() {
       <Header />
       <div className="w-full max-w-[1400px] mx-auto pt-18 flex justify-center items-start gap-10">
         {/* 1. 왼쪽 패널 */}
-        <aside className="w-[212px] flex-shrink-0 flex flex-col gap-4 pt-6 mt-48 mr-41">
-          <div className="w-full p-4 border border-primary-light rounded-lg">
-            <h3 className="mb-4 font-bold text-st1">세부 정보</h3>
-            <div className="space-y-2 text-body2">
-              <div className="flex justify-between">
-                <span>참여자 관계</span>
-                <span className="text-[#f5f5f5]">{details.relationship} ˅</span>
-              </div>
-              <div className="flex justify-between">
-                <span>대화 상황</span>
-                <span className="text-[#f5f5f5]">{details.situation} ˅</span>
-              </div>
-              <div className="flex justify-between">
-                <span>분석 기간</span>
-                <span className="text-[#f5f5f5]">{details.period} ˅</span>
-              </div>
+        <aside className="w-[222px] flex-shrink-0 mt-53 mr-10">
+          <div className="w-full py-4 px-1 flex flex-col justify-center items-center border border-secondary-light rounded-lg">
+            <DetailForm_Share
+              type={type}
+              value={resultData}
+              isAnalysis={true}
+            />
+            <div className="mt-5">
+              <button
+                onClick={() =>
+                  navigate(
+                    `/play/${type == 1 ? "chemi" : shareType}/${resultId}`
+                  )
+                }
+                disabled={loading}
+                className="w-30 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border border-secondary rounded-lg"
+              >
+                분석 보기
+              </button>
             </div>
-            <button className="w-full mt-6 py-1.5 text-body2 border border-secondary rounded text-secondary hover:bg-secondary hover:text-primary-dark">
-              다시 분석
-            </button>
           </div>
         </aside>
 

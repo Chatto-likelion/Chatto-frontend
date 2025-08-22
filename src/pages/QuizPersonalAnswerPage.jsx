@@ -1,7 +1,7 @@
 // src/pages/QuizPersonalAnswerPage.jsx
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { Header } from "@/components";
+import { Header, DetailForm_Share } from "@/components";
 import CheckBoxIcon from "@/assets/svg/CheckBox.svg?react";
 import CheckBoxCheckIcon from "@/assets/svg/CheckBoxCheck.svg?react";
 import CheckCircleIcon from "@/assets/svg/CheckCircle.svg?react";
@@ -14,14 +14,14 @@ export default function QuizPersonalAnswerPage() {
 
   const {
     // 개인 결과 상태
-    details, // { relationship, situation, period } (필요하면 사용)
-    sections, // [{ sectionTitle, questions:[{ id, title, options[], correctOptionIndex, userSelectedOptionIndex }] }]
+    sections, // [{ sectionTitle, questions:[{ id, title, options[], correctOptionIndex, userSelectedOptionIndex }]}]
     owner, // { name, score }
-
+    resultData,
+    type,
     // 로딩/에러
-    loading, // 기본(문제 로드 등) 로딩
-    resultLoading, // 개인 결과 로딩
-    error, // 에러 메시지(문자열)
+    loading,
+    resultLoading,
+    error,
 
     // 메서드
     fetchMyPersonalResult, // (qpId?: string|number) => Promise<void>
@@ -32,6 +32,19 @@ export default function QuizPersonalAnswerPage() {
     if (!uuid || !qpId) return;
     fetchMyPersonalResult(qpId);
   }, [uuid, qpId, fetchMyPersonalResult]);
+
+  // 전체 문항/정답 개수 집계
+  const { totalCount, correctCount } = useMemo(() => {
+    console.log("sec: ", sections);
+    const all = (sections ?? []).flatMap((s) => s?.questions ?? []);
+    const total = all.length;
+    const correct = all.reduce((acc, q) => {
+      const ci = q?.correctOptionIndex;
+      const ui = q?.userSelectedOptionIndex;
+      return Number.isInteger(ci) && ci >= 0 && ui === ci ? acc + 1 : acc;
+    }, 0);
+    return { totalCount: total, correctCount: correct };
+  }, [sections]);
 
   // 로딩/에러 처리
   if (loading || resultLoading) {
@@ -59,14 +72,32 @@ export default function QuizPersonalAnswerPage() {
     <div className="w-full min-h-screen bg-primary-dark text-[#f5f5f5]">
       <Header />
       <div className="w-full max-w-[1400px] mx-auto pt-18 flex justify-center items-start gap-10">
+        {/*왼쪽*/}
+        <aside className="w-[222px] flex-shrink-0 mt-53 mr-10">
+          <div className="w-full py-4 px-1 flex flex-col justify-center items-center border border-secondary-light rounded-lg">
+            <DetailForm_Share
+              type={type}
+              value={resultData}
+              isAnalysis={true}
+            />
+          </div>
+        </aside>
+
         {/* 가운데 퀴즈 본문 */}
         <main className="w-[650px] flex-shrink-0 flex flex-col items-start pt-6 mt-16 max-h-[calc(100vh-72px)] overflow-y-auto scrollbar-hide">
           <h1 className="text-h3">Quiz</h1>
           <h2 className="text-body1 text-primary-light mt-2">
             개인 점수 - {owner?.name ?? "-"}
           </h2>
+
           <div className="flex justify-between items-center w-full my-5">
-            <p className="text-h4 text-primary-light">{owner?.score ?? 0}점</p>
+            {/* 점수 + 정답 개수/전체 */}
+            <p className="text-h4 text-primary-light">
+              {owner?.score ?? 0}점{" "}
+              <span className="text-body1 text-gray-4 ml-2">
+                ({correctCount}/{totalCount})
+              </span>
+            </p>
           </div>
 
           <div className="w-full flex flex-col gap-6">
@@ -79,41 +110,51 @@ export default function QuizPersonalAnswerPage() {
                 >
                   <h4 className="font-bold text-h7 mb-4">{q.title}</h4>
                   <div className="space-y-0">
-                    {q.options.map((opt, optIndex) => (
-                      <div
-                        key={optIndex}
-                        className={`flex justify-between items-center p-3 rounded-md ${
-                          optIndex === q.correctOptionIndex
-                            ? "bg-green-500/20"
-                            : ""
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="relative w-6 h-6 flex-shrink-0 flex items-center justify-center">
-                            <CheckBoxIcon className="absolute w-4 h-4" />
-                            {optIndex === q.userSelectedOptionIndex && (
-                              <CheckBoxCheckIcon className="absolute left-0 bottom-0 w-full h-full text-primary-light transform -translate-y-1" />
-                            )}
+                    {q.options.map((opt, optIndex) => {
+                      const isCorrectOpt = optIndex === q.correctOptionIndex;
+                      const isUserSelected =
+                        optIndex === q.userSelectedOptionIndex;
+                      const isUserCorrect =
+                        isUserSelected &&
+                        Number.isInteger(q.correctOptionIndex) &&
+                        q.correctOptionIndex >= 0 &&
+                        q.userSelectedOptionIndex === q.correctOptionIndex;
+
+                      return (
+                        <div
+                          key={optIndex}
+                          className={`flex justify-between items-center p-3 rounded-md ${
+                            isCorrectOpt ? "bg-green-500/20" : ""
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="relative w-6 h-6 flex-shrink-0 flex items-center justify-center">
+                              <CheckBoxIcon className="absolute w-4 h-4" />
+                              {isUserSelected && (
+                                <CheckBoxCheckIcon className="absolute left-0 bottom-0 w-full h-full text-primary-light transform -translate-y-1" />
+                              )}
+                            </div>
+                            <span className="text-body2">{opt}</span>
                           </div>
-                          <span className="text-body2">{opt}</span>
-                        </div>
-                        <div>
-                          {optIndex === q.userSelectedOptionIndex &&
-                            optIndex === q.correctOptionIndex && (
+
+                          <div>
+                            {isUserSelected && isUserCorrect && (
                               <CheckCircleIcon className="w-5 h-5 text-green-400" />
                             )}
-                          {optIndex === q.userSelectedOptionIndex &&
-                            optIndex !== q.correctOptionIndex && (
+                            {isUserSelected && !isUserCorrect && (
                               <XCircleIcon className="w-5 h-5 text-red-500" />
                             )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ))}
           </div>
         </main>
+
+        {/*오른쪽*/}
       </div>
     </div>
   );

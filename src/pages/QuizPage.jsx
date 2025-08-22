@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { Header, SmallServices } from "@/components";
+import { Header, SmallServices, DetailForm_Share } from "@/components";
 import CheckBoxIcon from "@/assets/svg/CheckBox.svg?react";
 import CheckBoxCheckIcon from "@/assets/svg/CheckBoxCheck.svg?react";
 import useQuizData from "@/hooks/useQuizData";
@@ -15,6 +15,7 @@ export default function QuizPage() {
     questions,
     loading,
     error,
+    resultData,
     addOne,
     updateOne,
     deleteOne,
@@ -179,11 +180,31 @@ export default function QuizPage() {
       <Header />
       <div className="w-full max-w-[1400px] mx-auto pt-18 flex justify-center items-start">
         <aside className="w-[222px] flex-shrink-0 mt-53 mr-10">
-          <div className="flex flex-col gap-5" />
+          <div className="w-full py-4 px-1 flex flex-col justify-center items-center border border-secondary-light rounded-lg">
+            <DetailForm_Share
+              type={type}
+              value={resultData}
+              isAnalysis={true}
+            />
+            <div className="mt-5">
+              <button
+                onClick={() =>
+                  navigate(
+                    `/play/${type == 1 ? "chemi" : shareType}/${resultId}`
+                  )
+                }
+                disabled={loading}
+                className="w-30 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border border-secondary rounded-lg"
+              >
+                분석 보기
+              </button>
+            </div>
+          </div>
         </aside>
 
-        <main className="w-[1023px] flex flex-col justify-start max-h-[calc(100vh-72px)] overflow-y-auto scrollbar-hide">
-          <h1 className="text-h3 ml-30 pt-25">Quiz</h1>
+        {/* 본문 */}
+        <main className="w-[1023px] pb-20 flex flex-col justify-start max-h-[calc(100vh-72px)] overflow-y-auto scrollbar-hide">
+          <h1 className="text-h3 ml-43 pt-25">Quiz</h1>
 
           <div className="group flex w-[180px] text-button border-1 border-primary-light rounded-[2px] ml-[588px] my-6 px-[6px] py-1">
             <span className="flex-1 flex justify-center items-center text-primary-light pr-[2px]">

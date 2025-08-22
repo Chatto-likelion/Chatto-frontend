@@ -976,6 +976,7 @@ export const postQuizGuestName = async (type, uuid, name) => {
 //퀴즈 게스트 제출 (uuid)
 export const postQuizGuestSubmit = async (type, uuid, QP_id, data) => {
   try {
+    console.log("data: ", data);
     const response = await instance.post(
       `/play/quiz/${typeToSlug(type)}/${uuid}/submit/guest/${QP_id}/`,
       data
