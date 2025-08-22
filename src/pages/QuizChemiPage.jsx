@@ -8,14 +8,25 @@ import {
   DetailForm_Share,
 } from "@/components";
 import { useQuizData } from "../hooks/useQuizData";
+import CheckBoxIcon from "@/assets/svg/CheckBox.svg?react";
+import CheckBoxCheckIcon from "@/assets/svg/CheckBoxCheck.svg?react";
 
 export default function QuizPage() {
   const { analysisId } = useParams();
   const navigate = useNavigate();
 
-  const { questions, details, loading, error } = useQuizData(analysisId);
+  const { questions, details, loading, error, setQuestions } =
+    useQuizData(analysisId);
 
   const [editingQuestionId, setEditingQuestionId] = useState(null);
+  const [correctAnswers, setCorrectAnswers] = useState({});
+  const handleSelectCorrectAnswer = (questionId, optionIndex) => {
+    setCorrectAnswers((prevAnswers) => ({
+      ...prevAnswers,
+      [questionId]: optionIndex,
+    }));
+  };
+  const [deletingQuestionId, setDeletingQuestionId] = useState(null);
 
   //수정/완료 버튼을 누를 때 호출될 함수
   const handleToggleEdit = (questionId) => {
@@ -57,6 +68,19 @@ export default function QuizPage() {
     };
     setQuestions((currentQuestions) => [...currentQuestions, newQuestion]);
     setEditingQuestionId(newQuestionId);
+  };
+
+  const handleToggleDeleteConfirm = (questionId) => {
+    setDeletingQuestionId((currentId) =>
+      currentId === questionId ? null : questionId
+    );
+  };
+
+  const handleDeleteConfirm = (questionId) => {
+    setQuestions((currentQuestions) =>
+      currentQuestions.filter((q) => q.id !== questionId)
+    );
+    setDeletingQuestionId(null);
   };
 
   // 로딩 및 에러 처리
@@ -111,12 +135,14 @@ export default function QuizPage() {
           <div className="w-[600px] flex flex-col gap-4">
             {questions.map((q) => {
               const isEditing = editingQuestionId === q.id;
+              const isDeleting = deletingQuestionId === q.id;
               return (
                 <div
                   key={q.id}
                   className="w-[600px] ml-43 pt-3 pb-3 pl-4 pr-[14px] border border-primary-light rounded-lg"
                 >
                   <div className="flex justify-between items-center mb-4">
+                    {/* ✅ FIX: 질문 제목 UI가 항상 보이도록 복원 */}
                     {isEditing ? (
                       <input
                         type="text"
@@ -129,33 +155,83 @@ export default function QuizPage() {
                     ) : (
                       <h2 className="text-h7">{q.title}</h2>
                     )}
-                    <span
-                      onClick={() => handleToggleEdit(q.id)}
-                      className="text-button text-[#d9d9d9] cursor-pointer whitespace-nowrap"
-                    >
-                      {isEditing ? "완료" : "수정"}
-                    </span>
+                    {/* ✅ FIX: 수정/삭제 버튼이 항상 오른쪽 상단에 위치하도록 복원 */}
+                    <div className="flex items-center flex-shrink-0 ml-4">
+                      <span
+                        onClick={() => handleToggleEdit(q.id)}
+                        className="text-button text-[#d9d9d9] cursor-pointer whitespace-nowrap"
+                      >
+                        {isEditing ? "완료" : "수정"}
+                      </span>
+                      <span
+                        onClick={() => handleToggleDeleteConfirm(q.id)}
+                        className="text-button text-red-500 cursor-pointer whitespace-nowrap ml-2"
+                      >
+                        삭제
+                      </span>
+                    </div>
                   </div>
                   <div className="space-y-1">
-                    {q.options.map((option, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between text-body2 rounded-md"
-                      >
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            value={option}
-                            onChange={(e) =>
-                              handleOptionChange(q.id, index, e.target.value)
-                            }
-                            className="text-body2 bg-transparent text-gray-5 focus:outline-none w-full"
-                          />
-                        ) : (
-                          <span>{option}</span>
-                        )}
+                    {isDeleting ? (
+                      // ✅ FIX: 삭제 확인 UI를 버튼 옆이 아닌 하단 컨텐츠 영역에 표시
+                      <div className="flex flex-col items-center gap-3 bg-[#434343] border border-gray-500 py-4 px-4 rounded-md">
+                        <p className="text-body2 text-gray-2">
+                          해당 문제가 삭제되며, 친구들의 정답 데이터도 함께
+                          사라집니다
+                        </p>
+                        <div className="flex gap-4">
+                          <button
+                            onClick={() => handleDeleteConfirm(q.id)}
+                            className="text-button text-red-500 hover:text-red-400"
+                          >
+                            확인
+                          </button>
+                          <button
+                            onClick={() => handleToggleDeleteConfirm(null)}
+                            className="text-button text-gray-400 hover:text-white"
+                          >
+                            취소
+                          </button>
+                        </div>
                       </div>
-                    ))}
+                    ) : (
+                      q.options.map((option, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center text-body2 rounded-md"
+                        >
+                          <div className="flex items-center w-full">
+                            <div
+                              className="relative w-6 h-6 mr-2 cursor-pointer flex-shrink-0"
+                              onClick={() =>
+                                handleSelectCorrectAnswer(q.id, index)
+                              }
+                            >
+                              <CheckBoxIcon className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5" />
+                              {correctAnswers[q.id] === index && (
+                                <CheckBoxCheckIcon className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6" />
+                              )}
+                            </div>
+                            {isEditing ? (
+                              <input
+                                type="text"
+                                value={option}
+                                onChange={(e) =>
+                                  handleOptionChange(
+                                    q.id,
+                                    index,
+                                    e.target.value
+                                  )
+                                }
+                                className="text-body2 bg-transparent text-gray-5 focus:outline-none w-full"
+                              />
+                            ) : (
+                              <span>{option}</span>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               );
