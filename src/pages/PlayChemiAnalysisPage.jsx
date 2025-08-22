@@ -5,6 +5,7 @@ import {
   getChatList,
   postChemiAnalyze,
   deleteChemiAnalysis,
+  postChemiQuiz10,
 } from "@/apis/api";
 import {
   Header,
@@ -41,41 +42,6 @@ ChartJS.register(
   LineElement,
   Filler
 );
-
-// ──────────────────────────────────────────────────────────────
-// 조각 안에 퍼센트 라벨을 그려주는 커스텀 플러그인
-// (추가 설치 없이 사용 가능)
-// ──────────────────────────────────────────────────────────────
-const percentLabels = {
-  id: "percentLabels",
-  afterDatasetsDraw(chart, _args, options) {
-    const { ctx, data } = chart;
-    const ds = data.datasets?.[0];
-    if (!ds) return;
-    const meta = chart.getDatasetMeta(0);
-    const values = (ds.data ?? []).map((v) => Number(v || 0));
-    const total = values.reduce((a, b) => a + b, 0) || 1;
-
-    ctx.save();
-    ctx.fillStyle = options?.color || "#2E1A52"; // 보라 텍스트
-    ctx.font =
-      options?.font && typeof options.font === "string"
-        ? options.font
-        : "600 14px Pretendard, Noto Sans KR, sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-
-    meta.data.forEach((arc, i) => {
-      const v = values[i];
-      if (!v) return;
-      const p = Math.round((v / total) * 100);
-      // 차트 중심에서 약간 안쪽으로 찍히는 내장 좌표 사용
-      const pos = arc.tooltipPosition();
-      ctx.fillText(`${p}%`, pos.x, pos.y);
-    });
-    ctx.restore();
-  },
-};
 
 export default function PlayChemiAnalysisPage() {
   const { resultId } = useParams();
@@ -193,6 +159,17 @@ export default function PlayChemiAnalysisPage() {
       navigate("/play/chemi/");
     } catch (err) {
       setError(err.message || "분석에 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleQuiz = async () => {
+    try {
+      await postChemiQuiz10(resultId);
+      navigate(`/play/chemi/quiz/${resultId}`);
+    } catch (err) {
+      setError(err.message || "퀴즈 생성에 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -679,13 +656,26 @@ export default function PlayChemiAnalysisPage() {
               onClose={() => setModalOpen(false)}
               url={shareUrl}
             />
-            <button
-              onClick={() => {}}
-              disabled={loading}
-              className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
-            >
-              퀴즈 생성
-            </button>
+            {resultData.result.isQuized ? (
+              <button
+                onClick={handleQuiz}
+                disabled={loading}
+                className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
+              >
+                퀴즈 생성
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  navigate(`/play/chemi/quiz/${resultId}`);
+                }}
+                disabled={loading}
+                className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
+              >
+                퀴즈 보기
+              </button>
+            )}
+
             <button
               onClick={() => handleDelete()}
               disabled={loading}
@@ -703,3 +693,38 @@ export default function PlayChemiAnalysisPage() {
     </div>
   );
 }
+
+// ──────────────────────────────────────────────────────────────
+// 조각 안에 퍼센트 라벨을 그려주는 커스텀 플러그인
+// (추가 설치 없이 사용 가능)
+// ──────────────────────────────────────────────────────────────
+const percentLabels = {
+  id: "percentLabels",
+  afterDatasetsDraw(chart, _args, options) {
+    const { ctx, data } = chart;
+    const ds = data.datasets?.[0];
+    if (!ds) return;
+    const meta = chart.getDatasetMeta(0);
+    const values = (ds.data ?? []).map((v) => Number(v || 0));
+    const total = values.reduce((a, b) => a + b, 0) || 1;
+
+    ctx.save();
+    ctx.fillStyle = options?.color || "#2E1A52"; // 보라 텍스트
+    ctx.font =
+      options?.font && typeof options.font === "string"
+        ? options.font
+        : "600 14px Pretendard, Noto Sans KR, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    meta.data.forEach((arc, i) => {
+      const v = values[i];
+      if (!v) return;
+      const p = Math.round((v / total) * 100);
+      // 차트 중심에서 약간 안쪽으로 찍히는 내장 좌표 사용
+      const pos = arc.tooltipPosition();
+      ctx.fillText(`${p}%`, pos.x, pos.y);
+    });
+    ctx.restore();
+  },
+};
