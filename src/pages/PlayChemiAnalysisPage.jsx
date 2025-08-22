@@ -6,6 +6,8 @@ import {
   postChemiAnalyze,
   deleteChemiAnalysis,
   postQuiz10,
+  postUUID,
+  getUUID,
 } from "@/apis/api";
 import {
   Header,
@@ -48,7 +50,27 @@ export default function PlayChemiAnalysisPage() {
   const { setSelectedChatId } = useChat();
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
-  const shareUrl = "https://www.figma.com/file/abc...";
+  const [shareUrl, setShareUrl] = useState(null);
+  const [shareFetching, setShareFetching] = useState(false);
+  const [shareError, setShareError] = useState(null);
+  const makeShareUrl = (uuid) =>
+    `${window.location.origin}/play/chemi/share/${uuid}`; // 라우팅 규칙에 맞게 수정 가능
+
+  const handleOpenShare = async () => {
+    setModalOpen(true); // 모달 먼저 열고 로딩 스피너 보여주고 싶다면
+    if (shareUrl || shareFetching) return; // 이미 발급중/발급완료면 재호출 X
+
+    try {
+      setShareFetching(true);
+      setShareError(null);
+      const uuid = await postUUID("chem", resultId);
+      setShareUrl(makeShareUrl(uuid));
+    } catch (e) {
+      setShareError(e.message || "공유 링크 발급에 실패했습니다.");
+    } finally {
+      setShareFetching(false);
+    }
+  };
   const [form, setForm] = useState({
     relationship: "",
     situation: "",
@@ -645,7 +667,7 @@ export default function PlayChemiAnalysisPage() {
           </div>
           <div className="w-full flex justify-between items-center">
             <button
-              onClick={() => setModalOpen(true)}
+              onClick={handleOpenShare}
               disabled={loading}
               className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
             >
@@ -655,8 +677,10 @@ export default function PlayChemiAnalysisPage() {
               open={modalOpen}
               onClose={() => setModalOpen(false)}
               url={shareUrl}
+              loading={shareFetching}
+              error={shareError}
             />
-            {resultData.result.isQuized ? (
+            {!resultData.result.isQuized ? (
               <button
                 onClick={handleQuiz}
                 disabled={loading}
