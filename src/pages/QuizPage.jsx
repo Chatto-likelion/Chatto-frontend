@@ -1,4 +1,3 @@
-// src/pages/QuizPage.jsx
 import { useState, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Header, SmallServices, DetailForm_Share } from "@/components";
@@ -11,37 +10,32 @@ export default function QuizPage() {
   const navigate = useNavigate();
 
   const {
-    type, // 1|2|3 (필요 시 사용 가능)
-    shareType, // "chem" | "some" | "mbti" | null (표시/분기용)
-    questions, // [{ questionId, questionIndex, title, options[4], answer(1~4), ...}]
+    type,
+    shareType,
+    questions,
     loading,
     error,
     resultData,
     addOne,
-    updateOne, // { title, options, answer } 그대로 전달
+    updateOne,
     deleteOne,
     deleteAll,
     refetch,
   } = useQuizData(resultId, uuid);
 
-  // 편집/삭제 타깃(문항 index로 관리)
   const [editingIndex, setEditingIndex] = useState(null);
   const [deletingIndex, setDeletingIndex] = useState(null);
 
-  // 편집 드래프트 & 정답 체크(0-base)
   const [drafts, setDrafts] = useState({});
   const [correctAnswers, setCorrectAnswers] = useState({});
 
-  // questionIndex → question 매핑
   const questionByIndex = useMemo(() => {
     const m = new Map();
     questions.forEach((q) => m.set(q.questionIndex, q));
     return m;
   }, [questions]);
 
-  // 편집 토글 (완료 시 서버 저장)
   const handleToggleEdit = async (qIndex) => {
-    // 완료 → 저장
     if (editingIndex === qIndex) {
       const base = questionByIndex.get(qIndex);
       const draft = drafts[qIndex] ?? {
@@ -52,17 +46,22 @@ export default function QuizPage() {
       const sel = correctAnswers[qIndex];
       const answer = Number.isInteger(sel) ? sel + 1 : draft.answer;
 
-      await updateOne(qIndex, {
-        title: draft.title,
-        options: draft.options,
-        answer,
-      });
-
-      setEditingIndex(null);
+      try {
+        await updateOne(qIndex, {
+          title: draft.title,
+          options: draft.options,
+          answer,
+        });
+        // 'updateOne'이 내부적으로 상태를 업데이트하므로 refetch()는 필요 없습니다.
+      } catch (err) {
+        console.error("퀴즈 업데이트 실패:", err);
+        alert("저장에 실패했습니다. 다시 시도해주세요.");
+      } finally {
+        setEditingIndex(null);
+      }
       return;
     }
 
-    // 시작 → 드래프트/정답 초기화
     const q = questionByIndex.get(qIndex);
     if (!q) return;
     setDrafts((prev) => ({
@@ -71,12 +70,11 @@ export default function QuizPage() {
     }));
     setCorrectAnswers((prev) => ({
       ...prev,
-      [qIndex]: (q.answer ?? 1) - 1, // 1~4 → 0~3
+      [qIndex]: (q.answer ?? 1) - 1,
     }));
     setEditingIndex(qIndex);
   };
 
-  // 질문 제목 변경
   const handleQuestionChange = (qIndex, newTitle) => {
     setDrafts((prev) => ({
       ...prev,
@@ -91,7 +89,6 @@ export default function QuizPage() {
     }));
   };
 
-  // 선택지 변경
   const handleOptionChange = (qIndex, optIdx, newText) => {
     setDrafts((prev) => {
       const base =
@@ -110,28 +107,53 @@ export default function QuizPage() {
     });
   };
 
-  // 정답 선택(체크)
   const handleSelectCorrectAnswer = (qIndex, optIdx) => {
     setCorrectAnswers((prev) => ({ ...prev, [qIndex]: optIdx }));
   };
 
-  // 삭제 확인 UI 토글/확정
   const handleToggleDeleteConfirm = (qIndex) => {
     setDeletingIndex((cur) => (cur === qIndex ? null : qIndex));
   };
+
   const handleDeleteConfirm = async (qIndex) => {
-    await deleteOne(qIndex);
-    setDeletingIndex(null);
-    if (editingIndex === qIndex) setEditingIndex(null);
+    try {
+      await deleteOne(qIndex);
+      // 'deleteOne'이 내부적으로 상태를 업데이트하므로 refetch()는 필요 없습니다.
+    } catch (err) {
+      console.error("퀴즈 문항 삭제 실패:", err);
+      alert("삭제에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setDeletingIndex(null);
+      if (editingIndex === qIndex) setEditingIndex(null);
+    }
   };
 
-  // 문항 추가
   const handleAddQuestion = async () => {
-    await addOne();
-    await refetch(); // 최신 목록 반영
+    try {
+      await addOne();
+      await refetch(); // 새 항목 추가 후에는 refetch가 필요합니다.
+    } catch (err) {
+      console.error("퀴즈 추가 실패:", err);
+      alert("문항 추가에 실패했습니다.");
+    }
   };
 
-  // 로딩/에러 처리
+  const handleDeleteAll = async () => {
+    if (
+      !window.confirm(
+        "정말로 모든 문제를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+      )
+    ) {
+      return;
+    }
+    try {
+      await deleteAll();
+    } catch (err) {
+      console.error("퀴즈 전체 삭제 실패:", err);
+      alert("전체 삭제에 실패했습니다. 다시 시도해주세요.");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-primary-dark text-gray-2">
@@ -153,14 +175,10 @@ export default function QuizPage() {
     );
   }
 
-  // ────────────────────────────────────────────────────────────
-  // UI (레이아웃 변경 없음)
-  // ────────────────────────────────────────────────────────────
   return (
     <div className="w-full min-h-screen bg-primary-dark text-[#f5f5f5]">
       <Header />
       <div className="w-full max-w-[1400px] mx-auto pt-18 flex justify-center items-start">
-        {/* 왼쪽 패널 (비움) */}
         <aside className="w-[222px] flex-shrink-0 mt-53 mr-10">
           <div className="w-full py-4 px-1 flex flex-col justify-center items-center border border-secondary-light rounded-lg">
             <DetailForm_Share
@@ -193,7 +211,6 @@ export default function QuizPage() {
               퀴즈 문제 구성
             </span>
             <div className="border-r border-[#bfbfbf] h-4" />
-            {/* 점수 분석 페이지로 이동 (라우팅 규칙에 맞게 수정 가능) */}
             <Link
               to={`/play/quiz/result/analysis/${resultId}/${uuid}`}
               className="flex-1 flex justify-center items-center pl-[2px] text-[#595959]"
@@ -202,13 +219,11 @@ export default function QuizPage() {
             </Link>
           </div>
 
-          {/* 문제 리스트 */}
           <div className="w-[600px] flex flex-col gap-4">
             {questions.map((q) => {
               const qIndex = q.questionIndex;
               const isEditing = editingIndex === qIndex;
               const isDeleting = deletingIndex === qIndex;
-
               const draft = drafts[qIndex] ?? {
                 title: q.title,
                 options: q.options,
@@ -280,8 +295,10 @@ export default function QuizPage() {
                           <div className="flex items-center w-full">
                             <div
                               className="relative w-6 h-6 mr-2 cursor-pointer flex-shrink-0"
-                              onClick={() =>
-                                handleSelectCorrectAnswer(qIndex, i)
+                              onClick={
+                                isEditing
+                                  ? () => handleSelectCorrectAnswer(qIndex, i)
+                                  : undefined
                               }
                             >
                               <CheckBoxIcon className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5" />
@@ -312,7 +329,6 @@ export default function QuizPage() {
             })}
           </div>
 
-          {/* 문항 추가 */}
           <div className="w-full flex justify-center mt-6">
             <button
               onClick={handleAddQuestion}
@@ -323,7 +339,6 @@ export default function QuizPage() {
           </div>
         </main>
 
-        {/* 오른쪽 패널: 생성/전체삭제만 */}
         <aside className="w-53 flex flex-col mt-53 gap-4">
           <div className="w-full p-4 flex flex-col items-center border border-primary-light rounded-lg">
             <button
@@ -341,9 +356,7 @@ export default function QuizPage() {
               퀴즈 생성
             </button>
             <button
-              onClick={async () => {
-                await deleteAll();
-              }}
+              onClick={handleDeleteAll}
               className="w-[90px] h-7 text-button border border-secondary rounded-lg hover:bg-secondary hover:text-primary-dark"
             >
               전체 삭제

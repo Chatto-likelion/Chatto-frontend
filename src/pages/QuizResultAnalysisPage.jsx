@@ -1,12 +1,16 @@
 // src/pages/QuizResultAnalysisPage.jsx
 import { useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Header, DetailForm_Share } from "@/components";
+import { Header,  } from "@/components";
 import * as Icons from "@/assets/svg";
+import { useMemo, useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { Header, DetailForm_Share, ShareModal } from "@/components";
 import useQuizData from "@/hooks/useQuizData";
 
 export default function QuizResultAnalysisPage() {
   const { resultId, uuid } = useParams();
+  const navigate = useNavigate();
 
   const {
     type, // 1|2|3
@@ -17,7 +21,29 @@ export default function QuizResultAnalysisPage() {
     error,
     resultData,
     refetch, // 필요 시 재조회에 사용 가능
+    deleteAll,
   } = useQuizData(resultId, uuid);
+
+  // ── 공유 모달 상태
+  const [modalOpen, setModalOpen] = useState(false);
+  const openShareModal = () => setModalOpen(true);
+  const closeShareModal = () => setModalOpen(false);
+
+  // ── 퀴즈 삭제 진행 상태
+  const [deleting, setDeleting] = useState(false);
+
+  // 공유 URL: some 페이지 레퍼런스와 동일 우선순위
+  const shareUrl = useMemo(() => {
+    const base = window.location.origin;
+    if (
+      uuid &&
+      (shareType === "chem" || shareType === "some" || shareType === "mbti")
+    ) {
+      return `${base}/play/${shareType}/share/${uuid}`;
+    }
+    // fallback: 퀴즈 결과 상세 페이지
+    return `${base}/play/quiz/result/${resultId}/${uuid}`;
+  }, [resultId, uuid, shareType]);
 
   // ── 통계(평균/문항수/참여자수)
   const stats = useMemo(() => {
@@ -33,7 +59,7 @@ export default function QuizResultAnalysisPage() {
     return { averageScore, questionCount, participantCount };
   }, [scores, questions]);
 
-  // ── 섹션 구성: 가장 많이 맞춘/틀린/나머지
+  // ── 섹션 구성
   const sections = useMemo(() => {
     const normalized = (questions ?? []).map((q) => {
       const total =
@@ -87,6 +113,30 @@ export default function QuizResultAnalysisPage() {
     }
     return result;
   }, [questions]);
+
+  // ── 퀴즈 삭제 핸들러
+  const handleQuizDelete = async () => {
+    if (!deleteAll) {
+      alert("삭제 기능이 준비되지 않았습니다.");
+      return;
+    }
+    if (
+      !window.confirm("정말로 이 퀴즈 전체를 삭제할까요? 복구할 수 없습니다.")
+    ) {
+      return;
+    }
+    try {
+      setDeleting(true);
+      await deleteAll(); // 전체 퀴즈 데이터 삭제
+      // 적절한 리다이렉션 경로로 이동 (필요 시 수정)
+      navigate("/play/quiz/");
+    } catch (e) {
+      console.error(e);
+      alert("퀴즈 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   if (loading) {
     return <div>결과를 불러오는 중입니다...</div>;
@@ -182,9 +232,9 @@ export default function QuizResultAnalysisPage() {
                   >
                     <h4 className="mb-4 font-bold text-h7">{q.title}</h4>
                     <div className="space-y-3 text-body2">
-                      {q.options.map((opt) => (
+                      {q.options.map((opt, idx) => (
                         <div
-                          key={`${q.id}-${opt.text}`}
+                          key={`${q.id}-${idx}`}
                           className="flex items-center gap-4"
                         >
                           <span className="w-2/5 truncate">{opt.text}</span>
@@ -210,45 +260,41 @@ export default function QuizResultAnalysisPage() {
         </main>
 
         {/* 오른쪽 패널 */}
-        <aside className="w-[212px] mt-38 ml-[147px] flex-shrink-0 flex flex-col gap-4 pt-6">
-          <div className="w-full p-4 border border-primary-light rounded-lg">
-            <h3 className="mb-4 text-body1">개인 점수 보기</h3>
-            <div className="space-y-2 text-body2">
-              {(scores ?? []).map((s) => (
-                <div
-                  key={`${s.QP_id}-${s.name}`}
-                  className="flex justify-between"
-                >
-                  {s.name === "모모" ? (
-                    <Link
-                      to={`/play/quiz/result/${resultId}/${uuid}`}
-                      className="hover:text-[#595959] transition-colors"
-                    >
-                      {s.name}
-                    </Link>
-                  ) : (
-                    <span>{s.name}</span>
-                  )}
-                  <span className="text-gray-4">{s.score}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="w-full p-4 border border-primary-light rounded-lg">
-            <h3 className="mb-4 font-bold text-h7">URL 공유하기</h3>
-            <button className="w-full py-1.5 mb-4 text-body2 border border-secondary rounded text-secondary hover:bg-secondary hover:text-primary-dark">
-              Copy
-            </button>
-            <div className="flex justify-around">
-              <Icons.Person className="w-6 h-6 text-gray-4 cursor-pointer" />
-              <Icons.Person className="w-6 h-6 text-gray-4 cursor-pointer" />
-              <Icons.Person className="w-6 h-6 text-gray-4 cursor-pointer" />
-              <Icons.Person className="w-6 h-6 text-gray-4 cursor-pointer" />
+        <aside className="w-[244px] mt-38 ml-[147px] flex-shrink-0 flex flex-col gap-4 pt-6">
+          <div className="w-full p-4">
+            {/* ▶ 버튼 2개만 추가/변경 (다른 UI는 그대로) */}
+            <div className="w-full flex justify-between items-center gap-3">
+              <button
+                onClick={openShareModal}
+                className="flex-1 py-1.5 text-button border-1 border-secondary-light rounded-[4px] text-secondary-light hover:bg-secondary hover:text-primary-dark"
+              >
+                결과 공유
+              </button>
+              <button
+                onClick={handleQuizDelete}
+                disabled={deleting}
+                className={[
+                  "flex-1 py-1.5 text-button border-1 rounded-[4px]",
+                  deleting
+                    ? "border-secondary-light text-secondary-light cursor-not-allowed"
+                    : "border-secondary-light text-secondary-light hover:bg-secondary hover:text-primary-dark",
+                ].join(" ")}
+              >
+                {deleting ? "삭제 중..." : "퀴즈 삭제"}
+              </button>
             </div>
           </div>
         </aside>
       </div>
+
+      {/* 공유 모달 */}
+      <ShareModal
+        open={modalOpen}
+        onClose={closeShareModal}
+        url={shareUrl}
+        loading={false}
+        error={null}
+      />
     </div>
   );
 }

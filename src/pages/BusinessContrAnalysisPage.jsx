@@ -211,74 +211,47 @@ export default function BusinessContrAnalysisPage() {
   };
 
   // ✅ 데이터 가공 훅 수정 (map 후 filter)
-  const participationPeriodData = useMemo(() => {
-    if (!resultData?.spec_period || resultData.spec_period.length === 0)
+  const allItemChartsData = useMemo(() => {
+    if (!resultData?.spec_period || resultData.spec_period.length === 0) {
       return [];
+    }
+
     const periods = [
-      "pediod_1",
+      "period_1",
       "period_2",
       "period_3",
       "period_4",
       "period_5",
       "period_6",
     ];
-    const data = periods.map((period) => {
-      const periodData = { name: `기간 ${period.slice(-1)}` };
-      resultData.spec_period.forEach((p) => {
-        if (p.analysis === "종합 참여 점수") {
-          periodData[p.name] = p[period];
-        }
-      });
-      return periodData;
+    const analysisMap = new Map();
+
+    resultData.spec_period.forEach((entry) => {
+      const { analysis, name, ...periodData } = entry;
+      if (!analysisMap.has(analysis)) {
+        analysisMap.set(analysis, []);
+      }
+      analysisMap.get(analysis).push({ name, periodData });
     });
-    return data.filter((item) => Object.keys(item).length > 1);
+
+    // 최종 차트 데이터 구조로 변환
+    const transformedData = [];
+    analysisMap.forEach((peopleData, analysisTitle) => {
+      const chartData = periods.map((period) => {
+        const periodObj = { name: `기간 ${period.slice(-1)}` };
+        peopleData.forEach((person) => {
+          periodObj[person.name] = person.periodData[period];
+        });
+        return periodObj;
+      });
+      transformedData.push({ title: analysisTitle, data: chartData });
+    });
+
+    return transformedData;
   }, [resultData]);
 
-  const infoSharePeriodData = useMemo(() => {
-    if (!resultData?.spec_period || resultData.spec_period.length === 0)
-      return [];
-    const periods = [
-      "pediod_1",
-      "period_2",
-      "period_3",
-      "period_4",
-      "period_5",
-      "period_6",
-    ];
-    const data = periods.map((period) => {
-      const periodData = { name: `기간 ${period.slice(-1)}` };
-      resultData.spec_period.forEach((p) => {
-        if (p.analysis === "정보 공유") {
-          periodData[p.name] = p[period];
-        }
-      });
-      return periodData;
-    });
-    return data.filter((item) => Object.keys(item).length > 1);
-  }, [resultData]);
-
-  const probsolvePeriodData = useMemo(() => {
-    if (!resultData?.spec_period || resultData.spec_period.length === 0)
-      return [];
-    const periods = [
-      "pediod_1",
-      "period_2",
-      "period_3",
-      "period_4",
-      "period_5",
-      "period_6",
-    ];
-    const data = periods.map((period) => {
-      const periodData = { name: `기간 ${period.slice(-1)}` };
-      resultData.spec_period.forEach((p) => {
-        if (p.analysis === "문제 해결 참여") {
-          periodData[p.name] = p[period];
-        }
-      });
-      return periodData;
-    });
-    return data.filter((item) => Object.keys(item).length > 1);
-  }, [resultData]);
+  // 이 console.log를 통해 데이터가 올바르게 변환되었는지 확인하세요.
+  // console.log('Transformed totalPeriodData:', totalPeriodData);
 
   if (loading) return <p className="mt-44 text-sm">분석 중입니다...</p>;
   if (error) return <p className="mt-4 text-sm text-red-500">{error}</p>;
@@ -484,7 +457,52 @@ export default function BusinessContrAnalysisPage() {
                                 />
                                 <YAxis hide />
                                 <Tooltip />
-                                <Bar dataKey="probsolve" fill="#4C1E95D" />
+                                <Bar dataKey="probsolve" fill="#4C1E95" />
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 주도적 제안 */}
+                      <div>
+                        <p className="relative inline-block text-h7 text-primary-dark mb-5">
+                          주도적 제안
+                          <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
+                        </p>
+                        <div className="w-full overflow-x-auto border-3 border-primary rounded-lg">
+                          <div
+                            style={{
+                              minWidth: `${
+                                resultData.spec_personal.length * 80
+                              }px`,
+                              height: "240px",
+                            }}
+                          >
+                            <ResponsiveContainer width="100%" height="100%">
+                              <BarChart
+                                data={[...resultData.spec_personal].sort(
+                                  (a, b) => a.rank - b.rank
+                                )}
+                                margin={{
+                                  top: 10,
+                                  right: 10,
+                                  left: 0,
+                                  bottom: 30,
+                                }} // ✅ bottom 여백 추가
+                              >
+                                <CartesianGrid
+                                  vertical={false}
+                                  horizontal={false}
+                                />
+                                <XAxis
+                                  dataKey="name"
+                                  axisLine
+                                  tickLine={false}
+                                />
+                                <YAxis hide />
+                                <Tooltip />
+                                <Bar dataKey="proposal" fill="#4C1E95" />
                               </BarChart>
                             </ResponsiveContainer>
                           </div>
@@ -529,7 +547,7 @@ export default function BusinessContrAnalysisPage() {
                                 />
                                 <YAxis hide />
                                 <Tooltip />
-                                <Bar dataKey="resptime" fill="#6A0DAD" />
+                                <Bar dataKey="resptime" fill="#4C1E95" />
                               </BarChart>
                             </ResponsiveContainer>
                           </div>
@@ -573,8 +591,7 @@ export default function BusinessContrAnalysisPage() {
                               {getMetricText(person.probsolve)}
                             </p>
                             <p className="font-bold text-[#262626]">
-                              {getMetricText(null)}{" "}
-                              {/* ✅ 주도적 제안 데이터가 없으므로 null로 처리 */}
+                              {getMetricText(person.proposal)}{" "}
                             </p>
                             <p className="font-bold text-[#262626]">
                               {getMetricText(person.resptime)}
@@ -603,86 +620,44 @@ export default function BusinessContrAnalysisPage() {
 
               {activeTab === 2 && (
                 <section>
-                  <p className="relative inline-block text-h7 text-primary-dark mb-5">
-                    종합 참여 점수
-                    <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
-                  </p>
-                  <div className="w-full overflow-x-auto border-3 border-primary rounded-lg mb-10">
-                    <ResponsiveContainer width="100%" height={300}>
-                      <LineChart data={participationPeriodData}>
-                        <CartesianGrid vertical={false} horizontal={false} />
-                        <XAxis dataKey="name" />
-                        <YAxis hide />
-                        <Tooltip />
-                        <Legend />
-                        {/* spec_personal 배열을 순회하며 각 사람에 대한 라인을 추가 */}
-                        {resultData.spec_personal.map((person) => (
-                          <Line
-                            key={person.name}
-                            type="monotone"
-                            dataKey={person.name} // periodChartData 객체 내의 각 사람의 이름을 데이터 키로 사용
-                            stroke={`#${Math.floor(
-                              Math.random() * 16777215
-                            ).toString(16)}`} // 임시 색상
-                          />
-                        ))}
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-
-                  {/* 정보 공유 */}
-                  <div>
-                    <p className="relative inline-block text-h7 text-primary-dark mb-5">
-                      정보 공유
-                      <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
-                    </p>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <LineChart data={infoSharePeriodData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        {resultData.spec_personal.map((p) => (
-                          <Line
-                            key={p.name}
-                            type="monotone"
-                            dataKey={p.name}
-                            stroke={`#${((Math.random() * 0xffffff) << 0)
-                              .toString(16)
-                              .padStart(6, "0")}`}
-                          />
-                        ))}
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-
-                  {/* 문제 해결 참여 */}
-                  <div>
-                    <p className="relative inline-block text-h7 text-primary-dark mb-5">
-                      문제 해결 참여
-                      <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
-                    </p>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <LineChart data={probsolvePeriodData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        {resultData.spec_personal.map((p) => (
-                          <Line
-                            key={p.name}
-                            type="monotone"
-                            dataKey={p.name}
-                            stroke={`#${((Math.random() * 0xffffff) << 0)
-                              .toString(16)
-                              .padStart(6, "0")}`}
-                          />
-                        ))}
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
+                  <section>
+                    {/* 5개의 항목별 기간 추이 차트를 동적으로 렌더링 */}
+                    {allItemChartsData.map((chart, index) => (
+                      <div key={index} className="w-full  mb-10">
+                        <p className="relative inline-block text-h7 text-primary-dark mb-5">
+                          {chart.title}
+                          <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
+                        </p>
+                        <div className="flex justify-center pr-3 py-5 border-3 border-primary-dark rounded-lg">
+                          <ResponsiveContainer width="90%" height={280}>
+                            <LineChart data={chart.data}>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="name" />
+                              <YAxis
+                                domain={[0, 100]}
+                                tick={false}
+                                axisLine={false}
+                                tickLine={false}
+                              />
+                              <Tooltip />
+                              <Legend />
+                              {/* API에서 가져온 유저 이름으로 Line을 동적으로 생성 */}
+                              {resultData?.spec_personal?.map((p) => (
+                                <Line
+                                  key={p.name}
+                                  type="monotone" // 부드러운 곡선 차트
+                                  dataKey={p.name}
+                                  stroke={`#${((Math.random() * 0xffffff) << 0)
+                                    .toString(16)
+                                    .padStart(6, "0")}`}
+                                />
+                              ))}
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+                    ))}
+                  </section>
                 </section>
               )}
               <div className="mb-5 mt-10">
@@ -690,7 +665,7 @@ export default function BusinessContrAnalysisPage() {
                   AI 종합 인사이트
                   <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
                 </p>
-                <p>{resultData.spec.insights}</p>
+                <p className="mb-20">{resultData.spec.insights}</p>
               </div>
               <div className="mb-40">
                 <p className="relative inline-block text-h7 text-primary-dark mb-5">

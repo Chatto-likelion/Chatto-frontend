@@ -1,6 +1,5 @@
-// 변경 파일: PlayChemiAnalysisPage.jsx
 import { useParams } from "react-router-dom";
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   getChemiAnalysisDetail,
   getChatList,
@@ -50,77 +49,8 @@ export default function PlayChemiAnalysisPage() {
   const { resultId } = useParams();
   const { setSelectedChatId } = useChat();
   const navigate = useNavigate();
-
   const [modalOpen, setModalOpen] = useState(false);
-  const [shareUrl, setShareUrl] = useState(null);
-  const [shareFetching, setShareFetching] = useState(false);
-  const [shareError, setShareError] = useState(null);
-
-  const [shareUUID, setShareUUID] = useState(null);
-
-  const makeShareUrl = (uuid) =>
-    `${window.location.origin}/play/chemi/share/${uuid}`;
-
-  const normalizeUuid = (v) => (typeof v === "string" ? v : v?.uuid ?? null);
-
-  const ensureUuid = useCallback(async () => {
-    if (!resultId) return null;
-    if (shareUUID) return shareUUID;
-
-    let uuid = null;
-    try {
-      const got = await getUUID("chem", resultId);
-      uuid = normalizeUuid(got);
-    } catch (err) {
-      const msg = err?.message ?? "";
-      const status = err?.status ?? err?.response?.status;
-      // 404만 무시하고 나머지는 그대로 throw
-      if (!(status === 404 || /404/.test(msg))) {
-        throw err;
-      }
-    }
-    if (!uuid) {
-      const created = await postUUID("chem", resultId);
-      uuid = normalizeUuid(created);
-    }
-    if (!uuid) throw new Error("UUID를 생성/확인하지 못했습니다.");
-
-    setShareUUID(uuid);
-    return uuid;
-  }, [resultId, shareUUID]);
-
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        const uuid = await ensureUuid();
-        if (alive) setShareUUID(uuid);
-      } catch {
-        // uuid 확보 실패는 공유/퀴즈 이동에만 영향, 화면은 계속 보여줌
-      }
-    })();
-    return () => {
-      alive = false;
-    };
-  }, [ensureUuid]);
-
-  const handleOpenShare = async () => {
-    setModalOpen(true); // 모달 먼저 오픈 (스피너 등 표시용)
-    if (shareUrl || shareFetching) return; // 중복호출 방지
-
-    try {
-      setShareFetching(true);
-      setShareError(null);
-
-      const uuid = (await ensureUuid()) || shareUUID;
-      setShareUrl(makeShareUrl(uuid));
-    } catch (e) {
-      setShareError(e?.message || "공유 링크 발급에 실패했습니다.");
-    } finally {
-      setShareFetching(false);
-    }
-  };
-
+  const shareUrl = "https://www.figma.com/file/abc...";
   const [form, setForm] = useState({
     relationship: "",
     situation: "",
@@ -239,22 +169,11 @@ export default function PlayChemiAnalysisPage() {
   const handleQuiz = async () => {
     try {
       await postQuiz10(1, resultId);
-      const uuid = await ensureUuid();
-      navigate(`/play/quiz/${resultId}/${encodeURIComponent(uuid)}`);
+      navigate(`/play/chemi/quiz/${resultId}`);
     } catch (err) {
       setError(err.message || "퀴즈 생성에 실패했습니다.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  // ✅ 이미 퀴즈가 있다면 “퀴즈 보기”도 동일한 주소로 이동
-  const handleGoQuiz = async () => {
-    try {
-      const uuid = await ensureUuid();
-      navigate(`/play/quiz/${resultId}/${encodeURIComponent(uuid)}`);
-    } catch (err) {
-      setError(err.message || "퀴즈로 이동할 수 없습니다.");
     }
   };
 
@@ -302,30 +221,37 @@ export default function PlayChemiAnalysisPage() {
           value: v,
         };
       })
-      .filter(Boolean);
+      .filter(Boolean); // null 값을 제거하여 유효한 링크만 남깁니다.
+
+    console.log("Generated Links:", links);
 
     return { nodes, links };
   }, [resultData]);
 
+  // ───────────────── Pie 차트 데이터 (이미지 스타일 그대로) ─────────────────
+  // 공통 옵션: 범례 숨김 + 반응형
   const pieOpts = {
     plugins: { legend: { display: false } },
     responsive: true,
     maintainAspectRatio: false,
   };
 
+  // 조각 오프셋(퍼센트가 작은 조각만 살짝 띄움)
   const makeOffset = (vals) => {
     const total = vals.reduce((a, b) => a + b, 0) || 1;
     return (ctx) => {
       const v = Number(ctx.raw || 0);
       const p = (v / total) * 100;
-      return p < 12 ? 20 : 8;
+      return p < 12 ? 20 : 8; // 작은 조각 20px, 나머지 8px
     };
   };
 
+  // ── 대화 톤
   const tonePie = useMemo(() => {
     const s = resultData?.spec || {};
     const labels = [];
     const values = [];
+
     const push = (label, val) => {
       const n = Number(val ?? 0);
       if (n > 0) {
@@ -333,9 +259,11 @@ export default function PlayChemiAnalysisPage() {
         values.push(n);
       }
     };
+
     push("긍정", s.tone_pos);
     push("농담/유머", s.tone_humer);
     push("비판", s.tone_crit);
+    // 필요 시 기타도 추가: push("기타", s.tone_else);
 
     return {
       labels,
@@ -344,13 +272,14 @@ export default function PlayChemiAnalysisPage() {
           data: values,
           backgroundColor: "#FFF8DE",
           borderColor: "#462C71",
-          borderWidth: 8,
+          borderWidth: 8, // 두꺼운 갭
           offset: 0,
         },
       ],
     };
   }, [resultData]);
 
+  // 톤 한줄 요약(예: "긍정적 표현: 63%  농담/유머: 18%  비판적 의견: 7%")
   const toneLines = useMemo(() => {
     const ds = tonePie.datasets?.[0];
     if (!ds || !ds.data?.length) return [];
@@ -368,6 +297,7 @@ export default function PlayChemiAnalysisPage() {
     });
   }, [tonePie]);
 
+  // ── 대화 주제
   const topicPie = useMemo(() => {
     const s = resultData?.spec || {};
     const slices = [];
@@ -403,12 +333,14 @@ export default function PlayChemiAnalysisPage() {
   const formatToneExample = (text) => {
     if (!text) return null;
     const match = text.match(/^(.*)\((.*)\)$/);
+    // 예: "ㅋㅋㅋㅋ 조심히 출근하십쇼 (권혁준)" → ["ㅋㅋㅋㅋ 조심히 출근하십쇼 (권혁준)", "ㅋㅋㅋㅋ 조심히 출근하십쇼 ", "권혁준"]
+
     if (match) {
       const sentence = match[1].trim();
       const speaker = match[2].trim();
       return `"${sentence}" - ${speaker}`;
     }
-    return text;
+    return text; // 혹시 패턴이 다르면 그대로 출력
   };
 
   if (loading) return <p>결과를 불러오는 중...</p>;
@@ -436,7 +368,7 @@ export default function PlayChemiAnalysisPage() {
                 <div className="flex flex-col">
                   <span className="text-st1">종합 케미 점수</span>
                   <p className="text-st1">
-                    <span className="text-h2 text-secondary">
+                    <span className="text-h2 text-[#F5F5F5]">
                       {resultData.spec.score_main}
                     </span>{" "}
                     점
@@ -549,7 +481,7 @@ export default function PlayChemiAnalysisPage() {
                 )}
               </div>
 
-              {/* 대화 톤 */}
+              {/* 대화 톤 (이미지 스타일) */}
               <div className="mb-20">
                 <div className="mt-20 mb-3 gap-0.5">
                   <p className="relative inline-block text-h6 text-primary-light mb-3">
@@ -560,6 +492,7 @@ export default function PlayChemiAnalysisPage() {
 
                 <div className="flex items-center gap-8">
                   <div className="w-48 h-48">
+                    {/* 퍼센트 라벨 플러그인 사용 */}
                     <Pie
                       data={tonePie}
                       options={pieOpts}
@@ -672,7 +605,7 @@ export default function PlayChemiAnalysisPage() {
                 </div>
               </div>
 
-              {/* Chatto의 케미 레벨업 가이드 */}
+              {/* Chatto의 서비스 분석 */}
               <div className="mb-20">
                 <div>
                   <div className="mt-20 mb-3 gap-0.5">
@@ -714,7 +647,7 @@ export default function PlayChemiAnalysisPage() {
           </div>
           <div className="w-full flex justify-between items-center">
             <button
-              onClick={handleOpenShare}
+              onClick={() => setModalOpen(true)}
               disabled={loading}
               className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
             >
@@ -724,10 +657,8 @@ export default function PlayChemiAnalysisPage() {
               open={modalOpen}
               onClose={() => setModalOpen(false)}
               url={shareUrl}
-              loading={shareFetching}
-              error={shareError}
             />
-            {!resultData.result.is_quized ? (
+            {resultData.result.isQuized ? (
               <button
                 onClick={handleQuiz}
                 disabled={loading}
@@ -737,7 +668,9 @@ export default function PlayChemiAnalysisPage() {
               </button>
             ) : (
               <button
-                onClick={handleGoQuiz}
+                onClick={() => {
+                  navigate(`/play/chemi/quiz/${resultId}`);
+                }}
                 disabled={loading}
                 className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
               >
@@ -765,6 +698,7 @@ export default function PlayChemiAnalysisPage() {
 
 // ──────────────────────────────────────────────────────────────
 // 조각 안에 퍼센트 라벨을 그려주는 커스텀 플러그인
+// (추가 설치 없이 사용 가능)
 // ──────────────────────────────────────────────────────────────
 const percentLabels = {
   id: "percentLabels",
@@ -777,7 +711,7 @@ const percentLabels = {
     const total = values.reduce((a, b) => a + b, 0) || 1;
 
     ctx.save();
-    ctx.fillStyle = options?.color || "#2E1A52";
+    ctx.fillStyle = options?.color || "#2E1A52"; // 보라 텍스트
     ctx.font =
       options?.font && typeof options.font === "string"
         ? options.font
@@ -789,6 +723,7 @@ const percentLabels = {
       const v = values[i];
       if (!v) return;
       const p = Math.round((v / total) * 100);
+      // 차트 중심에서 약간 안쪽으로 찍히는 내장 좌표 사용
       const pos = arc.tooltipPosition();
       ctx.fillText(`${p}%`, pos.x, pos.y);
     });
