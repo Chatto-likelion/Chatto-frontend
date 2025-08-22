@@ -933,6 +933,87 @@ export const deleteQuizResultPersonal = async (type, resultId, QP_id) => {
   }
 };
 
+//퀴즈 조회 (uuid)
+export const getQuizGuest = async (type, uuid) => {
+  try {
+    const response = await instance.get(
+      `/play/quiz/${typeToSlug(type)}/${uuid}/questions/`
+    );
+    if (response.status === 200) {
+      console.log("퀴즈: ", response.data);
+      return response.data;
+    } else {
+      throw new Error("알 수 없는 응답 상태");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      404: "퀴즈를 찾을 수 없습니다. (404)",
+    });
+  }
+};
+
+//퀴즈 게스트 이름 등록 (uuid)
+export const postQuizGuestName = async (type, uuid, name) => {
+  try {
+    const response = await instance.post(
+      `/play/quiz/${typeToSlug(type)}/${uuid}/start/guest/`,
+      { name }
+    );
+    if (response.status === 201) {
+      console.log("퀴즈: ", response.data);
+      return response.data;
+    } else {
+      throw new Error("알 수 없는 응답 상태");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      400: "입력값이 잘못되었습니다. (400)",
+      404: "퀴즈를 찾을 수 없습니다. (404)",
+    });
+  }
+};
+
+//퀴즈 게스트 제출 (uuid)
+export const postQuizGuestSubmit = async (type, uuid, QP_id, data) => {
+  try {
+    const response = await instance.post(
+      `/play/quiz/${typeToSlug(type)}/${uuid}/submit/guest/${QP_id}/`,
+      data
+    );
+    if (response.status === 200) {
+      console.log("퀴즈: ", response.data);
+      return;
+    } else {
+      throw new Error("알 수 없는 응답 상태");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      400: "입력값이 잘못되었습니다. (400)",
+      404: "퀴즈를 찾을 수 없습니다. (404)",
+    });
+  }
+};
+
+//퀴즈 게스트 결과 보기 (uuid)
+export const getQuizGuestSubmit = async (type, uuid, QP_id) => {
+  try {
+    const response = await instance.get(
+      `/play/quiz/${typeToSlug(type)}/${uuid}/personal/guest/${QP_id}/`
+    );
+    if (response.status === 200) {
+      console.log("퀴즈: ", response.data);
+      return response.data;
+    } else {
+      throw new Error("알 수 없는 응답 상태");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      400: "입력값이 잘못되었습니다. (400)",
+      404: "퀴즈를 찾을 수 없습니다. (404)",
+    });
+  }
+};
+
 /**
  * 크레딧
  */

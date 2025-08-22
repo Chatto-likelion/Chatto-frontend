@@ -56,6 +56,12 @@ function App() {
           element={<BusinessContrSharePage />}
         />
 
+        <Route path="/play/quiz/solve/:uuid" element={<QuizSolvePage />} />
+        <Route
+          path="/play/quiz/answer/:uuid/:qpId"
+          element={<QuizPersonalAnswerPage />}
+        />
+
         <Route
           path="/play/chemi/result-test"
           element={<PlayChemiResultPage />}
@@ -106,14 +112,6 @@ function App() {
 
           <Route path="/profileedit" element={<ProfileEditPage />} />
         </Route>
-        <Route
-          path="/play/quiz/solve/:analysisId"
-          element={<QuizSolvePage />}
-        />
-        <Route
-          path="/play/quiz/answer/:resultId"
-          element={<QuizPersonalAnswerPage />}
-        />
       </Routes>
     </BrowserRouter>
   );

@@ -1,17 +1,58 @@
-import { useParams, Link } from "react-router-dom";
+// src/pages/QuizPersonalAnswerPage.jsx
+import { useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { Header } from "@/components";
-import { useQuizPersonalAnswer } from "@/hooks/useQuizPersonalAnswer";
 import CheckBoxIcon from "@/assets/svg/CheckBox.svg?react";
 import CheckBoxCheckIcon from "@/assets/svg/CheckBoxCheck.svg?react";
 import CheckCircleIcon from "@/assets/svg/CheckCircle.svg?react";
 import XCircleIcon from "@/assets/svg/XCircle.svg?react";
+import useQuizGuest from "@/hooks/useQuizGuest";
 
 export default function QuizPersonalAnswerPage() {
-  const { resultId } = useParams();
-  const { details, sections, owner, loading } = useQuizPersonalAnswer(resultId);
+  // URL: /play/quiz/answer/:uuid/:qpId
+  const { uuid, qpId } = useParams();
 
-  if (loading) {
-    return <div>결과를 불러오는 중입니다...</div>;
+  const {
+    // 개인 결과 상태
+    details, // { relationship, situation, period } (필요하면 사용)
+    sections, // [{ sectionTitle, questions:[{ id, title, options[], correctOptionIndex, userSelectedOptionIndex }] }]
+    owner, // { name, score }
+
+    // 로딩/에러
+    loading, // 기본(문제 로드 등) 로딩
+    resultLoading, // 개인 결과 로딩
+    error, // 에러 메시지(문자열)
+
+    // 메서드
+    fetchMyPersonalResult, // (qpId?: string|number) => Promise<void>
+  } = useQuizGuest(uuid);
+
+  // 진입 시 URL의 qpId로 바로 내 결과 조회
+  useEffect(() => {
+    if (!uuid || !qpId) return;
+    fetchMyPersonalResult(qpId);
+  }, [uuid, qpId, fetchMyPersonalResult]);
+
+  // 로딩/에러 처리
+  if (loading || resultLoading) {
+    return (
+      <div className="w-full min-h-screen bg-primary-dark text-[#f5f5f5]">
+        <Header />
+        <div className="flex items-center justify-center h-[calc(100vh-72px)]">
+          <p className="text-body1">결과를 불러오는 중입니다...</p>
+        </div>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="w-full min-h-screen bg-primary-dark text-[#f5f5f5]">
+        <Header />
+        <div className="flex items-center justify-center h-[calc(100vh-72px)] text-red-500">
+          {String(error)}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -22,16 +63,15 @@ export default function QuizPersonalAnswerPage() {
         <main className="w-[650px] flex-shrink-0 flex flex-col items-start pt-6 mt-16 max-h-[calc(100vh-72px)] overflow-y-auto scrollbar-hide">
           <h1 className="text-h3">Quiz</h1>
           <h2 className="text-body1 text-primary-light mt-2">
-            개인 점수 - {owner.name}
+            개인 점수 - {owner?.name ?? "-"}
           </h2>
           <div className="flex justify-between items-center w-full my-5">
-            <p className="text-h4 text-primary-light">{owner.score}점</p>{" "}
-            {/* 점수를 크게 표시 */}
+            <p className="text-h4 text-primary-light">{owner?.score ?? 0}점</p>
           </div>
 
           <div className="w-full flex flex-col gap-6">
-            {sections
-              .flatMap((section) => section.questions)
+            {(sections ?? [])
+              .flatMap((section) => section?.questions ?? [])
               .map((q) => (
                 <div
                   key={q.id}
