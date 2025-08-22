@@ -5,7 +5,7 @@ import {
   getChatList,
   postChemiAnalyze,
   deleteChemiAnalysis,
-  postChemiQuiz10,
+  postQuiz10,
 } from "@/apis/api";
 import {
   Header,
@@ -166,7 +166,7 @@ export default function PlayChemiAnalysisPage() {
 
   const handleQuiz = async () => {
     try {
-      await postChemiQuiz10(resultId);
+      await postQuiz10(1, resultId);
       navigate(`/play/chemi/quiz/${resultId}`);
     } catch (err) {
       setError(err.message || "퀴즈 생성에 실패했습니다.");

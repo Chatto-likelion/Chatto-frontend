@@ -7,6 +7,14 @@ import {
   SmallServices,
   DetailForm_Share,
 } from "@/components";
+import {
+  postChemiQuiz1,
+  putChemiQuiz,
+  deleteChemiQuiz1,
+  deleteChemiQuiz10,
+  getChemiQuiz,
+  getChemiQuizDetail,
+} from "@/apis/api";
 import { useQuizData } from "../hooks/useQuizData";
 
 export default function QuizPage() {
