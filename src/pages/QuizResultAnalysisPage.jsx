@@ -1,7 +1,4 @@
 // src/pages/QuizResultAnalysisPage.jsx
-import { useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
-import { Header,  } from "@/components";
 import * as Icons from "@/assets/svg";
 import { useMemo, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
@@ -35,11 +32,8 @@ export default function QuizResultAnalysisPage() {
   // 공유 URL: some 페이지 레퍼런스와 동일 우선순위
   const shareUrl = useMemo(() => {
     const base = window.location.origin;
-    if (
-      uuid &&
-      (shareType === "chem" || shareType === "some" || shareType === "mbti")
-    ) {
-      return `${base}/play/${shareType}/share/${uuid}`;
+    if (uuid) {
+      return `${base}/play/quiz/solve/${uuid}`;
     }
     // fallback: 퀴즈 결과 상세 페이지
     return `${base}/play/quiz/result/${resultId}/${uuid}`;
