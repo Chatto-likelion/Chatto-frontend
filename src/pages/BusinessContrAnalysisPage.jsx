@@ -653,10 +653,14 @@ export default function BusinessContrAnalysisPage() {
                     {/* `spec_personal` 배열을 map 함수로 순회하여 각 사람의 프로필을 렌더링 */}
                     {resultData.spec_personal.map((person) => (
                       <div key={person.specpersonal_id} className="mb-10 p-4 ">
-                        {/* 이름(제목)과 총 기여 점수 */}
                         <p className="mb-3">
-                          <span className="text-st1 mr-2">{person.name}</span>{" "}
-                          총 기여 점수: {person.participation}점
+                          <span className="text-st1">{person.name}</span>
+                          {person.name === resultData.spec.leader && (
+                            <span className="text-st1 ml-1">(팀장)</span>
+                          )}
+                          <span className="ml-4">
+                            총 기여 점수: {person.participation}점
+                          </span>
                         </p>
 
                         <div className="flex justify-between items-start ml-4">
