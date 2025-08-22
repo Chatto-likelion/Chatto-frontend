@@ -5,42 +5,12 @@ import * as Icons from "@/assets/svg";
 import CheckBoxIcon from "@/assets/svg/CheckBox.svg?react";
 import CheckBoxCheckIcon from "@/assets/svg/CheckBoxCheck.svg?react";
 
-// --- 페이지에 표시할 더미 데이터 ---
-const dummyChatRooms = [
-  { id: 1, name: "양재동 족제비", count: 7 },
-  { id: 2, name: "양재동 족제비", count: 7 },
-  { id: 3, name: "준영이", count: 2 },
-];
+export default function QuizSolvePage() {
+  const { quizId } = useParams();
 
-const dummyQuestions = [
-  {
-    id: "q1", // 👈 id를 문자열로 변경
-    title: "Q1 어쩌고 저쩌고",
-    options: [
-      "가나다라",
-      "가나다라마바사아자차카타파하가나다라",
-      "가나다라",
-      "가나다라",
-    ],
-  },
-  {
-    id: "q2", // 👈 id를 문자열로 변경
-    title: "Q2 어쩌고 저쩌고",
-    options: [
-      "가나다라",
-      "가나다라마바사아자차카타파하가나다라",
-      "가나다라",
-      "가나다라",
-    ],
-  },
-];
-// ---------------------------------
+  const { questions, loading, error } = useQuizSolve(quizId);
 
-export default function QuizPage() {
-  const [chatRooms] = useState(dummyChatRooms);
-  const [questions] = useState(dummyQuestions);
   const [answers, setAnswers] = useState({});
-
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSelectOption = (questionId, optionIndex) => {
@@ -56,7 +26,6 @@ export default function QuizPage() {
       };
     });
   };
-
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
