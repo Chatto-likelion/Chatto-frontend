@@ -94,21 +94,22 @@ function App() {
 
           <Route path="/credit" element={<CreditsPage />} />
           <Route path="/result/:analysisId" element={<ResultPage />} />
-          <Route path="/play/quiz/:analysisId" element={<QuizPage />} />
+          <Route path="/play/quiz/:resultId/:uuid" element={<QuizPage />} />
           <Route
-            path="/play/quiz/result/analysis/:analysisId"
+            path="/play/quiz/result/analysis/:resultId/:uuid"
             element={<QuizResultAnalysisPage />}
           />
           <Route
-            path="/play/quiz/result/:analysisId"
+            path="/play/quiz/result/:resultId/:uuid"
             element={<QuizResultPage />}
           />
-          <Route
-            path="/play/quiz/solve/:analysisId"
-            element={<QuizSolvePage />}
-          />
+
           <Route path="/profileedit" element={<ProfileEditPage />} />
         </Route>
+        <Route
+          path="/play/quiz/solve/:analysisId"
+          element={<QuizSolvePage />}
+        />
         <Route
           path="/play/quiz/answer/:resultId"
           element={<QuizPersonalAnswerPage />}

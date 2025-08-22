@@ -6,13 +6,18 @@ import * as Icons from "@/assets/svg";
 import useQuizData from "@/hooks/useQuizData";
 
 export default function QuizResultAnalysisPage() {
-  const { analysisId } = useParams();
+  const { resultId, uuid } = useParams();
 
-  // type: 1 = chemi
-  const { loading, error, questions, scores, overview } = useQuizData(
-    1,
-    analysisId
-  );
+  const {
+    type, // 1|2|3
+    shareType, // "chem" | "some" | "mbti" | null
+    questions, // [{ questionId, questionIndex, title, options[4], answer(1~4), counts[4], ...}]
+    overview, // 분석 메타(관계/상황/기간 등)
+    scores, // [{ QP_id, name, score }]
+    loading,
+    error,
+    refetch, // 필요 시 재조회에 사용 가능
+  } = useQuizData(resultId, uuid);
 
   // ── 세부 정보(왼쪽 패널)
   const details = useMemo(() => {
@@ -43,7 +48,6 @@ export default function QuizResultAnalysisPage() {
 
   // ── 섹션 구성: 가장 많이 맞춘/틀린/나머지
   const sections = useMemo(() => {
-    // 질문 정규화: 각 보기의 퍼센트 계산
     const normalized = (questions ?? []).map((q) => {
       const total =
         (q.counts ?? []).reduce((a, b) => a + (Number(b) || 0), 0) || 0;
@@ -62,11 +66,8 @@ export default function QuizResultAnalysisPage() {
       };
     });
 
-    if (!normalized.length) {
-      return [];
-    }
+    if (!normalized.length) return [];
 
-    // 가장 많이/적게 맞춘 문제 찾기 (동률이면 첫 번째)
     let mostCorrect = normalized[0];
     let mostIncorrect = normalized[0];
     for (const item of normalized) {
@@ -74,7 +75,6 @@ export default function QuizResultAnalysisPage() {
       if (item.correctRate < mostIncorrect.correctRate) mostIncorrect = item;
     }
 
-    // 나머지
     const others = normalized.filter(
       (q) => q.id !== mostCorrect.id && q.id !== mostIncorrect.id
     );
@@ -141,7 +141,7 @@ export default function QuizResultAnalysisPage() {
           <h1 className="text-h3">Quiz</h1>
           <div className="group flex w-[180px] text-button border-1 border-primary-light rounded-[2px] ml-[536px] mt-3 px-[6px] py-1 transition-colors">
             <Link
-              to={`/play/quiz/${analysisId}`}
+              to={`/play/quiz/${resultId}/${uuid}`}
               className="flex-1 flex justify-center items-center text-[#595959] whitespace-nowrap pr-[2px]"
             >
               퀴즈 문제 구성
@@ -232,10 +232,9 @@ export default function QuizResultAnalysisPage() {
                   key={`${s.QP_id}-${s.name}`}
                   className="flex justify-between"
                 >
-                  {/* 필요 시 특정 인물에만 링크 거는 로직을 유지 */}
                   {s.name === "모모" ? (
                     <Link
-                      to={`/play/quiz/result/${analysisId}`}
+                      to={`/play/quiz/result/${resultId}/${uuid}`}
                       className="hover:text-[#595959] transition-colors"
                     >
                       {s.name}

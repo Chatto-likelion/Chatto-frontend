@@ -1,21 +1,34 @@
 // src/pages/QuizResultPage.jsx
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Header } from "@/components";
 import CheckBoxIcon from "@/assets/svg/CheckBox.svg?react";
-import CheckBoxCheckIcon from "@/assets/svg/CheckBoxCheck.svg?react";
+import CheckBoxCheckIcon from "@/assets/svg/CheckBoxCheck.svg?react"; // (개인 선택 표시 시 사용 가능)
 import CheckCircleIcon from "@/assets/svg/CheckCircle.svg?react";
 import XCircleIcon from "@/assets/svg/XCircle.svg?react";
 import useQuizData from "@/hooks/useQuizData";
 
 export default function QuizResultPage() {
-  const { analysisId } = useParams();
+  const { resultId, uuid } = useParams();
 
-  // type: 1 = chemi
-  const { loading, error, questions, scores, overview } = useQuizData(
-    1,
-    analysisId
-  );
+  // 훅에서 타입을 추론하고, 문제/점수/개요 데이터를 받아옵니다.
+  const {
+    loading,
+    error,
+    questions,
+    scores,
+    overview,
+    fetchPersonal, // 개인별 상세(정답/선지 선택) 불러오기
+  } = useQuizData(resultId, uuid);
+
+  // 페이지 진입/점수 목록 갱신 시 모든 참여자의 개인 상세를 미리 로딩(정답자 이름 툴팁용)
+  useEffect(() => {
+    if (!Array.isArray(scores) || scores.length === 0) return;
+    const ids = [
+      ...new Set(scores.map((s) => s?.QP_id).filter((v) => v != null)),
+    ];
+    Promise.all(ids.map((id) => fetchPersonal(id))).catch(() => {});
+  }, [scores, fetchPersonal]);
 
   // 오른쪽 패널 - 점수 목록 정렬
   const sortedScores = useMemo(() => {
@@ -23,7 +36,7 @@ export default function QuizResultPage() {
     return [...scores].sort((a, b) => (b?.score ?? 0) - (a?.score ?? 0));
   }, [scores]);
 
-  // 가운데 타이틀의 "개인 점수 - {이름}"은 우선 1등 표시(별도 선택 UX가 생기면 교체)
+  // 가운데 타이틀: 1등 이름을 대표로 표시
   const ownerName = sortedScores[0]?.name ?? "-";
 
   // 툴팁(정답 바 호버) 상태
@@ -40,7 +53,7 @@ export default function QuizResultPage() {
     );
   }
 
-  // 왼쪽 패널 세부 정보(overview가 제공하는 경우 표시)
+  // 왼쪽 패널 세부 정보
   const details = {
     relationship: overview?.result?.relationship ?? "-",
     situation: overview?.result?.situation ?? "-",
@@ -147,8 +160,7 @@ export default function QuizResultPage() {
                           <div className="flex items-center gap-3 relative z-10">
                             <div className="relative w-6 h-6 flex-shrink-0 flex items-center justify-center">
                               <CheckBoxIcon className="absolute w-4 h-4" />
-                              {/* 개인 선택 정보가 없으므로 선택 체크는 숨김.
-                                  필요 시 개인 상세(QP 선택) 연동 후 표시 */}
+                              {/* 개인 선택 체크는 개인 상세 연동 후 사용 가능 */}
                               {/* <CheckBoxCheckIcon ... /> */}
                             </div>
                             <span className="text-body2">{opt}</span>
@@ -179,7 +191,7 @@ export default function QuizResultPage() {
         <aside className="w-[212px] flex-shrink-0 flex flex-col gap-4 pt-6 mt-48 ml-[147px]">
           <div className="w-full p-4 border border-primary-light rounded-lg">
             <Link
-              to={`/play/quiz/Result/Analysis/${analysisId}`}
+              to={`/play/quiz/result/analysis/${resultId}/${uuid}`}
               className="flex justify-center text-body2 mb-3 hover:text-[#595959] transition-colors"
             >
               전체 점수 보기
@@ -216,7 +228,7 @@ export default function QuizResultPage() {
               <input
                 type="text"
                 readOnly
-                value={`https://.../${analysisId}`}
+                value={`${window.location.origin}/play/quiz/result/${resultId}/${uuid}`}
                 className="flex-1 bg-primary text-xs p-1 rounded-l text-gray-400"
               />
               <button className="bg-secondary text-primary-dark text-xs font-bold p-1 rounded-r">
