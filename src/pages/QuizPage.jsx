@@ -260,8 +260,10 @@ export default function QuizPage() {
                           <div className="flex items-center w-full">
                             <div
                               className="relative w-6 h-6 mr-2 cursor-pointer flex-shrink-0"
-                              onClick={() =>
-                                handleSelectCorrectAnswer(qIndex, i)
+                              onClick={
+                                isEditing
+                                  ? () => handleSelectCorrectAnswer(qIndex, i)
+                                  : undefined
                               }
                             >
                               <CheckBoxIcon className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5" />
