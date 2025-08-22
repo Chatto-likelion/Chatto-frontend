@@ -399,6 +399,52 @@ export const postUUID = async (type, result_id) => {
   }
 };
 
+export const getUUID = async (type, result_id) => {
+  try {
+    const formData = new FormData();
+    formData.append("type", type);
+
+    const response = await instanceWithToken.get(
+      `/play/chat/uuid/${result_id}/`,
+      formData
+    );
+
+    if (response.status === 201) {
+      console.log("분석 성공:", response.data);
+      return response.data.uuid; // { uuid: string }
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      400: "입력값이 잘못되었습니다. (400)",
+      401: "로그인이 필요합니다. (401)",
+      403: "분석 결과를 공유할 권한이 없습니다. (403)",
+      404: "분석 결과를 찾을 수 없습니다. (404)",
+    });
+  }
+};
+
+//play uuid로 타입 반환
+export const getUUIDType = async (uuid) => {
+  try {
+    const response = await instanceWithToken.get(
+      `/play/chat/uuid/search/${uuid}/`
+    );
+
+    if (response.status === 200) {
+      console.log("분석 성공:", response.data);
+      return response.data.type; //type: string
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      404: "타입을 찾을 수 없습니다. (404)",
+    });
+  }
+};
+
 export const postUUID_Bus = async (type, result_id) => {
   try {
     const formData = new FormData();
@@ -850,7 +896,7 @@ export const getQuizResult = async (type, resultId) => {
   }
 };
 
-//퀴즈 사람별 점수 조회
+//퀴즈 사람별 상세 결과 조회
 export const getQuizResultPersonal = async (type, resultId, QP_id) => {
   try {
     const response = await instanceWithToken.get(
@@ -871,7 +917,7 @@ export const getQuizResultPersonal = async (type, resultId, QP_id) => {
   }
 };
 
-//퀴즈 사람별 점수 조회
+//퀴즈 사람별 결과 삭제
 export const deleteQuizResultPersonal = async (type, resultId, QP_id) => {
   try {
     const response = await instanceWithToken.delete(
