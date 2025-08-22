@@ -401,15 +401,11 @@ export const postUUID = async (type, result_id) => {
 
 export const getUUID = async (type, result_id) => {
   try {
-    const formData = new FormData();
-    formData.append("type", type);
-
     const response = await instanceWithToken.get(
-      `/play/chat/uuid/${result_id}/`,
-      formData
+      `/play/chat/result_type/search/${type}/${result_id}/`
     );
 
-    if (response.status === 201) {
+    if (response.status === 200) {
       console.log("분석 성공:", response.data);
       return response.data.uuid; // { uuid: string }
     } else {
@@ -419,7 +415,6 @@ export const getUUID = async (type, result_id) => {
     throwMapped(error, {
       400: "입력값이 잘못되었습니다. (400)",
       401: "로그인이 필요합니다. (401)",
-      403: "분석 결과를 공유할 권한이 없습니다. (403)",
       404: "분석 결과를 찾을 수 없습니다. (404)",
     });
   }

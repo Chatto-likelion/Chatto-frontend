@@ -1,5 +1,5 @@
 // src/pages/QuizPage.jsx
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Header, SmallServices } from "@/components";
 import CheckBoxIcon from "@/assets/svg/CheckBox.svg?react";
@@ -7,40 +7,31 @@ import CheckBoxCheckIcon from "@/assets/svg/CheckBoxCheck.svg?react";
 import useQuizData from "@/hooks/useQuizData";
 
 export default function QuizPage() {
-  const { analysisId } = useParams();
+  const { resultId, uuid } = useParams();
   const navigate = useNavigate();
 
-  // ✅ 초기엔 임시 1(chem)으로 시작 → shareType이 오면 실제 타입으로 교체
-  const [resolvedType, setResolvedType] = useState(1);
-
   const {
-    questions,
+    type, // 1|2|3 (필요 시 사용 가능)
+    shareType, // "chem" | "some" | "mbti" | null (표시/분기용)
+    questions, // [{ questionId, questionIndex, title, options[4], answer(1~4), ...}]
     loading,
     error,
     addOne,
-    updateOne,
+    updateOne, // { title, options, answer } 그대로 전달
     deleteOne,
     deleteAll,
     refetch,
-    shareType, // "chem" | "some" | "mbti" | null
-  } = useQuizData(analysisId);
+  } = useQuizData(resultId, uuid);
 
-  // shareType 수신 후 숫자 타입으로 매핑해 재설정
-  useEffect(() => {
-    if (!shareType) return;
-    const map = { chem: 1, some: 2, mbti: 3 };
-    const t = map[shareType];
-    if (t && t !== resolvedType) setResolvedType(t);
-  }, [shareType, resolvedType]);
-
-  // 편집/삭제 대상
+  // 편집/삭제 타깃(문항 index로 관리)
   const [editingIndex, setEditingIndex] = useState(null);
   const [deletingIndex, setDeletingIndex] = useState(null);
 
-  // 편집 드래프트 & 정답체크
+  // 편집 드래프트 & 정답 체크(0-base)
   const [drafts, setDrafts] = useState({});
-  const [correctAnswers, setCorrectAnswers] = useState({}); // 0-based
+  const [correctAnswers, setCorrectAnswers] = useState({});
 
+  // questionIndex → question 매핑
   const questionByIndex = useMemo(() => {
     const m = new Map();
     questions.forEach((q) => m.set(q.questionIndex, q));
@@ -49,6 +40,7 @@ export default function QuizPage() {
 
   // 편집 토글 (완료 시 서버 저장)
   const handleToggleEdit = async (qIndex) => {
+    // 완료 → 저장
     if (editingIndex === qIndex) {
       const base = questionByIndex.get(qIndex);
       const draft = drafts[qIndex] ?? {
@@ -69,6 +61,7 @@ export default function QuizPage() {
       return;
     }
 
+    // 시작 → 드래프트/정답 초기화
     const q = questionByIndex.get(qIndex);
     if (!q) return;
     setDrafts((prev) => ({
@@ -77,7 +70,7 @@ export default function QuizPage() {
     }));
     setCorrectAnswers((prev) => ({
       ...prev,
-      [qIndex]: (q.answer ?? 1) - 1,
+      [qIndex]: (q.answer ?? 1) - 1, // 1~4 → 0~3
     }));
     setEditingIndex(qIndex);
   };
@@ -110,18 +103,18 @@ export default function QuizPage() {
             answer: q?.answer ?? 1,
           };
         })();
-      const next = [...base.options];
-      next[optIdx] = newText;
-      return { ...prev, [qIndex]: { ...base, options: next } };
+      const nextOptions = [...base.options];
+      nextOptions[optIdx] = newText;
+      return { ...prev, [qIndex]: { ...base, options: nextOptions } };
     });
   };
 
-  // 정답 선택
+  // 정답 선택(체크)
   const handleSelectCorrectAnswer = (qIndex, optIdx) => {
     setCorrectAnswers((prev) => ({ ...prev, [qIndex]: optIdx }));
   };
 
-  // 삭제 토글/확정
+  // 삭제 확인 UI 토글/확정
   const handleToggleDeleteConfirm = (qIndex) => {
     setDeletingIndex((cur) => (cur === qIndex ? null : qIndex));
   };
@@ -134,9 +127,10 @@ export default function QuizPage() {
   // 문항 추가
   const handleAddQuestion = async () => {
     await addOne();
-    await refetch();
+    await refetch(); // 최신 목록 반영
   };
 
+  // 로딩/에러 처리
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-primary-dark text-gray-2">
@@ -152,12 +146,15 @@ export default function QuizPage() {
       <div className="flex flex-col items-center justify-center min-h-screen bg-primary-dark text-gray-2">
         <Header />
         <div className="flex-1 flex items-center justify-center text-red-500">
-          <p className="text-h6">{error}</p>
+          <p className="text-h6">{String(error)}</p>
         </div>
       </div>
     );
   }
 
+  // ────────────────────────────────────────────────────────────
+  // UI (레이아웃 변경 없음)
+  // ────────────────────────────────────────────────────────────
   return (
     <div className="w-full min-h-screen bg-primary-dark text-[#f5f5f5]">
       <Header />
@@ -176,8 +173,9 @@ export default function QuizPage() {
               퀴즈 문제 구성
             </span>
             <div className="border-r border-[#bfbfbf] h-4" />
+            {/* 점수 분석 페이지로 이동 (라우팅 규칙에 맞게 수정 가능) */}
             <Link
-              to={`/play/quiz/result/analysis/${analysisId}`}
+              to={`/play/quiz/result/analysis/${resultId}/${uuid}`}
               className="flex-1 flex justify-center items-center pl-[2px] text-[#595959]"
             >
               친구 점수 보기
