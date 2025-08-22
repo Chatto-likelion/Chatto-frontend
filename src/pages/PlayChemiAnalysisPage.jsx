@@ -301,24 +301,21 @@ export default function PlayChemiAnalysisPage() {
   }, [resultData]);
 
   // 톤 한줄 요약(예: "긍정적 표현: 63%  농담/유머: 18%  비판적 의견: 7%")
-  const toneLine = useMemo(() => {
+  const toneLines = useMemo(() => {
     const ds = tonePie.datasets?.[0];
-    if (!ds || !ds.data?.length) return "";
+    if (!ds || !ds.data?.length) return [];
     const vals = ds.data.map((v) => Number(v || 0));
     const total = vals.reduce((a, b) => a + b, 0) || 1;
-    return tonePie.labels
-      .map((label, i) => {
-        const p = Math.round((vals[i] / total) * 100);
-        // 라벨 약간 다듬기
-        const pretty =
-          label === "긍정"
-            ? "긍정적 표현"
-            : label === "비판"
-            ? "비판적 의견"
-            : label;
-        return `${pretty}: ${p}%`;
-      })
-      .join("  ");
+    return tonePie.labels.map((label, i) => {
+      const p = Math.round((vals[i] / total) * 100);
+      const pretty =
+        label === "긍정"
+          ? "긍정적 표현"
+          : label === "비판"
+          ? "비판적 의견"
+          : label;
+      return { label: pretty, percent: p };
+    });
   }, [tonePie]);
 
   // ── 대화 주제
@@ -354,6 +351,19 @@ export default function PlayChemiAnalysisPage() {
     };
   }, [resultData]);
 
+  const formatToneExample = (text) => {
+    if (!text) return null;
+    const match = text.match(/^(.*)\((.*)\)$/);
+    // 예: "ㅋㅋㅋㅋ 조심히 출근하십쇼 (권혁준)" → ["ㅋㅋㅋㅋ 조심히 출근하십쇼 (권혁준)", "ㅋㅋㅋㅋ 조심히 출근하십쇼 ", "권혁준"]
+
+    if (match) {
+      const sentence = match[1].trim();
+      const speaker = match[2].trim();
+      return `"${sentence}" - ${speaker}`;
+    }
+    return text; // 혹시 패턴이 다르면 그대로 출력
+  };
+
   if (loading) return <p>결과를 불러오는 중...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
@@ -378,10 +388,10 @@ export default function PlayChemiAnalysisPage() {
               <div className="flex justify-between">
                 <div className="flex flex-col">
                   <span className="text-st1">종합 케미 점수</span>
-                  <p>
+                  <p className="text-st1">
                     <span className="text-h2 text-secondary">
                       {resultData.spec.score_main}
-                    </span>
+                    </span>{" "}
                     점
                   </p>
                 </div>
@@ -443,34 +453,46 @@ export default function PlayChemiAnalysisPage() {
                 {resultData?.spec ? (
                   <div className="flex flex-col gap-5 text-st2">
                     {/* TOP1 */}
-                    <div className="flex justify-row gap-20">
-                      <p className="w-100 text-body1 text-[#F5F5F5]">
-                        TOP1 {resultData.spec.top1_A} & {resultData.spec.top1_B}{" "}
-                        – {resultData.spec.top1_score}점
-                      </p>
-                      <p className="text-[#F5F5F5]">
+                    <div className="flex justify-row">
+                      <div className="w-40 mr-10">
+                        <p className="text-body1 text-secondary-dark">
+                          TOP1 – {resultData.spec.top1_score}점
+                        </p>
+                        <p className="text-body1 text-[#F5F5F5]">
+                          {resultData.spec.top1_A} & {resultData.spec.top1_B}
+                        </p>
+                      </div>
+                      <p className="flex-1 text-[#F5F5F5]">
                         {resultData.spec.top1_comment}
                       </p>
                     </div>
 
                     {/* TOP2 */}
-                    <div className="flex justify-row gap-20">
-                      <p className="w-100 text-body1 text-[#F5F5F5]">
-                        TOP2 {resultData.spec.top2_A} & {resultData.spec.top2_B}{" "}
-                        – {resultData.spec.top2_score}점
-                      </p>
-                      <p className="text-[#F5F5F5]">
+                    <div className="flex justify-row">
+                      <div className="w-40 mr-10">
+                        <p className="text-body1 text-secondary-dark">
+                          TOP1 – {resultData.spec.top2_score}점
+                        </p>
+                        <p className="text-body1 text-[#F5F5F5]">
+                          {resultData.spec.top2_A} & {resultData.spec.top2_B}
+                        </p>
+                      </div>
+                      <p className="flex-1 text-[#F5F5F5]">
                         {resultData.spec.top2_comment}
                       </p>
                     </div>
 
                     {/* TOP3 */}
-                    <div className="flex justify-row gap-20">
-                      <p className="w-150 text-body1 text-[#F5F5F5]">
-                        TOP3 {resultData.spec.top3_A} & {resultData.spec.top3_B}{" "}
-                        – {resultData.spec.top3_score}점
-                      </p>
-                      <p className="text-[#F5F5F5]">
+                    <div className="flex justify-row">
+                      <div className="w-40 mr-10">
+                        <p className="text-body1 text-secondary-dark">
+                          TOP1 – {resultData.spec.top3_score}점
+                        </p>
+                        <p className="text-body1 text-[#F5F5F5]">
+                          {resultData.spec.top3_A} & {resultData.spec.top3_B}
+                        </p>
+                      </div>
+                      <p className="flex-1 text-[#F5F5F5]">
                         {resultData.spec.top3_comment}
                       </p>
                     </div>
@@ -498,19 +520,28 @@ export default function PlayChemiAnalysisPage() {
                       plugins={[percentLabels]}
                     />
                   </div>
-                  <div className="mt-7 flex-1 leading-7">
-                    <p className="mb-2 text-body2 text-[#F5F5F5]">{toneLine}</p>
+                  <div className="mt-2 flex-1 leading-7">
+                    <div className="mb-5 ml-5">
+                      {toneLines.map((item, idx) => (
+                        <p
+                          key={idx}
+                          className="text-start text-body2 text-[#F5F5F5]"
+                        >
+                          · {item.label} : {item.percent}%
+                        </p>
+                      ))}
+                    </div>
                     <div>
                       <p className="text-secondary text-st1 mb-2">예시 대화</p>
                       <div className="space-y-2">
                         <p className="pl-5 text-body2 text-[#F5F5F5]">
-                          {resultData.spec.tone_ex1}
+                          · {formatToneExample(resultData.spec.tone_ex1)}
                         </p>
                         <p className="pl-5 text-body2 text-[#F5F5F5]">
-                          {resultData.spec.tone_ex2}
+                          · {formatToneExample(resultData.spec.tone_ex2)}
                         </p>
                         <p className="pl-5 text-body2 text-[#F5F5F5]">
-                          {resultData.spec.tone_ex3}
+                          · {formatToneExample(resultData.spec.tone_ex3)}
                         </p>
                       </div>
                     </div>
@@ -528,9 +559,9 @@ export default function PlayChemiAnalysisPage() {
                 </div>
                 <div className="ml-10 space-y-4">
                   <div className="space-y-2">
-                    <p>평균 응답 시간 : {resultData.spec.resp_time}</p>
-                    <p>즉각 응답 비율 : {resultData.spec.resp_ratio}</p>
-                    <p>'읽씹' 발생률 : {resultData.spec.ignore}</p>
+                    <p>· 평균 응답 시간 : {resultData.spec.resp_time}초</p>
+                    <p>· 즉각 응답 비율 : {resultData.spec.resp_ratio}%</p>
+                    <p>· '읽씹' 발생률 : {resultData.spec.ignore}%</p>
                   </div>
                   <div>
                     <p className="text-secondary">
@@ -552,29 +583,30 @@ export default function PlayChemiAnalysisPage() {
                 </div>
                 <div className="flex justify-row gap-8 pl-8">
                   <div className="w-48 h-48 mb-2">
-                    <Pie data={topicPie} options={pieOpts} />
+                    <Pie
+                      data={topicPie}
+                      options={pieOpts}
+                      plugins={[percentLabels]}
+                    />
                   </div>
-                  <div className="space-y-1 mt-30">
-                    <div className="flex justify-row gap-4 text-body2 text-[#F5F5F5]">
-                      <p>
-                        {resultData.spec.topic1} :{" "}
-                        {resultData.spec.topic1_ratio}%
-                      </p>
-                      <p>
-                        {resultData.spec.topic2} :{" "}
-                        {resultData.spec.topic2_ratio}%
-                      </p>
-                    </div>
-                    <div className="flex justify-row gap-4 text-body2 text-[#F5F5F5]">
-                      <p>
-                        {resultData.spec.topic3} :{" "}
-                        {resultData.spec.topic3_ratio}%
-                      </p>
-                      <p>
-                        {resultData.spec.topic4} :{" "}
-                        {resultData.spec.topic4_ratio}%
-                      </p>
-                    </div>
+                  <div className="space-y-1 mt-10 ml-10">
+                    <p className="text-start text-body2 text-[#F5F5F5]">
+                      · {resultData.spec.topic1} :{" "}
+                      {resultData.spec.topic1_ratio}%
+                    </p>
+                    <p className="text-start text-body2 text-[#F5F5F5]">
+                      · {resultData.spec.topic2} :{" "}
+                      {resultData.spec.topic2_ratio}%
+                    </p>
+
+                    <p className="text-start text-body2 text-[#F5F5F5]">
+                      · {resultData.spec.topic3} :{" "}
+                      {resultData.spec.topic3_ratio}%
+                    </p>
+                    <p className="text-start text-body2 text-[#F5F5F5]">
+                      · {resultData.spec.topic4} :{" "}
+                      {resultData.spec.topic4_ratio}%
+                    </p>
                   </div>
                 </div>
               </div>
