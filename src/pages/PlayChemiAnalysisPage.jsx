@@ -237,11 +237,22 @@ export default function PlayChemiAnalysisPage() {
   const handleQuiz = async () => {
     try {
       await postQuiz10(1, resultId);
-      navigate(`/play/quiz/${resultId}/${shareUUID}`);
+      const uuid = await ensureUuid();
+      navigate(`/play/quiz/${resultId}/${encodeURIComponent(uuid)}`);
+
     } catch (err) {
       setError(err.message || "퀴즈 생성에 실패했습니다.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoQuiz = async () => {
+    try {
+      const uuid = await ensureUuid();
+      navigate(`${window.location.origin}/play/quiz/${resultId}/${encodeURIComponent(uuid)}`);
+    } catch (err) {
+      setError(err.message || "퀴즈로 이동할 수 없습니다.");
     }
   };
 
@@ -289,9 +300,7 @@ export default function PlayChemiAnalysisPage() {
           value: v,
         };
       })
-      .filter(Boolean); // null 값을 제거하여 유효한 링크만 남깁니다.
-
-    console.log("Generated Links:", links);
+      .filter(Boolean);
 
     return { nodes, links };
   }, [resultData]);
@@ -736,9 +745,7 @@ export default function PlayChemiAnalysisPage() {
               </button>
             ) : (
               <button
-                onClick={() => {
-                  navigate(`/play/quiz/${resultId}/${shareUUID}`);
-                }}
+                onClick={handleGoQuiz}
                 disabled={loading}
                 className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
               >

@@ -210,6 +210,51 @@ export default function BusinessContrAnalysisPage() {
     }
   };
 
+  // ✅ 툴팁 커스터마이징 (항목 별 보기)
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div
+          className="custom-tooltip"
+          style={{
+            backgroundColor: "#fff",
+            padding: "10px",
+            border: "1px solid #ccc",
+          }}
+        >
+          <p className="label">{`${label}`}</p>
+          <p className="intro">{`점수: ${payload[0].value}`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // ✅ 툴팁 커스터마이징 (기간별 보기)
+  const CustomLineTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div
+          className="custom-tooltip"
+          style={{
+            backgroundColor: "#fff",
+            padding: "10px",
+            border: "1px solid #ccc",
+          }}
+        >
+          {/* 이 부분을 제거하거나 주석 처리하여 기간 명을 숨깁니다. */}
+          {/* <p className="label">{`기간: ${label}`}</p> */}
+          {payload.map((entry, index) => (
+            <p key={index} style={{ color: entry.color }}>
+              {`${entry.name}: ${entry.value}`}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
   // ✅ 데이터 가공 훅 수정 (map 후 filter)
   const allItemChartsData = useMemo(() => {
     if (!resultData?.spec_period || resultData.spec_period.length === 0) {
@@ -249,6 +294,26 @@ export default function BusinessContrAnalysisPage() {
 
     return transformedData;
   }, [resultData]);
+
+  const CustomXAxisTick = ({ x, y, payload }) => {
+    // payload.value는 '기간 1', '기간 2' 같은 값입니다.
+    // 이 값에 따라 원하는 텍스트를 반환합니다.
+    if (payload.value === "기간 1") {
+      return (
+        <text x={x} y={y} dy={16} textAnchor="middle" fill="#666">
+          {resultData.result.analysis_date_start}
+        </text>
+      );
+    }
+    if (payload.value === "기간 6") {
+      return (
+        <text x={x} y={y} dy={16} textAnchor="middle" fill="#666">
+          {resultData.result.analysis_date_end}
+        </text>
+      );
+    }
+    return null; // 그 외의 틱은 숨깁니다.
+  };
 
   // 이 console.log를 통해 데이터가 올바르게 변환되었는지 확인하세요.
   // console.log('Transformed totalPeriodData:', totalPeriodData);
@@ -366,8 +431,12 @@ export default function BusinessContrAnalysisPage() {
                                   tickLine={false}
                                 />
                                 <YAxis hide />
-                                <Tooltip />
-                                <Bar dataKey="participation" fill="#4C1E95" />
+                                <Tooltip content={<CustomTooltip />} />
+                                <Bar
+                                  dataKey="participation"
+                                  fill="#4C1E95"
+                                  barSize={70}
+                                />
                               </BarChart>
                             </ResponsiveContainer>
                           </div>
@@ -411,8 +480,12 @@ export default function BusinessContrAnalysisPage() {
                                   tickLine={false}
                                 />
                                 <YAxis hide />
-                                <Tooltip />
-                                <Bar dataKey="infoshare" fill="#4C1E95" />
+                                <Tooltip content={<CustomTooltip />} />
+                                <Bar
+                                  dataKey="infoshare"
+                                  fill="#4C1E95"
+                                  barSize={70}
+                                />
                               </BarChart>
                             </ResponsiveContainer>
                           </div>
@@ -456,8 +529,12 @@ export default function BusinessContrAnalysisPage() {
                                   tickLine={false}
                                 />
                                 <YAxis hide />
-                                <Tooltip />
-                                <Bar dataKey="probsolve" fill="#4C1E95" />
+                                <Tooltip content={<CustomTooltip />} />
+                                <Bar
+                                  dataKey="probsolve"
+                                  fill="#4C1E95"
+                                  barSize={70}
+                                />
                               </BarChart>
                             </ResponsiveContainer>
                           </div>
@@ -501,8 +578,12 @@ export default function BusinessContrAnalysisPage() {
                                   tickLine={false}
                                 />
                                 <YAxis hide />
-                                <Tooltip />
-                                <Bar dataKey="proposal" fill="#4C1E95" />
+                                <Tooltip content={<CustomTooltip />} />
+                                <Bar
+                                  dataKey="proposal"
+                                  fill="#4C1E95"
+                                  barSize={70}
+                                />
                               </BarChart>
                             </ResponsiveContainer>
                           </div>
@@ -546,8 +627,12 @@ export default function BusinessContrAnalysisPage() {
                                   tickLine={false}
                                 />
                                 <YAxis hide />
-                                <Tooltip />
-                                <Bar dataKey="resptime" fill="#4C1E95" />
+                                <Tooltip content={<CustomTooltip />} />
+                                <Bar
+                                  dataKey="resptime"
+                                  fill="#4C1E95"
+                                  barSize={70}
+                                />
                               </BarChart>
                             </ResponsiveContainer>
                           </div>
@@ -568,14 +653,19 @@ export default function BusinessContrAnalysisPage() {
                     {/* `spec_personal` 배열을 map 함수로 순회하여 각 사람의 프로필을 렌더링 */}
                     {resultData.spec_personal.map((person) => (
                       <div key={person.specpersonal_id} className="mb-10 p-4 ">
-                        {/* 이름(제목)과 총 기여 점수 */}
-                        <p className="text-h7 font-bold text-primary-dark mb-3">
-                          {person.name} 총 기여 점수: {person.participation}점
+                        <p className="mb-3">
+                          <span className="text-st1">{person.name}</span>
+                          {person.name === resultData.spec.leader && (
+                            <span className="text-st1 ml-1">(팀장)</span>
+                          )}
+                          <span className="ml-4">
+                            총 기여 점수: {person.participation}점
+                          </span>
                         </p>
 
                         <div className="flex justify-between items-start ml-4">
                           {/* 세부 지표 목록 */}
-                          <div className="flex flex-col gap-2">
+                          <div className="flex flex-col gap-2 text-[#595959]">
                             <p>정보 공유</p>
                             <p>문제 해결 참여</p>
                             <p>주도적 제안</p>
@@ -583,7 +673,7 @@ export default function BusinessContrAnalysisPage() {
                           </div>
 
                           {/* 세부 지표 점수 (텍스트) */}
-                          <div className="flex flex-col gap-2">
+                          <div className="flex flex-col gap-2 mr-10">
                             <p className="font-bold text-[#262626]">
                               {getMetricText(person.infoshare)}
                             </p>
@@ -606,10 +696,9 @@ export default function BusinessContrAnalysisPage() {
 
                         {/* AI 분석 */}
                         <div className="mt-4 pt-4 ml-4">
-                          <p className="text-body2 text-primary-dark">
-                            <span className="font-bold">분석:</span> A는 주도적
-                            역할을 수행하며 핵심 정보와 아이디어를 자주
-                            제공합니다.
+                          <p className="text-body2 text-primary">
+                            <span className="font-bold">분석:</span>{" "}
+                            {person.analysis}
                           </p>
                         </div>
                       </div>
@@ -629,31 +718,47 @@ export default function BusinessContrAnalysisPage() {
                           <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
                         </p>
                         <div className="flex justify-center pr-3 py-5 border-3 border-primary-dark rounded-lg">
-                          <ResponsiveContainer width="90%" height={280}>
-                            <LineChart data={chart.data}>
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="name" />
-                              <YAxis
-                                domain={[0, 100]}
-                                tick={false}
-                                axisLine={false}
-                                tickLine={false}
-                              />
-                              <Tooltip />
-                              <Legend />
-                              {/* API에서 가져온 유저 이름으로 Line을 동적으로 생성 */}
-                              {resultData?.spec_personal?.map((p) => (
-                                <Line
-                                  key={p.name}
-                                  type="monotone" // 부드러운 곡선 차트
-                                  dataKey={p.name}
-                                  stroke={`#${((Math.random() * 0xffffff) << 0)
-                                    .toString(16)
-                                    .padStart(6, "0")}`}
+                          <div
+                            style={{
+                              position: "relative",
+                              width: "90%",
+                              height: "280px",
+                            }}
+                          >
+                            <ResponsiveContainer width="90%" height={280}>
+                              <LineChart data={chart.data}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis
+                                  dataKey="name"
+                                  tick={<CustomXAxisTick />}
+                                  axisLine={false}
+                                  tickLine={false}
                                 />
-                              ))}
-                            </LineChart>
-                          </ResponsiveContainer>
+                                <YAxis
+                                  domain={[0, 100]}
+                                  tick={false}
+                                  axisLine={false}
+                                  tickLine={false}
+                                />
+                                <Tooltip content={<CustomLineTooltip />} />
+                                <Legend />
+                                {/* API에서 가져온 유저 이름으로 Line을 동적으로 생성 */}
+                                {resultData?.spec_personal?.map((p) => (
+                                  <Line
+                                    key={p.name}
+                                    type="monotone" // 부드러운 곡선 차트
+                                    dataKey={p.name}
+                                    stroke={`#${(
+                                      (Math.random() * 0xffffff) <<
+                                      0
+                                    )
+                                      .toString(16)
+                                      .padStart(6, "0")}`}
+                                  />
+                                ))}
+                              </LineChart>
+                            </ResponsiveContainer>
+                          </div>
                         </div>
                       </div>
                     ))}
