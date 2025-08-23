@@ -18,6 +18,7 @@ export default function DetailForm({
   value,
   onChange,
   isAnalysis = false,
+  loading = false,
 }) {
   const mode = useCurrentMode();
   const isPlay = mode === "play";
@@ -33,7 +34,6 @@ export default function DetailForm({
     [isAnalysis, isPlay]
   );
 
-  // ✅ isPlay까지 고려해 폼 선택
   const Form = useMemo(() => {
     // business 모드(= !isPlay)에서 type=1이면 ContrForm 사용
     if (!isPlay && type === TYPE.CHEMI) return ContrForm;
@@ -45,6 +45,17 @@ export default function DetailForm({
     };
     return map[type] || ChemiForm;
   }, [isPlay, type]);
+
+  if (loading) {
+    return (
+      <div
+        className={`${ui.ww} ${ui.text} flex items-center justify-center gap-2 py-6`}
+      >
+        <span className="inline-block w-5 h-5 rounded-full border-2 border-secondary-light border-t-transparent animate-spin" />
+        <span className={ui.text}>분석 중...</span>
+      </div>
+    );
+  }
 
   return (
     <Form value={value} onChange={onChange} ui={ui} isAnalysis={isAnalysis} />

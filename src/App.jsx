@@ -5,7 +5,6 @@ import AboutPage from "./pages/AboutPage";
 import PlayPage from "./pages/PlayPage";
 import PlayChemiPage from "./pages/PlayChemiPage";
 import PlayChemiAnalysisPage from "./pages/PlayChemiAnalysisPage";
-import PlayChemiResultPage from "./pages/PlayChemiResultPage";
 import PlaySomePage from "./pages/PlaySomePage";
 import PlaySomeAnalysisPage from "./pages/PlaySomeAnalysisPage";
 import PlayMbtiPage from "./pages/PlayMbtiPage.jsx";
@@ -16,11 +15,9 @@ import BusinessContrPage from "./pages/BusinessContrPage";
 import BusinessContrAnalysisPage from "./pages/BusinessContrAnalysisPage";
 import BusinessMyPage from "./pages/BusinessMyPage";
 import CreditsPage from "./pages/CreditsPage";
-import ResultPage from "./pages/ResultPage";
 import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
 import ForgetPasswordPage from "./pages/ForgetPasswordPage";
-import BusinessResultPage from "./pages/BusinessResultPage_test.jsx";
 import QuizPage from "./pages/QuizPage.jsx";
 import QuizResultAnalysisPage from "./pages/QuizResultAnalysisPage.jsx";
 import QuizResultPage from "./pages/QuizResultPage.jsx";
@@ -62,15 +59,6 @@ function App() {
           element={<QuizPersonalAnswerPage />}
         />
 
-        <Route
-          path="/play/chemi/result-test"
-          element={<PlayChemiResultPage />}
-        />
-        <Route
-          path="/business/contr/result-test"
-          element={<BusinessResultPage />}
-        />
-
         <Route element={<RequireAuth />}>
           <Route path="/play/chemi" element={<PlayChemiPage />} />
           <Route
@@ -99,7 +87,6 @@ function App() {
           <Route path="/business/mypage" element={<BusinessMyPage />} />
 
           <Route path="/credit" element={<CreditsPage />} />
-          <Route path="/result/:analysisId" element={<ResultPage />} />
           <Route path="/play/quiz/:resultId/:uuid" element={<QuizPage />} />
           <Route
             path="/play/quiz/result/analysis/:resultId/:uuid"

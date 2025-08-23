@@ -132,10 +132,15 @@ export default function ChatList(onDeleted) {
   if (loading && chats.length === 0) {
     return (
       <div
-        className={`w-full pt-2 pl-3.75 pr-1.75 pb-3 flex flex-col items-center overflow-y-auto border ${
+        className={`w-full pt-2 pl-3.75 pr-1.75 pb-3 flex flex-col justify-center items-center overflow-y-auto border ${
           isPlay ? "border-secondary-light" : "border-primary"
         } rounded-lg`}
       >
+        <span
+          className={`inline-block w-5 h-5 rounded-full border-2 ${
+            isPlay ? "border-secondary-light" : "border-primary"
+          } border-t-transparent animate-spin`}
+        />
         <p className={`${isPlay ? "text-white" : "text-black"}`}>
           불러오는 중...
         </p>
