@@ -2,7 +2,12 @@
 import * as Icons from "@/assets/svg";
 import { useMemo, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Header, DetailForm_Share, ShareModal } from "@/components";
+import {
+  Header,
+  SmallServices,
+  DetailForm_Share,
+  ShareModal,
+} from "@/components";
 import useQuizData from "@/hooks/useQuizData";
 
 export default function QuizResultAnalysisPage() {
@@ -17,6 +22,7 @@ export default function QuizResultAnalysisPage() {
     loading,
     error,
     resultData,
+    getOptionTakers,
     refetch, // 필요 시 재조회에 사용 가능
     deleteAll,
   } = useQuizData(resultId, uuid);
@@ -25,9 +31,6 @@ export default function QuizResultAnalysisPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const openShareModal = () => setModalOpen(true);
   const closeShareModal = () => setModalOpen(false);
-
-  // ── 퀴즈 삭제 진행 상태
-  const [deleting, setDeleting] = useState(false);
 
   // 공유 URL: some 페이지 레퍼런스와 동일 우선순위
   const shareUrl = useMemo(() => {
@@ -38,6 +41,9 @@ export default function QuizResultAnalysisPage() {
     // fallback: 퀴즈 결과 상세 페이지
     return `${base}/play/quiz/result/${resultId}/${uuid}`;
   }, [resultId, uuid, shareType]);
+
+  // ── 퀴즈 삭제 진행 상태
+  const [deleting, setDeleting] = useState(false);
 
   // ── 통계(평균/문항수/참여자수)
   const stats = useMemo(() => {
@@ -109,7 +115,7 @@ export default function QuizResultAnalysisPage() {
   }, [questions]);
 
   // ── 퀴즈 삭제 핸들러
-  const handleQuizDelete = async () => {
+  const handleDeleteAll = async () => {
     if (!deleteAll) {
       alert("삭제 기능이 준비되지 않았습니다.");
       return;
@@ -122,8 +128,11 @@ export default function QuizResultAnalysisPage() {
     try {
       setDeleting(true);
       await deleteAll(); // 전체 퀴즈 데이터 삭제
-      // 적절한 리다이렉션 경로로 이동 (필요 시 수정)
-      navigate("/play/quiz/");
+      navigate(
+        `${window.location.origin}/play/${
+          type == 1 ? "chemi" : shareType
+        }/${resultId}`
+      );
     } catch (e) {
       console.error(e);
       alert("퀴즈 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.");
@@ -142,9 +151,9 @@ export default function QuizResultAnalysisPage() {
   return (
     <div className="w-full min-h-screen bg-primary-dark text-gray-2">
       <Header />
-      <div className="w-full max-w-[1400px] mx-auto pt-18 flex justify-center items-start gap-5">
+      <div className="w-full max-w-[1400px] mx-auto pt-18 flex justify-center items-start">
         {/* 왼쪽 패널 */}
-        <aside className="w-[222px] flex-shrink-0 mt-53 mr-10">
+        <aside className="w-[222px] flex-shrink-0 mt-44 mr-10">
           <div className="w-full py-4 px-1 flex flex-col justify-center items-center border border-secondary-light rounded-lg">
             <DetailForm_Share
               type={type}
@@ -168,22 +177,24 @@ export default function QuizResultAnalysisPage() {
         </aside>
 
         {/* 가운데 퀴즈 본문 */}
-        <main className="w-[717px] flex-shrink-0 flex flex-col items-start mt-16 pt-6 max-h-[calc(100vh-72px)] overflow-y-auto scrollbar-hide">
-          <h1 className="text-h3">Quiz</h1>
-          <div className="group flex w-[180px] text-button border-1 border-primary-light rounded-[2px] ml-[536px] mt-3 px-[6px] py-1 transition-colors">
-            <Link
-              to={`/play/quiz/${resultId}/${uuid}`}
-              className="flex-1 flex justify-center items-center text-[#595959] whitespace-nowrap pr-[2px]"
-            >
-              퀴즈 문제 구성
-            </Link>
-            <div className="border-r border-[#bfbfbf] h-4"></div>
-            <a
-              href="#"
-              className="flex-1 flex justify-center items-center pl-[2px] text-primary-light whitespace-nowrap"
-            >
-              친구 점수 보기
-            </a>
+        <main className="w-[1023px] px-[153px] pb-20 flex flex-col justify-start max-h-[calc(100vh-72px)] overflow-y-auto scrollbar-hide">
+          <div className="w-full flex flex-col items-end">
+            <h1 className="w-full text-h3 pt-25">Quiz</h1>
+            <div className="group flex w-[180px] text-button border-1 border-primary-light rounded-[2px] mt-3 px-[6px] py-1 transition-colors">
+              <Link
+                to={`/play/quiz/${resultId}/${uuid}`}
+                className="flex-1 flex justify-center items-center text-[#595959] whitespace-nowrap pr-[2px]"
+              >
+                퀴즈 문제 구성
+              </Link>
+              <div className="border-r border-[#bfbfbf] h-4"></div>
+              <a
+                href="#"
+                className="flex-1 flex justify-center items-center pl-[2px] text-primary-light whitespace-nowrap"
+              >
+                친구 점수 보기
+              </a>
+            </div>
           </div>
           <div className="flex justify-between items-center w-full my-8">
             <div className="text-left">
@@ -254,18 +265,41 @@ export default function QuizResultAnalysisPage() {
         </main>
 
         {/* 오른쪽 패널 */}
-        <aside className="w-[244px] mt-38 ml-[147px] flex-shrink-0 flex flex-col gap-4 pt-6">
+        <aside className="w-[244px] mt-44 flex-shrink-0 flex flex-col gap-4">
+          <div className="w-full p-4 flex flex-col items-center border border-primary-light rounded-lg">
+            <p className="">개별 점수 보기</p>
+            <div className="w-full mt-4 flex flex-col items-center max-h-[240px] overflow-y-scroll scrollbar-hide">
+              {[...scores].reverse().map((p) => (
+                <button
+                  key={p.QP_id}
+                  onClick={() => {
+                    navigate(
+                      `/play/quiz/result/${resultId}/${uuid}/${p.QP_id}`
+                    );
+                  }}
+                  className="w-full px-4 py-2 flex justify-between cursor-pointer rounded-lg hover:bg-primary-light/50"
+                >
+                  <p>{p.name}</p>
+                  <span>
+                    {stats.questionCount
+                      ? Math.round((p.score / stats.questionCount) * 100)
+                      : 0}
+                    점
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="w-full p-4">
-            {/* ▶ 버튼 2개만 추가/변경 (다른 UI는 그대로) */}
             <div className="w-full flex justify-between items-center gap-3">
               <button
                 onClick={openShareModal}
                 className="flex-1 py-1.5 text-button border-1 border-secondary-light rounded-[4px] text-secondary-light hover:bg-secondary hover:text-primary-dark"
               >
-                결과 공유
+                퀴즈 공유
               </button>
               <button
-                onClick={handleQuizDelete}
+                onClick={handleDeleteAll}
                 disabled={deleting}
                 className={[
                   "flex-1 py-1.5 text-button border-1 rounded-[4px]",
@@ -277,6 +311,9 @@ export default function QuizResultAnalysisPage() {
                 {deleting ? "삭제 중..." : "퀴즈 삭제"}
               </button>
             </div>
+          </div>
+          <div className="w-full p-4 border border-primary-light rounded-lg">
+            <SmallServices />
           </div>
         </aside>
       </div>

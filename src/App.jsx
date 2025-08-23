@@ -106,7 +106,7 @@ function App() {
             element={<QuizResultAnalysisPage />}
           />
           <Route
-            path="/play/quiz/result/:resultId/:uuid"
+            path="/play/quiz/result/:resultId/:uuid/:qpId"
             element={<QuizResultPage />}
           />
 
