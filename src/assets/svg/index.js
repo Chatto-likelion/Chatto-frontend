@@ -8,15 +8,15 @@ import ChemiIconFull from "./ChemiIconFull.svg?react";
 import ContrIconFull from "./ContrIconFull.svg?react";
 import EyeOpened from "./eyeOpened.svg";
 import EyeClosed from "./eyeClosed.svg";
-import NavChemi from "./NavChemi.svg?react";
-import NavLover from "./NavLover.svg?react";
-import NavMBTI from "./NavMBTI.svg?react";
-import NavMore from "./NavMore.svg?react";
-import NavSome from "./NavSome.svg?react";
-import NavStat from "./NavStat.svg?react";
+import NavChemi from "./navChemi.svg?react";
+import NavLover from "./navLover.svg?react";
+import NavMBTI from "./navMBTI.svg?react";
+import NavMore from "./navMore.svg?react";
+import NavSome from "./navSome.svg?react";
+import NavStat from "./navStat.svg?react";
 import XCircle from "./XCircle.svg?react";
 import CheckCircle from "./CheckCircle.svg?react";
-import Search from "./Search.svg?react";
+import Search from "./search.svg?react";
 
 export {
   X,
