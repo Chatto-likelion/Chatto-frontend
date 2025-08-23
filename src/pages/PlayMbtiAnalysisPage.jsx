@@ -82,6 +82,7 @@ export default function PlayMbtiAnalysisPage() {
   const [hasSourceChat, setHasSourceChat] = useState(null); // true/false/null
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [analysisCost, setAnalysisCost] = useState(0);
 
   const sourceChatId = resultData?.result?.chat ?? null;
   const handleChatDeleted = useCallback(
@@ -119,6 +120,7 @@ export default function PlayMbtiAnalysisPage() {
           analysis_start: detail.result.analysis_date_start,
           analysis_end: detail.result.analysis_date_end,
         });
+        setAnalysisCost(detail.spec.total_I + detail.spec.total_E); // 이 분석 결과를 보는 데 필요한 크레딧
 
         const ids = new Set((chats || []).map((c) => c.chat_id));
         setChatIds(ids);
@@ -267,7 +269,6 @@ export default function PlayMbtiAnalysisPage() {
   };
 
   const [isRevealed, setIsRevealed] = useState(false);
-  const analysisCost = resultData.spec.total_I + resultData.spec.total_E; // 이 분석 결과를 보는 데 필요한 크레딧
   const handleReveal = () => {
     if (user.credit >= analysisCost) {
       postCreditUsage({
