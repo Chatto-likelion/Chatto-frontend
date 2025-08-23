@@ -2,26 +2,29 @@
 import axios from "axios";
 import { getCookie, deleteCookie } from "../utils/cookie";
 
-const baseURL = import.meta.env.VITE_API_URL;
+function normalizeBaseURL(raw) {
+  const val = (raw || "/api").trim(); // env 없으면 '/api'로 fallback
+  if (/^https?:\/\//i.test(val)) {
+    return val.endsWith("/api") || val.endsWith("/api/")
+      ? val
+      : `${val.replace(/\/+$/, "")}/api`;
+  }
+  const ensured = val.startsWith("/") ? val : `/${val}`;
+  return ensured.endsWith("/api") || ensured.endsWith("/api/")
+    ? ensured
+    : `${ensured.replace(/\/+$/, "")}/api`;
+}
 
-// 인증 필요 없는 인스턴스
-export const instance = axios.create({
-  baseURL,
-  withCredentials: true,
-});
+const baseURL = normalizeBaseURL(import.meta.env.VITE_API_URL);
 
-// 인증 필요한 인스턴스
-export const instanceWithToken = axios.create({
-  baseURL,
-  withCredentials: true,
-});
+const commonOpts = {
+  baseURL, // ✅ dev: '/api', prod: 'https://domain/api'
+  withCredentials: true, // HttpOnly Cookie(JWT) 쓰면 필수
+};
 
-// refresh 전용 인스턴스 (인터셉터 안 탐)
-const refreshClient = axios.create({
-  baseURL,
-  withCredentials: true,
-});
-
+export const instance = axios.create(commonOpts);
+export const instanceWithToken = axios.create(commonOpts);
+const refreshClient = axios.create(commonOpts);
 // 요청 인터셉터: Authorization 쿠키 붙이기
 instanceWithToken.interceptors.request.use(
   (config) => {
