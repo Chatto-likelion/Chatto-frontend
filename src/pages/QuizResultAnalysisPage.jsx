@@ -114,7 +114,6 @@ export default function QuizResultAnalysisPage() {
     return result;
   }, [questions]);
 
-  // ── 퀴즈 삭제 핸들러
   const handleDeleteAll = async () => {
     if (!deleteAll) {
       alert("삭제 기능이 준비되지 않았습니다.");
@@ -125,20 +124,15 @@ export default function QuizResultAnalysisPage() {
     ) {
       return;
     }
-    try {
-      setDeleting(true);
-      await deleteAll(); // 전체 퀴즈 데이터 삭제
-      navigate(
-        `${window.location.origin}/play/${
-          type == 1 ? "chemi" : shareType
-        }/${resultId}`
-      );
-    } catch (e) {
-      console.error(e);
-      alert("퀴즈 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.");
-    } finally {
-      setDeleting(false);
-    }
+
+    setDeleting(true);
+
+    navigate(`/play/${type == 1 ? "chemi" : shareType}/${resultId}`);
+    deleteAll()
+      .catch((e) => {
+        console.error(e);
+      })
+      .finally(() => setDeleting(false));
   };
 
   if (loading) {
@@ -199,7 +193,12 @@ export default function QuizResultAnalysisPage() {
           <div className="flex justify-between items-center w-full my-8">
             <div className="text-left">
               <p className="text-body1 text-gray-4">친구 평균 점수</p>
-              <p className="text-h2 text-[#f5f5f5]">{stats.averageScore}점</p>
+              <p className="text-h2 text-[#f5f5f5]">
+                {stats.questionCount
+                  ? Math.round((stats.averageScore / stats.questionCount) * 100)
+                  : 0}
+                점
+              </p>
             </div>
             <div className="text-body1 w-25">
               <p className="flex justify-between items-center">

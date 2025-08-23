@@ -6,6 +6,7 @@ import {
   postContrAnalyze,
   deleteContrAnalysis,
   postUUID_Bus,
+  getUUID_Bus,
 } from "@/apis/api"; // 실제 API 호출 함수
 import {
   Header,
@@ -31,27 +32,6 @@ import {
   Line,
 } from "recharts";
 
-// 점수를 텍스트로 변환하는 헬퍼 함수
-const getMetricText = (score) => {
-  if (score === null || score === undefined) return "분석 불가";
-  if (score >= 90) {
-    return "매우 높음";
-  }
-  if (score >= 70) {
-    return "매우 적극적";
-  }
-  if (score >= 50) {
-    return "적극적";
-  }
-  if (score >= 30) {
-    return "평균 수준";
-  }
-  if (score >= 1) {
-    return "노력 필요";
-  }
-  return "데이터 없음";
-};
-
 export default function BusinessContrAnalysisPage() {
   const { resultId } = useParams(); // URL 파라미터 추출
   const { setSelectedChatId } = useChat();
@@ -60,21 +40,66 @@ export default function BusinessContrAnalysisPage() {
   const [shareUrl, setShareUrl] = useState(null);
   const [shareFetching, setShareFetching] = useState(false);
   const [shareError, setShareError] = useState(null);
+  const [shareUUID, setShareUUID] = useState(null);
 
   const makeShareUrl = (uuid) =>
     `${window.location.origin}/business/contr/share/${uuid}`;
 
+  const normalizeUuid = (v) => (typeof v === "string" ? v : v?.uuid ?? null);
+
+  const ensureUuid = useCallback(async () => {
+    if (!resultId) return null;
+    if (shareUUID) return shareUUID;
+
+    let uuid = null;
+    try {
+      const got = await getUUID_Bus(resultId);
+      uuid = normalizeUuid(got);
+    } catch (err) {
+      const msg = err?.message ?? "";
+      const status = err?.status ?? err?.response?.status;
+      // 404만 무시하고 나머지는 그대로 throw
+      if (!(status === 404 || /404/.test(msg))) {
+        throw err;
+      }
+    }
+    if (!uuid) {
+      const created = await postUUID_Bus(resultId);
+      uuid = normalizeUuid(created);
+    }
+    if (!uuid) throw new Error("UUID를 생성/확인하지 못했습니다.");
+
+    setShareUUID(uuid);
+    return uuid;
+  }, [resultId, shareUUID]);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const uuid = await ensureUuid();
+        if (alive) setShareUUID(uuid);
+      } catch {
+        // uuid 확보 실패는 공유/퀴즈 이동에만 영향, 화면은 계속 보여줌
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [ensureUuid]);
+
   const handleOpenShare = async () => {
-    setModalOpen(true);
-    if (shareUrl || shareFetching) return;
+    setModalOpen(true); // 모달 먼저 오픈 (스피너 등 표시용)
+    if (shareUrl || shareFetching) return; // 중복호출 방지
 
     try {
       setShareFetching(true);
       setShareError(null);
-      const uuid = await postUUID_Bus("contrib", resultId);
+
+      const uuid = (await ensureUuid()) || shareUUID;
       setShareUrl(makeShareUrl(uuid));
     } catch (e) {
-      setShareError(e.message || "공유 링크 발급에 실패했습니다.");
+      setShareError(e?.message || "공유 링크 발급에 실패했습니다.");
     } finally {
       setShareFetching(false);
     }
@@ -847,3 +872,24 @@ export default function BusinessContrAnalysisPage() {
     </div>
   );
 }
+
+// 점수를 텍스트로 변환하는 헬퍼 함수
+const getMetricText = (score) => {
+  if (score === null || score === undefined) return "분석 불가";
+  if (score >= 90) {
+    return "매우 높음";
+  }
+  if (score >= 70) {
+    return "매우 적극적";
+  }
+  if (score >= 50) {
+    return "적극적";
+  }
+  if (score >= 30) {
+    return "평균 수준";
+  }
+  if (score >= 1) {
+    return "노력 필요";
+  }
+  return "데이터 없음";
+};
