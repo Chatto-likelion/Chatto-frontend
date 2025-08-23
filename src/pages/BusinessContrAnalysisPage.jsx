@@ -665,7 +665,7 @@ export default function BusinessContrAnalysisPage() {
 
                         <div className="flex justify-between items-start ml-4">
                           {/* 세부 지표 목록 */}
-                          <div className="flex flex-col gap-2">
+                          <div className="flex flex-col gap-2 text-[#595959]">
                             <p>정보 공유</p>
                             <p>문제 해결 참여</p>
                             <p>주도적 제안</p>
@@ -673,7 +673,7 @@ export default function BusinessContrAnalysisPage() {
                           </div>
 
                           {/* 세부 지표 점수 (텍스트) */}
-                          <div className="flex flex-col gap-2">
+                          <div className="flex flex-col gap-2 mr-10">
                             <p className="font-bold text-[#262626]">
                               {getMetricText(person.infoshare)}
                             </p>
@@ -696,10 +696,9 @@ export default function BusinessContrAnalysisPage() {
 
                         {/* AI 분석 */}
                         <div className="mt-4 pt-4 ml-4">
-                          <p className="text-body2 text-primary-dark">
-                            <span className="font-bold">분석:</span> A는 주도적
-                            역할을 수행하며 핵심 정보와 아이디어를 자주
-                            제공합니다.
+                          <p className="text-body2 text-primary">
+                            <span className="font-bold">분석:</span>{" "}
+                            {person.analysis}
                           </p>
                         </div>
                       </div>
