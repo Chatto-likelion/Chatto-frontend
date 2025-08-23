@@ -895,7 +895,7 @@ export const getQuizResult = async (type, resultId) => {
 export const getQuizResultPersonal = async (type, resultId, QP_id) => {
   try {
     const response = await instanceWithToken.get(
-      `/play/quiz/${typeToSlug(type)}/${resultId}/personal/${QP_id}`
+      `/play/quiz/${typeToSlug(type)}/${resultId}/personal/${QP_id}/`
     );
     if (response.status === 200) {
       console.log("퀴즈 점수: ", response.data);

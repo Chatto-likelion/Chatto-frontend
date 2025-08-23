@@ -239,6 +239,7 @@ export default function PlayChemiAnalysisPage() {
       await postQuiz10(1, resultId);
       const uuid = await ensureUuid();
       navigate(`/play/quiz/${resultId}/${encodeURIComponent(uuid)}`);
+
     } catch (err) {
       setError(err.message || "퀴즈 생성에 실패했습니다.");
     } finally {
@@ -249,7 +250,7 @@ export default function PlayChemiAnalysisPage() {
   const handleGoQuiz = async () => {
     try {
       const uuid = await ensureUuid();
-      navigate(`/play/quiz/${resultId}/${encodeURIComponent(uuid)}`);
+      navigate(`${window.location.origin}/play/quiz/${resultId}/${encodeURIComponent(uuid)}`);
     } catch (err) {
       setError(err.message || "퀴즈로 이동할 수 없습니다.");
     }

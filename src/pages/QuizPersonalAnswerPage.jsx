@@ -1,7 +1,7 @@
 // src/pages/QuizPersonalAnswerPage.jsx
-import { useEffect, useMemo } from "react";
-import { useParams } from "react-router-dom";
-import { Header, DetailForm_Share } from "@/components";
+import { useEffect, useMemo, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { Header, DetailForm_Share, ShareModal } from "@/components";
 import CheckBoxIcon from "@/assets/svg/CheckBox.svg?react";
 import CheckBoxCheckIcon from "@/assets/svg/CheckBoxCheck.svg?react";
 import CheckCircleIcon from "@/assets/svg/CheckCircle.svg?react";
@@ -32,6 +32,19 @@ export default function QuizPersonalAnswerPage() {
     if (!uuid || !qpId) return;
     fetchMyPersonalResult(qpId);
   }, [uuid, qpId, fetchMyPersonalResult]);
+
+  // ── 공유 모달 상태
+  const [modalOpen, setModalOpen] = useState(false);
+  const openShareModal = () => setModalOpen(true);
+  const closeShareModal = () => setModalOpen(false);
+
+  // 공유 URL: some 페이지 레퍼런스와 동일 우선순위
+  const shareUrl = useMemo(() => {
+    const base = window.location.origin;
+    if (uuid) {
+      return `${base}/play/quiz/solve/${uuid}`;
+    }
+  }, [uuid]);
 
   // 전체 문항/정답 개수 집계
   const { totalCount, correctCount } = useMemo(() => {
@@ -69,11 +82,11 @@ export default function QuizPersonalAnswerPage() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-primary-dark text-[#f5f5f5]">
+    <div className="w-full min-h-screen bg-primary-dark text-gray-2">
       <Header />
-      <div className="w-full max-w-[1400px] mx-auto pt-18 flex justify-center items-start gap-10">
+      <div className="w-full max-w-[1400px] mx-auto pt-18 flex justify-center items-start">
         {/*왼쪽*/}
-        <aside className="w-[222px] flex-shrink-0 mt-53 mr-10">
+        <aside className="w-[222px] flex-shrink-0 mt-44 mr-10">
           <div className="w-full py-4 px-1 flex flex-col justify-center items-center border border-secondary-light rounded-lg">
             <DetailForm_Share
               type={type}
@@ -84,20 +97,37 @@ export default function QuizPersonalAnswerPage() {
         </aside>
 
         {/* 가운데 퀴즈 본문 */}
-        <main className="w-[650px] flex-shrink-0 flex flex-col items-start pt-6 mt-16 max-h-[calc(100vh-72px)] overflow-y-auto scrollbar-hide">
-          <h1 className="text-h3">Quiz</h1>
-          <h2 className="text-body1 text-primary-light mt-2">
-            개인 점수 - {owner?.name ?? "-"}
-          </h2>
+        <main className="w-[1023px] px-[153px] pb-20 flex flex-col justify-start max-h-[calc(100vh-72px)] overflow-y-auto scrollbar-hide">
+          <h1 className="text-h3 w-full mt-25 mb-4">Quiz</h1>
 
-          <div className="flex justify-between items-center w-full my-5">
+          <div className="flex justify-between items-end w-full mt-2 mb-5">
             {/* 점수 + 정답 개수/전체 */}
-            <p className="text-h4 text-primary-light">
+            <p className="mb-1 text-h4 text-primary-light">
               {owner?.score ?? 0}점{" "}
               <span className="text-body1 text-gray-4 ml-2">
                 ({correctCount}/{totalCount})
               </span>
             </p>
+            <div className="flex justify-end items-end gap-2">
+              <Link
+                to={shareUrl}
+                className="text-button border border-gray-2 rounded w-[110px] h-[32px] hover:bg-primary-light hover:text-primary-dark flex justify-center items-center"
+              >
+                퀴즈 다시 풀기
+              </Link>
+              <button
+                onClick={openShareModal}
+                className="text-button border border-gray-2 rounded w-[110px] h-[32px] hover:bg-primary-light hover:text-primary-dark flex justify-center items-center"
+              >
+                퀴즈 공유하기
+              </button>
+              <Link
+                to="/about"
+                className="text-button border border-gray-2 text-gray-2 rounded w-[110px] h-[32px] hover:bg-primary-light hover:text-primary-dark flex justify-center items-center"
+              >
+                나도 분석하기
+              </Link>
+            </div>
           </div>
 
           <div className="w-full flex flex-col gap-6">
@@ -154,7 +184,13 @@ export default function QuizPersonalAnswerPage() {
           </div>
         </main>
 
-        {/*오른쪽*/}
+        <ShareModal
+          open={modalOpen}
+          onClose={closeShareModal}
+          url={shareUrl}
+          loading={false}
+          error={null}
+        />
       </div>
     </div>
   );

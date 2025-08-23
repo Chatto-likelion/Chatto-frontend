@@ -1,77 +1,143 @@
 // src/pages/QuizResultPage.jsx
 import { useMemo, useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { Header, DetailForm_Share } from "@/components";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import {
+  Header,
+  SmallServices,
+  DetailForm_Share,
+  ShareModal,
+} from "@/components";
 import CheckBoxIcon from "@/assets/svg/CheckBox.svg?react";
-import CheckBoxCheckIcon from "@/assets/svg/CheckBoxCheck.svg?react"; // (개인 선택 표시 시 사용 가능)
+import CheckBoxCheckIcon from "@/assets/svg/CheckBoxCheck.svg?react";
 import CheckCircleIcon from "@/assets/svg/CheckCircle.svg?react";
 import XCircleIcon from "@/assets/svg/XCircle.svg?react";
 import useQuizData from "@/hooks/useQuizData";
 
 export default function QuizResultPage() {
-  const { resultId, uuid } = useParams();
+  const { resultId, uuid, qpId } = useParams();
+  const navigate = useNavigate();
 
-  // 훅에서 타입을 추론하고, 문제/점수/개요 데이터를 받아옵니다.
   const {
+    // 공통 데이터
     loading,
     error,
     questions,
     scores,
-    overview,
     type,
     resultData,
-    fetchPersonal, // 개인별 상세(정답/선지 선택) 불러오기
+    shareType,
+    // 개인 상세
+    fetchPersonal, // (QP_id) → 개인 응답 로드
+    personalDetails, // [{ response(1~4), result(bool), QP, question }]
+    fetchAllPersonal, // ★ 전체 참여자 개인 응답 로드
+    getOptionTakers, // ★ (questionId, optionNum[1~4]) => string[] (이름 배열)
+    // 분석/공유 사이드바에 필요한 기능들
+    deleteAll,
   } = useQuizData(resultId, uuid);
 
-  // 페이지 진입/점수 목록 갱신 시 모든 참여자의 개인 상세를 미리 로딩(정답자 이름 툴팁용)
+  /* ===================== 좌/우 사이드바 공통 ===================== */
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const openShareModal = () => setModalOpen(true);
+  const closeShareModal = () => setModalOpen(false);
+
+  const shareUrl = useMemo(() => {
+    const base = window.location.origin;
+    return uuid
+      ? `${base}/play/quiz/solve/${uuid}`
+      : `${base}/play/quiz/result/${resultId}/${uuid}`;
+  }, [resultId, uuid]);
+
+  const [deleting, setDeleting] = useState(false);
+
+  /* ===================== 개인 보기용 데이터 로딩/가공 ===================== */
+
+  // 선택된 참가자 이름
+  const me = useMemo(
+    () => scores?.find((s) => String(s.QP_id) === String(qpId)),
+    [scores, qpId]
+  );
+  const ownerName = me?.name ?? "-";
+
+  // 페이지 진입/qpId 변경 시: 해당 참가자 개인 상세 로드
   useEffect(() => {
-    if (!Array.isArray(scores) || scores.length === 0) return;
-    const ids = [
-      ...new Set(scores.map((s) => s?.QP_id).filter((v) => v != null)),
-    ];
-    Promise.all(ids.map((id) => fetchPersonal(id))).catch(() => {});
-  }, [scores, fetchPersonal]);
+    if (!qpId) return;
+    fetchPersonal?.(qpId);
+  }, [qpId, fetchPersonal]);
 
-  // 오른쪽 패널 - 점수 목록 정렬
-  const sortedScores = useMemo(() => {
-    if (!Array.isArray(scores)) return [];
-    return [...scores].sort((a, b) => (b?.score ?? 0) - (a?.score ?? 0));
-  }, [scores]);
+  // 모든 참여자 개인 응답을 미리 로드(툴팁용)
+  useEffect(() => {
+    // scores가 바뀌면 전체를 갱신해두면, 각 선지 hover시 즉시 이름을 보여줄 수 있음
+    fetchAllPersonal?.().catch(() => {});
+  }, [scores, fetchAllPersonal]);
 
-  // 가운데 타이틀: 1등 이름을 대표로 표시
-  const ownerName = sortedScores[0]?.name ?? "-";
+  // 내 응답 인덱스 맵 (questionId -> response(1~4))
+  const myAnswers = useMemo(() => {
+    const m = new Map();
+    (personalDetails ?? [])
+      .filter((d) => String(d.QP) === String(qpId))
+      .forEach((d) => m.set(d.question, d.response));
+    return m;
+  }, [personalDetails, qpId]);
 
-  // 툴팁(정답 바 호버) 상태
-  const [hover, setHover] = useState({ qid: null, show: false });
+  const myCorrectCount = useMemo(() => {
+    return (personalDetails ?? []).filter(
+      (d) => String(d.QP) === String(qpId) && d.result === true
+    ).length;
+  }, [personalDetails, qpId]);
 
-  if (loading) {
-    return <div>결과를 불러오는 중입니다...</div>;
-  }
-  if (error) {
-    return (
-      <div className="text-red-500">
-        결과를 불러오는 중 오류가 발생했어요: {String(error)}
-      </div>
+  // 정답/선지 퍼센트 바 호버(툴팁)
+  const [hover, setHover] = useState({ qid: null, opt: null, show: false });
+
+  // 통계 카드
+  const stats = useMemo(() => {
+    const participantCount = Array.isArray(scores) ? scores.length : 0;
+    const questionCount = Array.isArray(questions) ? questions.length : 0;
+    const total = (scores ?? []).reduce(
+      (sum, s) => sum + (Number(s.score) || 0),
+      0
     );
-  }
+    const averageScore = participantCount
+      ? Math.round(total / participantCount)
+      : 0;
+    return { averageScore, questionCount, participantCount };
+  }, [scores, questions]);
 
-  // 왼쪽 패널 세부 정보
-  const details = {
-    relationship: overview?.result?.relationship ?? "-",
-    situation: overview?.result?.situation ?? "-",
-    period:
-      overview?.result?.analysis_date_start &&
-      overview?.result?.analysis_date_end
-        ? `${overview.result.analysis_date_start} ~ ${overview.result.analysis_date_end}`
-        : "-",
+  const handleDeleteAll = async () => {
+    if (!deleteAll) {
+      alert("삭제 기능이 준비되지 않았습니다.");
+      return;
+    }
+    if (
+      !window.confirm("정말로 이 퀴즈 전체를 삭제할까요? 복구할 수 없습니다.")
+    ) {
+      return;
+    }
+    try {
+      setDeleting(true);
+      await deleteAll();
+      navigate(
+        `${window.location.origin}/play/${
+          type == 1 ? "chemi" : shareType
+        }/${resultId}`
+      );
+    } catch (e) {
+      console.error(e);
+      alert("퀴즈 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setDeleting(false);
+    }
   };
+
+  if (loading) return <div>결과를 불러오는 중입니다...</div>;
+  if (error) return <div className="text-red-500">{String(error)}</div>;
 
   return (
     <div className="w-full min-h-screen bg-primary-dark text-[#f5f5f5]">
       <Header />
-      <div className="w-full max-w-[1400px] mx-auto pt-18 flex justify-center items-start gap-10">
-        {/* 1. 왼쪽 패널 */}
-        <aside className="w-[222px] flex-shrink-0 mt-53 mr-10">
+      <div className="w-full max-w-[1400px] mx-auto pt-18 flex justify-center items-start">
+        {/* ============ 왼쪽 사이드바 ============ */}
+        <aside className="w-[222px] flex-shrink-0 mt-44 mr-10">
           <div className="w-full py-4 px-1 flex flex-col justify-center items-center border border-secondary-light rounded-lg">
             <DetailForm_Share
               type={type}
@@ -85,7 +151,6 @@ export default function QuizResultPage() {
                     `/play/${type == 1 ? "chemi" : shareType}/${resultId}`
                   )
                 }
-                disabled={loading}
                 className="w-30 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border border-secondary rounded-lg"
               >
                 분석 보기
@@ -94,21 +159,56 @@ export default function QuizResultPage() {
           </div>
         </aside>
 
-        {/* 2. 가운데 퀴즈 본문 */}
-        <main className="w-[650px] flex-shrink-0 flex flex-col items-start pt-6 mt-16 max-h-[calc(100vh-72px)] overflow-y-auto scrollbar-hide">
-          <h1 className="text-h3">Quiz</h1>
-          <h2 className="text-body1 text-primary-light mt-2">
-            개인 점수 - {ownerName}
-          </h2>
+        {/* ========================= 가운데: 개인(main) ========================= */}
+        <main className="w-[1023px] px-[153px] pb-20 flex flex-col justify-start max-h-[calc(100vh-72px)] overflow-y-auto scrollbar-hide">
+          <div className="w-full flex flex-col items-end">
+            <h1 className="w-full text-h3 pt-25">Quiz</h1>
+            <div className="group flex w-[180px] text-button border-1 border-primary-light rounded-[2px] mt-3 px-[6px] py-1 transition-colors">
+              <Link
+                to={`/play/quiz/${resultId}/${uuid}`}
+                className="flex-1 flex justify-center items-center text-[#595959] whitespace-nowrap pr-[2px]"
+              >
+                퀴즈 문제 구성
+              </Link>
+              <div className="border-r border-[#bfbfbf] h-4" />
+              <Link
+                to={`/play/quiz/result/analysis/${resultId}/${uuid}`}
+                className="flex-1 flex justify-center items-center pl-[2px] text-primary-light whitespace-nowrap"
+              >
+                친구 점수 보기
+              </Link>
+            </div>
+          </div>
 
           <div className="flex justify-between items-center w-full my-8">
-            {/* 점수 카드가 따로 있다면 여기에 배치 */}
+            <div className="text-left">
+              <p className="text-body1 text-gray-4">{ownerName}</p>
+              <p className="text-h2 text-[#f5f5f5]">
+                {stats.questionCount
+                  ? Math.round((myCorrectCount / stats.questionCount) * 100)
+                  : 0}
+                <span className="text-st1"> 점</span>
+              </p>
+            </div>
+            <div className="text-body1 w-25">
+              <p className="flex justify-between items-center">
+                <span>문제 수</span>
+                <span className="text-primary-light">
+                  {stats.questionCount}
+                </span>
+              </p>
+              <p className="flex justify-between items-center">
+                <span>맞힌 개수</span>
+                <span className="text-primary-light">{myCorrectCount}</span>
+              </p>
+            </div>
           </div>
 
           <div className="w-full flex flex-col gap-6">
             {questions.map((q) => {
               const total =
                 (q.counts ?? []).reduce((a, b) => a + (Number(b) || 0), 0) || 0;
+              const myPick = myAnswers.get(q.questionId) ?? null; // 1~4 or null
 
               return (
                 <div
@@ -121,40 +221,51 @@ export default function QuizResultPage() {
                     {q.options.map((opt, optIndex) => {
                       const c = Number(q.counts?.[optIndex] ?? 0);
                       const pct = total ? Math.round((c / total) * 100) : 0;
-                      const isCorrect = (q.answer ?? 0) - 1 === optIndex;
+                      const optionNum = optIndex + 1;
+                      const isCorrect = Number(q.answer ?? 0) === optionNum;
+                      const isMine = myPick === optionNum;
+
+                      // 툴팁용 이름 목록 (훅의 헬퍼 사용)
+                      const takers =
+                        typeof getOptionTakers === "function"
+                          ? getOptionTakers(q.questionId, optionNum) // string[]
+                          : [];
 
                       return (
                         <div
                           key={optIndex}
-                          className={`relative flex justify-between items-center p-3 rounded-md overflow-hidden ${
+                          className={`relative flex justify-between items-center p-3 rounded-md ${
                             isCorrect ? "bg-green-500/10" : ""
                           }`}
+                          // 행 전체에 hover 핸들러(툴팁 on/off)
+                          onMouseEnter={() =>
+                            setHover({
+                              qid: q.questionId,
+                              opt: optionNum,
+                              show: true,
+                            })
+                          }
+                          onMouseLeave={() =>
+                            setHover({ qid: null, opt: null, show: false })
+                          }
+                          style={{ overflow: "visible" }} // 툴팁 잘리지 않게
                         >
                           {/* 퍼센트 바 (뒤 배경) */}
                           <div
                             className={`absolute left-0 top-0 h-full opacity-20 ${
                               isCorrect ? "bg-green-500" : "bg-[#888]"
-                            }`}
+                            } pointer-events-none`}
                             style={{ width: `${pct}%` }}
-                            onMouseEnter={() =>
-                              isCorrect &&
-                              setHover({ qid: q.questionId, show: true })
-                            }
-                            onMouseLeave={() =>
-                              isCorrect && setHover({ qid: null, show: false })
-                            }
                           />
 
-                          {/* 툴팁: 정답 바 위에 호버 시, 맞힌 사람 명수 + 이름 */}
-                          {isCorrect &&
-                            hover.show &&
-                            hover.qid === q.questionId && (
-                              <div className="absolute -top-8 left-0 z-10 bg-black text-white text-xs rounded px-2 py-1 whitespace-pre-wrap max-w-[520px]">
-                                {q.correctNames?.length
-                                  ? `${
-                                      q.correctNames.length
-                                    }명: ${q.correctNames.join(", ")}`
-                                  : "맞힌 사람이 아직 없습니다"}
+                          {/* 툴팁: 해당 선지에 마우스 올리면, 고른 사람 명단 */}
+                          {hover.show &&
+                            hover.qid === q.questionId &&
+                            hover.opt === optionNum && (
+                              <div className="absolute -top-2 left-0 z-20 bg-black text-white text-xs rounded px-2 py-1 whitespace-pre-wrap max-w-[520px]">
+                                {takers.length
+                                  ? `${takers.length}명: ${takers.join(", ")}`
+                                  : "아직 이 보기를 고른 사람이 없습니다"}
                               </div>
                             )}
 
@@ -162,21 +273,26 @@ export default function QuizResultPage() {
                           <div className="flex items-center gap-3 relative z-10">
                             <div className="relative w-6 h-6 flex-shrink-0 flex items-center justify-center">
                               <CheckBoxIcon className="absolute w-4 h-4" />
-                              {/* 개인 선택 체크는 개인 상세 연동 후 사용 가능 */}
-                              {/* <CheckBoxCheckIcon ... /> */}
+                              {isMine && (
+                                <CheckBoxCheckIcon className="absolute w-4 h-4" />
+                              )}
                             </div>
                             <span className="text-body2">{opt}</span>
                           </div>
 
-                          {/* 우측: 퍼센트/정답 아이콘 */}
+                          {/* 우측: 퍼센트/정답/오답 아이콘(내 선택 기준) */}
                           <div className="flex items-center gap-2 relative z-10">
                             <span className="text-caption text-[#f5f5f5]">
                               {pct}%
                             </span>
-                            {isCorrect ? (
-                              <CheckCircleIcon className="w-5 h-5 text-green-400" />
+                            {isMine ? (
+                              isCorrect ? (
+                                <CheckCircleIcon className="w-5 h-5 text-green-400" />
+                              ) : (
+                                <XCircleIcon className="w-5 h-5 text-red-500" />
+                              )
                             ) : (
-                              <XCircleIcon className="w-5 h-5 text-transparent" />
+                              <div className="w-5 h-5" />
                             )}
                           </div>
                         </div>
@@ -189,57 +305,68 @@ export default function QuizResultPage() {
           </div>
         </main>
 
-        {/* 3. 오른쪽 패널 */}
-        <aside className="w-[212px] flex-shrink-0 flex flex-col gap-4 pt-6 mt-48 ml-[147px]">
-          <div className="w-full p-4 border border-primary-light rounded-lg">
-            <Link
-              to={`/play/quiz/result/analysis/${resultId}/${uuid}`}
-              className="flex justify-center text-body2 mb-3 hover:text-[#595959] transition-colors"
-            >
-              전체 점수 보기
-            </Link>
-
-            <hr className="border-t border-primary-light" />
-
-            {/* 개인 점수 섹션 */}
-            <div className="mt-4">
-              <p className="font-bold text-body2 mb-2">개인 점수</p>
-              <div className="space-y-2 text-body2">
-                {sortedScores.map((s) => (
-                  <div
-                    key={`${s.QP_id}-${s.name}`}
-                    className="flex justify-between"
-                  >
-                    <span>{s.name}</span>
-                    <span className="text-[#f5f5f5]">{s.score}</span>
-                  </div>
-                ))}
-              </div>
+        {/* ============ 오른쪽 사이드바 ============ */}
+        <aside className="w-[244px] mt-44 flex-shrink-0 flex flex-col gap-4">
+          <div className="w-full p-4 flex flex-col items-center border border-primary-light rounded-lg">
+            <p className="">개별 점수 보기</p>
+            <div className="w-full mt-4 flex flex-col items-center max-h-[240px] overflow-y-scroll scrollbar-hide">
+              {[...scores].reverse().map((p) => (
+                <button
+                  key={p.QP_id}
+                  onClick={() => {
+                    navigate(
+                      `/play/quiz/result/${resultId}/${uuid}/${p.QP_id}`
+                    );
+                  }}
+                  className="w-full px-4 py-2 flex justify-between cursor-pointer rounded-lg hover:bg-primary-light/50"
+                >
+                  <p>{p.name}</p>
+                  <span>
+                    {stats.questionCount
+                      ? Math.round((p.score / stats.questionCount) * 100)
+                      : 0}
+                    점
+                  </span>
+                </button>
+              ))}
             </div>
           </div>
-
-          <div className="w-full h-7 border border-primary-light rounded-lg">
-            <div className="flex justify-center text-button pt-[5px]">
-              <span>나도 풀어보기</span>
-            </div>
-          </div>
-
-          <div className="w-full p-4 border border-primary-light rounded-lg">
-            <p className="text-overline mb-0">URL</p>
-            <div className="flex items-center">
-              <input
-                type="text"
-                readOnly
-                value={`${window.location.origin}/play/quiz/result/${resultId}/${uuid}`}
-                className="flex-1 bg-primary text-xs p-1 rounded-l text-gray-400"
-              />
-              <button className="bg-secondary text-primary-dark text-xs font-bold p-1 rounded-r">
-                COPY
+          <div className="w-full p-4">
+            <div className="w-full flex justify-between items-center gap-3">
+              <button
+                onClick={openShareModal}
+                className="flex-1 py-1.5 text-button border-1 border-secondary-light rounded-[4px] text-secondary-light hover:bg-secondary hover:text-primary-dark"
+              >
+                퀴즈 공유
+              </button>
+              <button
+                onClick={handleDeleteAll}
+                disabled={deleting}
+                className={[
+                  "flex-1 py-1.5 text-button border-1 rounded-[4px]",
+                  deleting
+                    ? "border-secondary-light text-secondary-light cursor-not-allowed"
+                    : "border-secondary-light text-secondary-light hover:bg-secondary hover:text-primary-dark",
+                ].join(" ")}
+              >
+                {deleting ? "삭제 중..." : "퀴즈 삭제"}
               </button>
             </div>
           </div>
+          <div className="w-full p-4 border border-primary-light rounded-lg">
+            <SmallServices />
+          </div>
         </aside>
       </div>
+
+      {/* 공유 모달 */}
+      <ShareModal
+        open={modalOpen}
+        onClose={closeShareModal}
+        url={shareUrl}
+        loading={false}
+        error={null}
+      />
     </div>
   );
 }

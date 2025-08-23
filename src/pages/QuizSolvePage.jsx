@@ -23,7 +23,6 @@ export default function QuizSolvePage() {
     submitGuest, // submitGuest(answersMap)
   } = useQuizGuest(uuid);
 
-  console.log(questions);
   const [answers, setAnswers] = useState({});
   const [guestName, setGuestName] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -114,11 +113,11 @@ export default function QuizSolvePage() {
   }
 
   return (
-    <div className="flex flex-col justify-start items-center h-screen text-white bg-primary-dark">
+    <div className="w-full min-h-screen bg-primary-dark text-gray-2">
       <Header />
-      <div className="w-full max-w-[1400px] overflow-hidden mt-18 flex justify-center items-start gap-10">
+      <div className="w-full max-w-[1400px] mx-auto pt-18 flex justify-center items-start">
         {/*왼쪽*/}
-        <aside className="w-[222px] flex-shrink-0 mt-53 mr-10">
+        <aside className="w-[222px] flex-shrink-0 mt-44 mr-10">
           <div className="w-full py-4 px-1 flex flex-col justify-center items-center border border-secondary-light rounded-lg">
             <DetailForm_Share
               type={type}
@@ -129,8 +128,8 @@ export default function QuizSolvePage() {
         </aside>
 
         {/*가운데*/}
-        <main className="w-[717px] flex-shrink-0 flex flex-col items-start mt-16 pt-6 max-h-[calc(100vh-72px)] overflow-y-auto scrollbar-hide">
-          <h1 className="text-h3 w-[700px] mb-4">Quiz</h1>
+        <main className="w-[1023px] px-[153px] pb-20 flex flex-col justify-start max-h-[calc(100vh-72px)] overflow-y-auto scrollbar-hide">
+          <h1 className="text-h3 w-full mt-25 mb-4">Quiz</h1>
 
           <div className="flex justify-end items-center w-[700px] mb-4 gap-2">
             <div className="flex items-center gap-2">
@@ -193,8 +192,6 @@ export default function QuizSolvePage() {
             ))}
           </div>
         </main>
-
-        {/*오른쪽*/}
       </div>
 
       {/* 제출 완료 모달 */}
