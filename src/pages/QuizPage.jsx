@@ -1,6 +1,11 @@
 import { useState, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { Header, SmallServices, DetailForm_Share } from "@/components";
+import {
+  Header,
+  SmallServices,
+  DetailForm_Share,
+  ShareModal,
+} from "@/components";
 import CheckBoxIcon from "@/assets/svg/CheckBox.svg?react";
 import CheckBoxCheckIcon from "@/assets/svg/CheckBoxCheck.svg?react";
 import useQuizData from "@/hooks/useQuizData";
@@ -188,20 +193,15 @@ export default function QuizPage() {
     ) {
       return;
     }
-    try {
-      setDeleting(true);
-      await deleteAll();
-      navigate(
-        `${window.location.origin}/play/${
-          type == 1 ? "chemi" : shareType
-        }/${resultId}`
-      );
-    } catch (e) {
-      console.error(e);
-      alert("퀴즈 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.");
-    } finally {
-      setDeleting(false);
-    }
+
+    setDeleting(true);
+
+    navigate(`/play/${type == 1 ? "chemi" : shareType}/${resultId}`);
+    deleteAll()
+      .catch((e) => {
+        console.error(e);
+      })
+      .finally(() => setDeleting(false));
   };
 
   if (loading) {
@@ -423,6 +423,15 @@ export default function QuizPage() {
           </div>
         </aside>
       </div>
+
+      {/* 공유 모달 */}
+      <ShareModal
+        open={modalOpen}
+        onClose={closeShareModal}
+        url={shareUrl}
+        loading={false}
+        error={null}
+      />
 
       {/* + 버튼 확인 모달 */}
       {addConfirmOpen && (

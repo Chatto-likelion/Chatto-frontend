@@ -113,20 +113,15 @@ export default function QuizResultPage() {
     ) {
       return;
     }
-    try {
-      setDeleting(true);
-      await deleteAll();
-      navigate(
-        `${window.location.origin}/play/${
-          type == 1 ? "chemi" : shareType
-        }/${resultId}`
-      );
-    } catch (e) {
-      console.error(e);
-      alert("퀴즈 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.");
-    } finally {
-      setDeleting(false);
-    }
+
+    setDeleting(true);
+
+    navigate(`/play/${type == 1 ? "chemi" : shareType}/${resultId}`);
+    deleteAll()
+      .catch((e) => {
+        console.error(e);
+      })
+      .finally(() => setDeleting(false));
   };
 
   if (loading) return <div>결과를 불러오는 중입니다...</div>;

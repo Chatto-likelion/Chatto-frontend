@@ -440,14 +440,11 @@ export const getUUIDType = async (uuid) => {
   }
 };
 
-export const postUUID_Bus = async (type, result_id) => {
+export const postUUID_Bus = async (result_id) => {
   try {
-    const formData = new FormData();
-    formData.append("type", type);
-
     const response = await instanceWithToken.post(
-      `/business/chat/uuid/${result_id}/`,
-      formData
+      `/business/chat/uuid/${result_id}`,
+      { type: "contrib" }
     );
 
     if (response.status === 201) {
@@ -461,6 +458,27 @@ export const postUUID_Bus = async (type, result_id) => {
       400: "입력값이 잘못되었습니다. (400)",
       401: "로그인이 필요합니다. (401)",
       403: "분석 결과를 공유할 권한이 없습니다. (403)",
+      404: "분석 결과를 찾을 수 없습니다. (404)",
+    });
+  }
+};
+
+export const getUUID_Bus = async (result_id) => {
+  try {
+    const response = await instanceWithToken.get(
+      `/business/chat/result_type/search/contrib/${result_id}/`
+    );
+
+    if (response.status === 200) {
+      console.log("분석 성공:", response.data);
+      return response.data.uuid; // { uuid: string }
+    } else {
+      throw new Error("알 수 없는 응답 상태입니다.");
+    }
+  } catch (error) {
+    throwMapped(error, {
+      400: "입력값이 잘못되었습니다. (400)",
+      401: "로그인이 필요합니다. (401)",
       404: "분석 결과를 찾을 수 없습니다. (404)",
     });
   }
