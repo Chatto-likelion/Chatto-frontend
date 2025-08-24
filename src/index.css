@@ -8,6 +8,14 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "LINE Seed Sans KR Bold";
+  src: url("/fonts/woff2/LINESeedKR-Bd.woff2") format("woff2"),
+    url("/fonts/woff/LINESeedKR-Bd.woff") format("woff");
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --color-primary: #6937b9; /* bg-primary 처럼 사용 */
   --color-primary-light: #eadcff;
@@ -74,11 +82,11 @@
 
   --text-body2: 14px;
   --text-body2--line-height: 19px;
-  --text-body2--font-weight: 600;
+  --text-body2--font-weight: 400;
 
   --text-button: 14px;
   --text-button--line-height: 16px;
-  --text-button--font-weight: 300;
+  --text-button--font-weight: 700;
 
   --text-caption: 12px;
   --text-caption--line-height: 16px;
@@ -93,4 +101,48 @@ html,
 body {
   @apply text-black;
   font-family: "LINE Seed Sans KR", "Pretendard", sans-serif;
+}
+
+.bold {
+  font-family: "LINE Seed Sans KR Bold", "Pretendard", sans-serif;
+}
+
+/* Chrome, Safari, Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Firefox */
+.scrollbar-hide {
+  scrollbar-width: none;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px; /* 폭 */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #fff787;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background-clip: content-box;
+}
+
+.custom-scrollbar-bus::-webkit-scrollbar {
+  width: 4px; /* 폭 */
+}
+
+.custom-scrollbar-bus::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar-bus::-webkit-scrollbar-thumb {
+  background-color: #6937b9;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background-clip: content-box;
 }

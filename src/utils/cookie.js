@@ -14,6 +14,6 @@ export const getCookie = (name) => {
 };
 
 // 쿠키 정보 삭제하는 함수
-export const removeCookie = (name) => {
+export const deleteCookie = (name) => {
   cookies.remove(name);
 };
