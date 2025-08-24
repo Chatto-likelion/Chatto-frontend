@@ -22,12 +22,12 @@ export default function SmallServices() {
     { type: "svg", Component: NavChemi, path: "/play/chemi" },
     { type: "svg", Component: NavSome, path: "/play/some" },
     { type: "svg", Component: NavMBTI, path: "/play/MBTI" },
-    { type: "svg", Component: NavLover, path: "/play/lovers" },
-    { type: "svg", Component: NavStat, path: "/play/stat" },
+    { type: "svg", Component: NavLover, path: "/more" },
+    { type: "svg", Component: NavStat, path: "/more" },
     {
       type: "svg",
       Component: NavMore,
-      path: "/play/more",
+      path: "/more",
       svgClassName: "text-primary-light",
     },
   ];
@@ -40,11 +40,11 @@ export default function SmallServices() {
       alt: "Chatto Business",
       path: "/business/contr",
     }, // PNG
-    { type: "img", src: ChattoBusiness, path: "/business/more" }, // SVG
+    { type: "img", src: ChattoBusiness, path: "/more" }, // SVG
     {
       type: "svg",
       Component: NavMore,
-      path: "/business/more",
+      path: "/more",
       svgClassName: "text-primary-dark",
     }, // SVG + 색상
   ];

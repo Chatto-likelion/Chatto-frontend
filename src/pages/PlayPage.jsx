@@ -44,13 +44,13 @@ export default function PlayPage() {
             title="연인 유형 분석"
             description="우리 얼마나 잘맞을까?"
             icon={Lovers}
-            navigateTo="/play/lovers"
+            navigateTo="/more"
           />
           <ServiceCard
             title="재밌는 통계"
             description="MT 게임에 제격! 단톡방 통계"
             icon={Statistics}
-            navigateTo="/play/stat"
+            navigateTo="/more"
           />
           <ServiceCard
             bgColor="bg-primary-dark"
@@ -59,7 +59,7 @@ export default function PlayPage() {
             title="더 많은 분석"
             description="그 외 다양한 분석을 체험하세요"
             icon={SearchMore}
-            navigateTo="/play/more"
+            navigateTo="/more"
           />
         </div>
       </div>

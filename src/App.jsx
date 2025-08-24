@@ -28,6 +28,7 @@ import QuizPersonalAnswerPage from "./pages/QuizPersonalAnswerPage";
 import PlaySomeSharePage from "./pages/PlaySomeSharePage.jsx";
 import PlayMbtiSharePage from "./pages/PlayMbtiSharePage.jsx";
 import BusinessContrSharePage from "./pages/BusinessContrSharePage.jsx";
+import MorePage from "./pages/MorePage.jsx";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/forget" element={<ForgetPasswordPage />} />
+        <Route path="/more" element={<MorePage />} />
 
         <Route
           path="/play/chemi/share/:uuid"
