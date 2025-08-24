@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   Header,
@@ -53,6 +53,30 @@ export default function QuizPage() {
   // + 버튼용 확인 모달
   const [addConfirmOpen, setAddConfirmOpen] = useState(false);
   const [adding, setAdding] = useState(false);
+
+  const mainRef = useRef(null);
+  const shouldScrollAfterAddRef = useRef(false);
+
+  const scrollMainToBottom = () => {
+    const el = mainRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+  };
+
+  const prevLenRef = useRef(questions.length);
+
+  useEffect(() => {
+    const increased = questions.length > prevLenRef.current;
+    if (increased && shouldScrollAfterAddRef.current) {
+      // 렌더 완료 보장용 rAF x2
+      requestAnimationFrame(() => {
+        requestAnimationFrame(scrollMainToBottom);
+      });
+      // 한 번 스크롤하고 플래그 리셋
+      shouldScrollAfterAddRef.current = false;
+    }
+    prevLenRef.current = questions.length;
+  }, [questions.length]);
 
   // 완료(수정 저장)용 확인 모달
   const [updateConfirmOpen, setUpdateConfirmOpen] = useState(false);
@@ -156,11 +180,13 @@ export default function QuizPage() {
   const handleAddQuestion = async () => {
     try {
       setAdding(true);
+      shouldScrollAfterAddRef.current = true;
       await addOne();
       await refetch();
     } catch (err) {
       console.error("퀴즈 추가 실패:", err);
       alert("문항 추가에 실패했습니다.");
+      shouldScrollAfterAddRef.current = false;
     } finally {
       setAdding(false);
     }
@@ -253,7 +279,10 @@ export default function QuizPage() {
         </aside>
 
         {/* 본문 */}
-        <main className="w-[1023px] px-[153px] pb-20 flex flex-col justify-start max-h-[calc(100vh-72px)] overflow-y-auto scrollbar-hide">
+        <main
+          ref={mainRef}
+          className="w-[1023px] px-[153px] pb-20 flex flex-col justify-start max-h-[calc(100vh-72px)] overflow-y-auto scrollbar-hide"
+        >
           <div className="w-full flex flex-col items-end">
             <h1 className="w-full text-h3 pt-25">Quiz</h1>
             <div className="group flex w-[180px] text-button border-1 border-primary-light rounded-[2px] my-6 px-[6px] py-1">
@@ -385,12 +414,18 @@ export default function QuizPage() {
           </div>
 
           <div className="w-full flex justify-center mt-6">
-            <button
-              onClick={() => setAddConfirmOpen(true)}
-              className="text-h4 text-primary-light hover:text-gray-2"
-            >
-              +
-            </button>
+            {adding ? (
+              <span
+                className={`inline-block w-5 h-5 rounded-full border-2 border-secondary-light border-t-transparent animate-spin`}
+              />
+            ) : (
+              <button
+                onClick={() => setAddConfirmOpen(true)}
+                className="text-h4 text-primary-light hover:text-gray-2"
+              >
+                +
+              </button>
+            )}
           </div>
         </main>
 

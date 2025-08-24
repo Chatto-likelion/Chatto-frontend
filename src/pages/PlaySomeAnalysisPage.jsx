@@ -110,6 +110,7 @@ export default function PlaySomeAnalysisPage() {
   const [chatIds, setChatIds] = useState(() => new Set()); // 채팅 id 집합
   const [hasSourceChat, setHasSourceChat] = useState(null); // true/false/null
   const [loading, setLoading] = useState(true);
+  const [quizLoading, setQuizLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const sourceChatId = resultData?.result?.chat ?? null;
@@ -180,7 +181,8 @@ export default function PlaySomeAnalysisPage() {
   }, [resultData?.result, form]);
 
   // 비활성화 조건 및 사유
-  const disableAnalyze = loading || hasSourceChat === false || isSameNow;
+  const disableAnalyze =
+    loading || quizLoading || hasSourceChat === false || isSameNow;
 
   const disableReason = useMemo(() => {
     if (loading) return "분석 중입니다...";
@@ -240,6 +242,7 @@ export default function PlaySomeAnalysisPage() {
   };
 
   const handleQuiz = async () => {
+    setQuizLoading(true);
     try {
       await postQuiz10(2, resultId);
       const uuid = await ensureUuid();
@@ -247,18 +250,14 @@ export default function PlaySomeAnalysisPage() {
     } catch (err) {
       setError(err.message || "퀴즈 생성에 실패했습니다.");
     } finally {
-      setLoading(false);
+      setQuizLoading(false);
     }
   };
 
   const handleGoQuiz = async () => {
     try {
       const uuid = await ensureUuid();
-      navigate(
-        `${window.location.origin}/play/quiz/${resultId}/${encodeURIComponent(
-          uuid
-        )}`
-      );
+      navigate(`/play/quiz/${resultId}/${encodeURIComponent(uuid)}`);
     } catch (err) {
       setError(err.message || "퀴즈로 이동할 수 없습니다.");
     }
@@ -284,9 +283,6 @@ export default function PlaySomeAnalysisPage() {
     }
   };
 
-  if (loading) return <p>결과를 불러오는 중...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
-
   return (
     <div className="flex flex-col justify-start items-center h-screen text-white bg-primary-dark">
       <Header />
@@ -302,192 +298,210 @@ export default function PlaySomeAnalysisPage() {
           {/* 결과 출력 */}
           {loading && <p className="mt-44 text-sm">분석 중입니다...</p>}
           {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
-          {/* 상단 분석 */}
-          <section className="w-full pb-7">
-            <div className="w-full">
-              <div className="flex justify-between items-start">
-                {/* 왼쪽: 타이틀 + 점수 */}
-                <div className="flex-1 pr-6">
-                  <p className="text-xl pb-2">
-                    {resultData.spec.name_A}와 {resultData.spec.name_B}의 썸
-                    지수
-                  </p>
-                  <div className="flex justify-between">
-                    <div className="flex items-end gap-2">
-                      <h2 className="text-6xl">
-                        <span className="text-secondary">
-                          {resultData.spec.score_main}
-                        </span>
-                        점
-                      </h2>
+
+          {!loading && !error && (
+            <div className="w-full flex flex-col items-start">
+              {/* 상단 분석 */}
+              <section className="w-full pb-7">
+                <div className="w-full">
+                  <div className="flex justify-between items-start">
+                    {/* 왼쪽: 타이틀 + 점수 */}
+                    <div className="flex-1 pr-6">
+                      <p className="text-xl pb-2">
+                        {resultData.spec.name_A}와 {resultData.spec.name_B}의 썸
+                        지수
+                      </p>
+                      <div className="flex justify-between">
+                        <div className="flex items-end gap-2">
+                          <h2 className="text-6xl">
+                            <span className="text-secondary">
+                              {resultData.spec.score_main}
+                            </span>
+                            점
+                          </h2>
+                        </div>
+                        <div className="text-right text-[#F5F5F5] text-base pt-1">
+                          <p>
+                            분석된 메시지 수: {resultData.result.num_chat}개
+                          </p>
+                          <p>
+                            분석 기간: {resultData.result.analysis_date_start}
+                            부터
+                            {resultData.result.analysis_date_end}까지
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-right text-[#F5F5F5] text-base pt-1">
-                      <p>분석된 메시지 수: {resultData.result.num_chat}개</p>
-                      <p>
-                        분석 기간: {resultData.result.analysis_date_start}부터
-                        {resultData.result.analysis_date_end}까지
+                  </div>
+
+                  {/* 하단 카피 */}
+                  <div className="mt-6">
+                    <p className="text-sm text-primary-light whitespace-pre-line">
+                      {resultData.spec.comment_main}
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              {/* 섹션 1: 호감 지수 분석 */}
+              <Section title="호감 지수 분석">
+                <div className="w-full max-w-[700px] mx-auto space-y-6 text-white pl-5 pr-5">
+                  {/* 방향 */}
+                  <div className="flex items-start">
+                    <p className="w-24 text-body1">방향</p>
+                    <p className="flex-1 text-body2">
+                      {resultData.spec.name_A} → {resultData.spec.name_B}
+                    </p>
+                    <p className="flex-1 text-body2">
+                      {resultData.spec.name_B} → {resultData.spec.name_A}
+                    </p>
+                  </div>
+
+                  {/* 호감점수 */}
+                  <div className="flex items-start">
+                    <p className="w-24 text-body1">호감점수</p>
+                    <p className="flex-1 text-body2">
+                      {resultData.spec.score_A}
+                    </p>
+                    <p className="flex-1 text-body2">
+                      {resultData.spec.score_B}
+                    </p>
+                  </div>
+
+                  {/* 특징 */}
+                  <div className="flex items-start">
+                    <p className="w-24 text-body1">특징</p>
+                    <div className="flex-1 text-body2">
+                      <p className="flex-1 text-body2">
+                        {resultData.spec.trait_A}
+                      </p>
+                    </div>
+                    <div className="flex-1 text-body2">
+                      <p className="flex-1 text-body2">
+                        {resultData.spec.trait_B}
                       </p>
                     </div>
                   </div>
                 </div>
-              </div>
+              </Section>
 
-              {/* 하단 카피 */}
-              <div className="mt-6">
-                <p className="text-sm text-primary-light whitespace-pre-line">
-                  {resultData.spec.comment_main}
+              {/* 섹션 2: 말투 & 감정 */}
+              <Section title="말투 & 감정 분석">
+                <p className="text-xs text-primary-light mb-5">
+                  가장 활발하게 서로 연결된 멤버 조합
                 </p>
-              </div>
-            </div>
-          </section>
 
-          {/* 섹션 1: 호감 지수 분석 */}
-          <Section title="호감 지수 분석">
-            <div className="w-full max-w-[700px] mx-auto space-y-6 text-white pl-5 pr-5">
-              {/* 방향 */}
-              <div className="flex items-start">
-                <p className="w-24 text-body1">방향</p>
-                <p className="flex-1 text-body2">
-                  {resultData.spec.name_A} → {resultData.spec.name_B}
-                </p>
-                <p className="flex-1 text-body2">
-                  {resultData.spec.name_B} → {resultData.spec.name_A}
-                </p>
-              </div>
+                <div className="space-y-10 w-full max-w-[700px] mx-auto">
+                  <AnalysisGauge
+                    title="말투"
+                    left="어색"
+                    right="편안"
+                    value={resultData.spec.tone}
+                    desc={resultData.spec.tone_desc}
+                    example={resultData.spec.tone_ex}
+                  />
 
-              {/* 호감점수 */}
-              <div className="flex items-start">
-                <p className="w-24 text-body1">호감점수</p>
-                <p className="flex-1 text-body2">{resultData.spec.score_A}</p>
-                <p className="flex-1 text-body2">{resultData.spec.score_B}</p>
-              </div>
+                  <AnalysisGauge
+                    title="감정 표현"
+                    left="적음"
+                    right="풍부"
+                    value={resultData.spec.emo}
+                    desc={resultData.spec.emo_desc}
+                    example={resultData.spec.emo_ex}
+                  />
 
-              {/* 특징 */}
-              <div className="flex items-start">
-                <p className="w-24 text-body1">특징</p>
-                <div className="flex-1 text-body2">
-                  <p className="flex-1 text-body2">{resultData.spec.trait_A}</p>
+                  <AnalysisGauge
+                    title="호칭"
+                    left="딱딱"
+                    right="애정"
+                    value={resultData.spec.addr}
+                    desc={resultData.spec.addr_desc}
+                    example={resultData.spec.addr_ex}
+                  />
                 </div>
-                <div className="flex-1 text-body2">
-                  <p className="flex-1 text-body2">{resultData.spec.trait_B}</p>
+              </Section>
+
+              {/* 섹션 3: 대화 패턴 */}
+              <Section title="대화 패턴 분석">
+                {!isRevealed && (
+                  <CreditWall onClick={handleReveal} cost={analysisCost} />
+                )}
+                <div className="relative space-y-10 w-full max-w-[700px] mx-auto">
+                  <CompareMetric
+                    title="평균 답장 시간"
+                    leftValue={`${resultData.spec.reply_A}분`}
+                    rightValue={`${resultData.spec.reply_B}분`}
+                    leftPct={65}
+                    leftDesc={resultData.spec.reply_A_desc}
+                    rightDesc={resultData.spec.reply_B_desc}
+                  />
+
+                  <CompareMetric
+                    title="약속 제안 횟수"
+                    leftValue={`${resultData.spec.rec_A}회`}
+                    rightValue={`${resultData.spec.rec_B}회`}
+                    leftPct={
+                      (resultData.spec.rec_A /
+                        (resultData.spec.rec_A + resultData.spec.rec_B)) *
+                      100
+                    }
+                    leftDesc={resultData.spec.rec_A_desc}
+                    rightDesc={resultData.spec.rec_B_desc}
+                    leftExample={resultData.spec.rec_A_ex}
+                    rightExample={resultData.spec.rec_A_ex}
+                  />
+                  <CompareMetric
+                    title="주제 시작 비율"
+                    leftValue={`${resultData.spec.atti_A}%`}
+                    rightValue={`${resultData.spec.atti_B}%`}
+                    leftPct={resultData.spec.atti_A}
+                    leftDesc={resultData.spec.atti_A_desc}
+                    rightDesc={resultData.spec.atti_B_desc}
+                    leftExample={resultData.spec.atti_A_ex}
+                    rightExample={resultData.spec.atti_A_ex}
+                  />
+
+                  <CompareMetric
+                    title="평균 메시지 길이"
+                    leftValue={`${resultData.spec.len_A}자`}
+                    rightValue={`${resultData.spec.len_B}자`}
+                    leftPct={
+                      (resultData.spec.len_A /
+                        (resultData.spec.len_A + resultData.len_B)) *
+                      100
+                    }
+                    leftDesc={resultData.spec.len_A_desc}
+                    rightDesc={resultData.spec.len_B_desc}
+                    leftExample={resultData.spec.len_A_ex}
+                    rightExample={resultData.spec.len_A_ex}
+                  />
+
+                  <div className="text-sm text-secondary leading-6">
+                    <p>분석:</p>
+                    <p>{resultData.spec.pattern_analysis}</p>
+                  </div>
                 </div>
-              </div>
+              </Section>
+
+              {/* 섹션 4: 상담 (업데이트) */}
+              <Section title="챗토의 연애상담">
+                <div className="w-full max-w-[700px] mx-auto space-y-5">
+                  <p className="text-sm text-white/80 leading-7">
+                    {resultData.spec.chatto_counsel}
+                  </p>
+
+                  <div className="mt-2 space-y-3">
+                    <p className="text-base font-semibold text-secondary">
+                      Tip
+                    </p>
+                    <p className="text-sm text-white/80 leading-7 space-y-2">
+                      {resultData.spec.chatto_counsel_tips}
+                    </p>
+                  </div>
+                </div>
+              </Section>
             </div>
-          </Section>
-
-          {/* 섹션 2: 말투 & 감정 */}
-          <Section title="말투 & 감정 분석">
-            <p className="text-xs text-primary-light mb-5">
-              가장 활발하게 서로 연결된 멤버 조합
-            </p>
-
-            <div className="space-y-10 w-full max-w-[700px] mx-auto">
-              <AnalysisGauge
-                title="말투"
-                left="어색"
-                right="편안"
-                value={resultData.spec.tone}
-                desc={resultData.spec.tone_desc}
-                example={resultData.spec.tone_ex}
-              />
-
-              <AnalysisGauge
-                title="감정 표현"
-                left="적음"
-                right="풍부"
-                value={resultData.spec.emo}
-                desc={resultData.spec.emo_desc}
-                example={resultData.spec.emo_ex}
-              />
-
-              <AnalysisGauge
-                title="호칭"
-                left="딱딱"
-                right="애정"
-                value={resultData.spec.addr}
-                desc={resultData.spec.addr_desc}
-                example={resultData.spec.addr_ex}
-              />
-            </div>
-          </Section>
-
-          {/* 섹션 3: 대화 패턴 */}
-          <Section title="대화 패턴 분석">
-            {!isRevealed && (
-              <CreditWall onClick={handleReveal} cost={analysisCost} />
-            )}
-            <div className="relative space-y-10 w-full max-w-[700px] mx-auto">
-              <CompareMetric
-                title="평균 답장 시간"
-                leftValue={`${resultData.spec.reply_A}분`}
-                rightValue={`${resultData.spec.reply_B}분`}
-                leftPct={65}
-                leftDesc={resultData.spec.reply_A_desc}
-                rightDesc={resultData.spec.reply_B_desc}
-              />
-
-              <CompareMetric
-                title="약속 제안 횟수"
-                leftValue={`${resultData.spec.rec_A}회`}
-                rightValue={`${resultData.spec.rec_B}회`}
-                leftPct={
-                  (resultData.spec.rec_A /
-                    (resultData.spec.rec_A + resultData.spec.rec_B)) *
-                  100
-                }
-                leftDesc={resultData.spec.rec_A_desc}
-                rightDesc={resultData.spec.rec_B_desc}
-                leftExample={resultData.spec.rec_A_ex}
-                rightExample={resultData.spec.rec_A_ex}
-              />
-              <CompareMetric
-                title="주제 시작 비율"
-                leftValue={`${resultData.spec.atti_A}%`}
-                rightValue={`${resultData.spec.atti_B}%`}
-                leftPct={resultData.spec.atti_A}
-                leftDesc={resultData.spec.atti_A_desc}
-                rightDesc={resultData.spec.atti_B_desc}
-                leftExample={resultData.spec.atti_A_ex}
-                rightExample={resultData.spec.atti_A_ex}
-              />
-
-              <CompareMetric
-                title="평균 메시지 길이"
-                leftValue={`${resultData.spec.len_A}자`}
-                rightValue={`${resultData.spec.len_B}자`}
-                leftPct={
-                  (resultData.spec.len_A /
-                    (resultData.spec.len_A + resultData.len_B)) *
-                  100
-                }
-                leftDesc={resultData.spec.len_A_desc}
-                rightDesc={resultData.spec.len_B_desc}
-                leftExample={resultData.spec.len_A_ex}
-                rightExample={resultData.spec.len_A_ex}
-              />
-
-              <div className="text-sm text-secondary leading-6">
-                <p>분석:</p>
-                <p>{resultData.spec.pattern_analysis}</p>
-              </div>
-            </div>
-          </Section>
-
-          {/* 섹션 4: 상담 (업데이트) */}
-          <Section title="챗토의 연애상담">
-            <div className="w-full max-w-[700px] mx-auto space-y-5">
-              <p className="text-sm text-white/80 leading-7">
-                {resultData.spec.chatto_counsel}
-              </p>
-
-              <div className="mt-2 space-y-3">
-                <p className="text-base font-semibold text-secondary">Tip</p>
-                <p className="text-sm text-white/80 leading-7 space-y-2">
-                  {resultData.spec.chatto_counsel_tips}
-                </p>
-              </div>
-            </div>
-          </Section>
+          )}
         </main>
 
         {/* 오른쪽 */}
@@ -496,6 +510,7 @@ export default function PlaySomeAnalysisPage() {
             <DetailForm
               type={2} // 1=chemi, 2=some, 3=mbti
               value={form}
+              loading={quizLoading}
               onChange={updateForm}
               isAnalysis={true}
             />
@@ -528,7 +543,7 @@ export default function PlaySomeAnalysisPage() {
           <div className="w-full flex justify-between items-center">
             <button
               onClick={handleOpenShare}
-              disabled={loading}
+              disabled={loading || quizLoading}
               className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
             >
               결과 공유
@@ -540,10 +555,10 @@ export default function PlaySomeAnalysisPage() {
               loading={shareFetching}
               error={shareError}
             />
-            {!resultData.result.is_quized ? (
+            {!loading && !resultData.result.is_quized ? (
               <button
                 onClick={handleQuiz}
-                disabled={loading}
+                disabled={quizLoading}
                 className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
               >
                 퀴즈 생성
@@ -551,7 +566,7 @@ export default function PlaySomeAnalysisPage() {
             ) : (
               <button
                 onClick={handleGoQuiz}
-                disabled={loading}
+                disabled={quizLoading}
                 className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
               >
                 퀴즈 보기
@@ -559,7 +574,7 @@ export default function PlaySomeAnalysisPage() {
             )}
             <button
               onClick={() => handleDelete()}
-              disabled={loading}
+              disabled={quizLoading}
               className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
             >
               결과 삭제
