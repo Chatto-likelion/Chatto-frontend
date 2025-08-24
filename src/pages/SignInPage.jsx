@@ -96,9 +96,9 @@ export default function SignInPage() {
           />
           <div className="flex flex-col items-end gap-2.5">
             <Button type="submit">sign in</Button>
-            <a href="/forget" className="text-primary hover:text-primary-dark">
+            <div className="text-primary hover:text-primary-dark">
               비밀번호를 잊으셨나요?
-            </a>
+            </div>
           </div>
 
           <div className="flex text-body2 mt-2 gap-2">
