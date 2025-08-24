@@ -744,11 +744,19 @@ export default function PlayChemiAnalysisPage() {
                       </p>
                     </div>
                   </div>
-                  <p className="ml-10">{resultData.spec.chatto_levelup}</p>
+                  <p className="ml-10">· {resultData.spec.chatto_levelup1}</p>
+                  <p className="ml-10">· {resultData.spec.chatto_levelup2}</p>
+                  <p className="ml-10">· {resultData.spec.chatto_levelup3}</p>
                   <div className="flex flex-col space-y-2 text-secondary-dark mt-5">
                     <p className="mt-2">Tip</p>
                     <p className="text-body2">
-                      {resultData.spec.chatto_levelup_tips}
+                      · {resultData.spec.chatto_levelup_tips1}
+                    </p>
+                    <p className="text-body2">
+                      · {resultData.spec.chatto_levelup_tips2}
+                    </p>
+                    <p className="text-body2">
+                      · {resultData.spec.chatto_levelup_tips3}
                     </p>
                   </div>
                 </div>

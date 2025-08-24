@@ -485,11 +485,7 @@ export default function PlaySomeAnalysisPage() {
 
                   <div className="text-sm text-secondary leading-6">
                     <p>분석:</p>
-                    {JSON.parse(resultData.spec.pattern_analysis).map(
-                      (sentence, idx) => (
-                        <p key={idx}>{sentence}</p>
-                      )
-                    )}
+                    {resultData.spec.pattern_analysis}
                   </div>
                 </div>
               </Section>
