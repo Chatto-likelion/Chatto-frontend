@@ -130,6 +130,7 @@ export default function PlayChemiAnalysisPage() {
   const [chatIds, setChatIds] = useState(() => new Set());
   const [hasSourceChat, setHasSourceChat] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [quizLoading, setQuizLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -171,6 +172,29 @@ export default function PlayChemiAnalysisPage() {
   }, [resultId, setSelectedChatId]);
 
   const normalize = (s) => (s && s.trim() ? s.trim() : "입력 안 함");
+
+  const isSameNow = useMemo(() => {
+    if (!resultData?.result) return false;
+    return (
+      resultData.result.relationship === normalize(form.relationship) &&
+      resultData.result.age === form.age &&
+      resultData.result.analysis_date_start === form.analysis_start &&
+      resultData.result.analysis_date_end === form.analysis_end
+    );
+  }, [resultData?.result, form]);
+
+  // 비활성화 조건 및 사유
+  const disableAnalyze =
+    loading || quizLoading || hasSourceChat === false || isSameNow;
+
+  const disableReason = useMemo(() => {
+    if (loading) return "분석 중입니다...";
+    if (hasSourceChat === false)
+      return "원본 채팅이 삭제되어 재분석할 수 없습니다.";
+    if (isSameNow)
+      return "이전 분석과 동일한 조건입니다. 변경 후 다시 시도해 주세요.";
+    return "";
+  }, [loading, hasSourceChat, isSameNow]);
 
   const handleAnalyze = async () => {
     if (!hasSourceChat) {
@@ -235,6 +259,7 @@ export default function PlayChemiAnalysisPage() {
   };
 
   const handleQuiz = async () => {
+    setQuizLoading(true);
     try {
       await postQuiz10(1, resultId);
       const uuid = await ensureUuid();
@@ -242,18 +267,14 @@ export default function PlayChemiAnalysisPage() {
     } catch (err) {
       setError(err.message || "퀴즈 생성에 실패했습니다.");
     } finally {
-      setLoading(false);
+      setQuizLoading(false);
     }
   };
 
   const handleGoQuiz = async () => {
     try {
       const uuid = await ensureUuid();
-      navigate(
-        `${window.location.origin}/play/quiz/${resultId}/${encodeURIComponent(
-          uuid
-        )}`
-      );
+      navigate(`/play/quiz/${resultId}/${encodeURIComponent(uuid)}`);
     } catch (err) {
       setError(err.message || "퀴즈로 이동할 수 없습니다.");
     }
@@ -423,9 +444,6 @@ export default function PlayChemiAnalysisPage() {
     return text; // 혹시 패턴이 다르면 그대로 출력
   };
 
-  if (loading) return <p>결과를 불러오는 중...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
-
   return (
     <div className="flex flex-col justify-start items-center h-screen text-white bg-primary-dark">
       <Header />
@@ -438,273 +456,277 @@ export default function PlayChemiAnalysisPage() {
 
         {/* 가운데 */}
         <main className="overflow-y-auto scrollbar-hide pt-28 w-[722px] h-[calc(100vh-72px)] flex flex-col justify-start items-start">
-          {loading && <p className="mt-44 text-sm">분석 중입니다...</p>}
+          {loading && <p className="mt-44 text-sm">불러오는 중입니다...</p>}
           {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
 
-          <div className="w-full flex flex-col items-start gap-8">
-            {/* 종합 케미 점수 */}
-            <div className="w-full flex flex-col gap-4 p-2 text-left">
-              <div className="flex justify-between">
-                <div className="flex flex-col">
-                  <span className="text-st1">종합 케미 점수</span>
-                  <p className="text-st1">
-                    <span className="text-h2 text-[#F5F5F5]">
-                      {resultData.spec.score_main}
-                    </span>{" "}
-                    점
-                  </p>
-                </div>
-                <div className="flex flex-col text-st2 gap-0.5 mt-1">
-                  <p>분석된 메시지 수: {resultData.result.num_chat}개</p>
-                  <p>참여자 수: {resultData.result.people_num}</p>
-                  <p>
-                    분석 기간: {resultData.result.analysis_date_start} ~{" "}
-                    {resultData.result.analysis_date_end}
-                  </p>
-                </div>
-              </div>
-              <div className="text-body2 text-primary-light mt-2">
-                {resultData.spec.summary_main}
-              </div>
-            </div>
-
-            {/* 상호작용 매트릭스 */}
-            <section className="w-full p-6 border border-secondary rounded-lg">
-              <h3 className="text-h6 font-bold mb-2">상호작용 매트릭스</h3>
-              <p className="text-body2 mb-4">
-                ※ 진한 선일수록 대화가 활발합니다! 분석 대상은 대화량 상위
-                5명입니다.
-              </p>
-              <div
-                className="rounded-md overflow-hidden"
-                style={{ height: 420 }}
-              >
-                {graphData?.tooFew ? (
-                  <div className="h-full flex items-center justify-center text-sm opacity-70">
-                    상호작용 매트릭스는 대화상대가 2명 이상일 때만 표시됩니다.
+          {!loading && !error && (
+            <div className="w-full flex flex-col items-start gap-8">
+              {/* 종합 케미 점수 */}
+              <div className="w-full flex flex-col gap-4 p-2 text-left">
+                <div className="flex justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-st1">종합 케미 점수</span>
+                    <p className="text-st1">
+                      <span className="text-h2 text-[#F5F5F5]">
+                        {resultData.spec.score_main}
+                      </span>{" "}
+                      점
+                    </p>
                   </div>
-                ) : graphData ? (
-                  <InteractionMatrix
-                    nodes={graphData.nodes}
-                    links={graphData.links}
-                  />
-                ) : (
-                  <div className="h-full flex items-center justify-center text-sm opacity-70">
-                    그래프를 표시할 수 없습니다.
+                  <div className="flex flex-col text-st2 gap-0.5 mt-1">
+                    <p>분석된 메시지 수: {resultData.result.num_chat}개</p>
+                    <p>참여자 수: {resultData.result.people_num}</p>
+                    <p>
+                      분석 기간: {resultData.result.analysis_date_start} ~{" "}
+                      {resultData.result.analysis_date_end}
+                    </p>
                   </div>
-                )}
-              </div>
-            </section>
-
-            {/* TOP3 */}
-            <section className="w-full p-6 border border-secondary rounded-lg">
-              <div>
-                <div className="mb-10 gap-0.5">
-                  <p className="relative inline-block text-h6 text-primary-light mb-3">
-                    케미 순위 TOP3
-                    <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary"></span>
-                  </p>
-
-                  <p className="text-primary-light text-body2">
-                    가장 활발하게 서로 연결된 멤버 조합
-                  </p>
                 </div>
-                {resultData?.spec ? (
-                  <div className="flex flex-col gap-5 text-st2">
-                    {/* TOP1 */}
-                    <div className="flex justify-row">
-                      <div className="w-40 mr-10">
-                        <p className="text-body1 text-secondary-dark">
-                          TOP1 – {resultData.spec.top1_score}점
-                        </p>
-                        <p className="text-body1 text-[#F5F5F5]">
-                          {resultData.spec.top1_A} & {resultData.spec.top1_B}
-                        </p>
-                      </div>
-                      <p className="flex-1 text-[#F5F5F5]">
-                        {resultData.spec.top1_comment}
-                      </p>
-                    </div>
-
-                    {/* TOP2 */}
-                    <div className="flex justify-row">
-                      <div className="w-40 mr-10">
-                        <p className="text-body1 text-secondary-dark">
-                          TOP1 – {resultData.spec.top2_score}점
-                        </p>
-                        <p className="text-body1 text-[#F5F5F5]">
-                          {resultData.spec.top2_A} & {resultData.spec.top2_B}
-                        </p>
-                      </div>
-                      <p className="flex-1 text-[#F5F5F5]">
-                        {resultData.spec.top2_comment}
-                      </p>
-                    </div>
-
-                    {/* TOP3 */}
-                    <div className="flex justify-row">
-                      <div className="w-40 mr-10">
-                        <p className="text-body1 text-secondary-dark">
-                          TOP1 – {resultData.spec.top3_score}점
-                        </p>
-                        <p className="text-body1 text-[#F5F5F5]">
-                          {resultData.spec.top3_A} & {resultData.spec.top3_B}
-                        </p>
-                      </div>
-                      <p className="flex-1 text-[#F5F5F5]">
-                        {resultData.spec.top3_comment}
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-400">데이터가 없습니다.</p>
-                )}
+                <div className="text-body2 text-primary-light mt-2">
+                  {resultData.spec.summary_main}
+                </div>
               </div>
 
-              {/* 대화 톤 (이미지 스타일) */}
-              <div className="mb-20">
-                <div className="mt-20 mb-3 gap-0.5">
-                  <p className="relative inline-block text-h6 text-primary-light mb-3">
-                    대화 톤
-                    <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary"></span>
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-8">
-                  <div className="w-48 h-48">
-                    {/* 퍼센트 라벨 플러그인 사용 */}
-                    <Pie
-                      data={tonePie}
-                      options={pieOpts}
-                      plugins={[percentLabels]}
+              {/* 상호작용 매트릭스 */}
+              <section className="w-full p-6 border border-secondary rounded-lg">
+                <h3 className="text-h6 font-bold mb-2">상호작용 매트릭스</h3>
+                <p className="text-body2 mb-4">
+                  ※ 진한 선일수록 대화가 활발합니다! 분석 대상은 대화량 상위
+                  5명입니다.
+                </p>
+                <div
+                  className="rounded-md overflow-hidden"
+                  style={{ height: 420 }}
+                >
+                  {graphData?.tooFew ? (
+                    <div className="h-full flex items-center justify-center text-sm opacity-70">
+                      상호작용 매트릭스는 대화상대가 2명 이상일 때만 표시됩니다.
+                    </div>
+                  ) : graphData ? (
+                    <InteractionMatrix
+                      nodes={graphData.nodes}
+                      links={graphData.links}
                     />
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-sm opacity-70">
+                      그래프를 표시할 수 없습니다.
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              {/* TOP3 */}
+              <section className="w-full p-6 border border-secondary rounded-lg">
+                <div>
+                  <div className="mb-10 gap-0.5">
+                    <p className="relative inline-block text-h6 text-primary-light mb-3">
+                      케미 순위 TOP3
+                      <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary"></span>
+                    </p>
+
+                    <p className="text-primary-light text-body2">
+                      가장 활발하게 서로 연결된 멤버 조합
+                    </p>
                   </div>
-                  <div className="mt-2 flex-1 leading-7">
-                    <div className="mb-5 ml-5">
-                      {toneLines.map((item, idx) => (
-                        <p
-                          key={idx}
-                          className="text-start text-body2 text-[#F5F5F5]"
-                        >
-                          · {item.label} : {item.percent}%
+                  {resultData?.spec ? (
+                    <div className="flex flex-col gap-5 text-st2">
+                      {/* TOP1 */}
+                      <div className="flex justify-row">
+                        <div className="w-40 mr-10">
+                          <p className="text-body1 text-secondary-dark">
+                            TOP1 – {resultData.spec.top1_score}점
+                          </p>
+                          <p className="text-body1 text-[#F5F5F5]">
+                            {resultData.spec.top1_A} & {resultData.spec.top1_B}
+                          </p>
+                        </div>
+                        <p className="flex-1 text-[#F5F5F5]">
+                          {resultData.spec.top1_comment}
                         </p>
-                      ))}
+                      </div>
+
+                      {/* TOP2 */}
+                      <div className="flex justify-row">
+                        <div className="w-40 mr-10">
+                          <p className="text-body1 text-secondary-dark">
+                            TOP1 – {resultData.spec.top2_score}점
+                          </p>
+                          <p className="text-body1 text-[#F5F5F5]">
+                            {resultData.spec.top2_A} & {resultData.spec.top2_B}
+                          </p>
+                        </div>
+                        <p className="flex-1 text-[#F5F5F5]">
+                          {resultData.spec.top2_comment}
+                        </p>
+                      </div>
+
+                      {/* TOP3 */}
+                      <div className="flex justify-row">
+                        <div className="w-40 mr-10">
+                          <p className="text-body1 text-secondary-dark">
+                            TOP1 – {resultData.spec.top3_score}점
+                          </p>
+                          <p className="text-body1 text-[#F5F5F5]">
+                            {resultData.spec.top3_A} & {resultData.spec.top3_B}
+                          </p>
+                        </div>
+                        <p className="flex-1 text-[#F5F5F5]">
+                          {resultData.spec.top3_comment}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-400">데이터가 없습니다.</p>
+                  )}
+                </div>
+
+                {/* 대화 톤 (이미지 스타일) */}
+                <div className="mb-20">
+                  <div className="mt-20 mb-3 gap-0.5">
+                    <p className="relative inline-block text-h6 text-primary-light mb-3">
+                      대화 톤
+                      <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary"></span>
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-8">
+                    <div className="w-48 h-48">
+                      {/* 퍼센트 라벨 플러그인 사용 */}
+                      <Pie
+                        data={tonePie}
+                        options={pieOpts}
+                        plugins={[percentLabels]}
+                      />
+                    </div>
+                    <div className="mt-2 flex-1 leading-7">
+                      <div className="mb-5 ml-5">
+                        {toneLines.map((item, idx) => (
+                          <p
+                            key={idx}
+                            className="text-start text-body2 text-[#F5F5F5]"
+                          >
+                            · {item.label} : {item.percent}%
+                          </p>
+                        ))}
+                      </div>
+                      <div>
+                        <p className="text-secondary text-st1 mb-2">
+                          예시 대화
+                        </p>
+                        <div className="space-y-2">
+                          <p className="pl-5 text-body2 text-[#F5F5F5]">
+                            · {formatToneExample(resultData.spec.tone_ex1)}
+                          </p>
+                          <p className="pl-5 text-body2 text-[#F5F5F5]">
+                            · {formatToneExample(resultData.spec.tone_ex2)}
+                          </p>
+                          <p className="pl-5 text-body2 text-[#F5F5F5]">
+                            · {formatToneExample(resultData.spec.tone_ex3)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 응답 패턴 */}
+                <div className="mb-20">
+                  <div className="mt-20 mb-3 gap-0.5">
+                    <p className="relative inline-block text-h6 text-primary-light mb-3">
+                      응답 패턴
+                      <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary"></span>
+                    </p>
+                  </div>
+                  <div className="ml-10 space-y-4">
+                    <div className="space-y-2">
+                      <p>· 평균 응답 시간 : {resultData.spec.resp_time}초</p>
+                      <p>· 즉각 응답 비율 : {resultData.spec.resp_ratio}%</p>
+                      <p>· '읽씹' 발생률 : {resultData.spec.ignore}%</p>
                     </div>
                     <div>
-                      <p className="text-secondary text-st1 mb-2">예시 대화</p>
-                      <div className="space-y-2">
-                        <p className="pl-5 text-body2 text-[#F5F5F5]">
-                          · {formatToneExample(resultData.spec.tone_ex1)}
-                        </p>
-                        <p className="pl-5 text-body2 text-[#F5F5F5]">
-                          · {formatToneExample(resultData.spec.tone_ex2)}
-                        </p>
-                        <p className="pl-5 text-body2 text-[#F5F5F5]">
-                          · {formatToneExample(resultData.spec.tone_ex3)}
-                        </p>
-                      </div>
+                      <p className="text-secondary">
+                        분석 : {resultData.spec.resp_analysis}
+                      </p>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* 응답 패턴 */}
-              <div className="mb-20">
-                <div className="mt-20 mb-3 gap-0.5">
-                  <p className="relative inline-block text-h6 text-primary-light mb-3">
-                    응답 패턴
-                    <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary"></span>
-                  </p>
+                {/* 대화 주제 비율 */}
+                <div className="mb-20">
+                  <div>
+                    <div className="mt-20 mb-3 gap-0.5">
+                      <p className="relative inline-block text-h6 text-primary-light mb-3">
+                        대화 주제 비율
+                        <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary"></span>
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex justify-row gap-8 pl-8">
+                    <div className="w-48 h-48 mb-2">
+                      <Pie
+                        data={topicPie}
+                        options={pieOpts}
+                        plugins={[percentLabels]}
+                      />
+                    </div>
+                    <div className="space-y-1 mt-10 ml-10">
+                      <p className="text-start text-body2 text-[#F5F5F5]">
+                        · {resultData.spec.topic1} :{" "}
+                        {resultData.spec.topic1_ratio}%
+                      </p>
+                      <p className="text-start text-body2 text-[#F5F5F5]">
+                        · {resultData.spec.topic2} :{" "}
+                        {resultData.spec.topic2_ratio}%
+                      </p>
+
+                      <p className="text-start text-body2 text-[#F5F5F5]">
+                        · {resultData.spec.topic3} :{" "}
+                        {resultData.spec.topic3_ratio}%
+                      </p>
+                      <p className="text-start text-body2 text-[#F5F5F5]">
+                        · {resultData.spec.topic4} :{" "}
+                        {resultData.spec.topic4_ratio}%
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div className="ml-10 space-y-4">
-                  <div className="space-y-2">
-                    <p>· 평균 응답 시간 : {resultData.spec.resp_time}초</p>
-                    <p>· 즉각 응답 비율 : {resultData.spec.resp_ratio}%</p>
-                    <p>· '읽씹' 발생률 : {resultData.spec.ignore}%</p>
+
+                {/* Chatto의 서비스 분석 */}
+                <div className="mb-20">
+                  <div>
+                    <div className="mt-20 mb-3 gap-0.5">
+                      <p className="relative inline-block text-h6 text-primary-light mb-3">
+                        챗토의 서비스 분석
+                        <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary"></span>
+                      </p>
+                    </div>
                   </div>
                   <div>
-                    <p className="text-secondary">
-                      분석 : {resultData.spec.resp_analysis}
-                    </p>
+                    <p className="ml-10">{resultData.spec.chatto_analysis}</p>
                   </div>
                 </div>
-              </div>
 
-              {/* 대화 주제 비율 */}
-              <div className="mb-20">
-                <div>
-                  <div className="mt-20 mb-3 gap-0.5">
-                    <p className="relative inline-block text-h6 text-primary-light mb-3">
-                      대화 주제 비율
-                      <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary"></span>
+                {/* Chatto의 서비스 분석 */}
+                <div className="mb-20">
+                  <div>
+                    <div className="mt-20 mb-3 gap-0.5">
+                      <p className="relative inline-block text-h6 text-primary-light mb-3">
+                        챗토의 케미 레벨업 가이드
+                        <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary"></span>
+                      </p>
+                    </div>
+                  </div>
+                  <p className="ml-10">{resultData.spec.chatto_levelup}</p>
+                  <div className="flex flex-col space-y-2 text-secondary-dark mt-5">
+                    <p className="mt-2">Tip</p>
+                    <p className="text-body2">
+                      {resultData.spec.chatto_levelup_tips}
                     </p>
                   </div>
                 </div>
-                <div className="flex justify-row gap-8 pl-8">
-                  <div className="w-48 h-48 mb-2">
-                    <Pie
-                      data={topicPie}
-                      options={pieOpts}
-                      plugins={[percentLabels]}
-                    />
-                  </div>
-                  <div className="space-y-1 mt-10 ml-10">
-                    <p className="text-start text-body2 text-[#F5F5F5]">
-                      · {resultData.spec.topic1} :{" "}
-                      {resultData.spec.topic1_ratio}%
-                    </p>
-                    <p className="text-start text-body2 text-[#F5F5F5]">
-                      · {resultData.spec.topic2} :{" "}
-                      {resultData.spec.topic2_ratio}%
-                    </p>
-
-                    <p className="text-start text-body2 text-[#F5F5F5]">
-                      · {resultData.spec.topic3} :{" "}
-                      {resultData.spec.topic3_ratio}%
-                    </p>
-                    <p className="text-start text-body2 text-[#F5F5F5]">
-                      · {resultData.spec.topic4} :{" "}
-                      {resultData.spec.topic4_ratio}%
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Chatto의 서비스 분석 */}
-              <div className="mb-20">
-                <div>
-                  <div className="mt-20 mb-3 gap-0.5">
-                    <p className="relative inline-block text-h6 text-primary-light mb-3">
-                      챗토의 서비스 분석
-                      <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary"></span>
-                    </p>
-                  </div>
-                </div>
-                <div>
-                  <p className="ml-10">{resultData.spec.chatto_analysis}</p>
-                </div>
-              </div>
-
-              {/* Chatto의 서비스 분석 */}
-              <div className="mb-20">
-                <div>
-                  <div className="mt-20 mb-3 gap-0.5">
-                    <p className="relative inline-block text-h6 text-primary-light mb-3">
-                      챗토의 케미 레벨업 가이드
-                      <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary"></span>
-                    </p>
-                  </div>
-                </div>
-                <p className="ml-10">{resultData.spec.chatto_levelup}</p>
-                <div className="flex flex-col space-y-2 text-secondary-dark mt-5">
-                  <p className="mt-2">Tip</p>
-                  <p className="text-body2">
-                    {resultData.spec.chatto_levelup_tips}
-                  </p>
-                </div>
-              </div>
-            </section>
-          </div>
+              </section>
+            </div>
+          )}
         </main>
 
         {/* 오른쪽 */}
@@ -713,22 +735,40 @@ export default function PlayChemiAnalysisPage() {
             <DetailForm
               type={1}
               value={form}
+              loading={quizLoading}
               onChange={updateForm}
               isAnalysis={true}
             />
-            <button
-              onClick={() => handleAnalyze()}
-              disabled={loading}
-              className="mt-6 w-18.5 h-6.5 px-1.5 py-1 flex justify-center gap-0.5 items-center hover:bg-secondary-light hover:text-primary-dark text-caption border border-secondary-light rounded-lg"
-            >
-              다시 분석
-              <Icons.Search className="w-2.5 h-2.5" />
-            </button>
+            {/* 다시 분석 버튼 */}
+            <div className="relative group mt-6">
+              <button
+                onClick={handleAnalyze}
+                disabled={disableAnalyze}
+                className={[
+                  "w-18.5 h-6.5 px-1.5 py-1 flex justify-center gap-0.5 items-center text-caption rounded-lg border transition-colors duration-150",
+                  disableAnalyze
+                    ? "border-secondary-light/40 text-secondary-light/40 cursor-not-allowed"
+                    : "border-secondary-light hover:bg-secondary-light hover:text-primary-dark text-secondary-light",
+                ].join(" ")}
+              >
+                다시 분석
+                <Icons.Search className="w-2.5 h-2.5" />
+              </button>
+
+              {/* 비활성화 사유 툴팁: 래퍼(div)에 hover 걸어서 disabled여도 보이도록 */}
+              {disableAnalyze && disableReason && (
+                <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-7 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="whitespace-nowrap text-[10px] leading-none px-2 py-1 rounded bg-primary-dark/80 text-secondary-light border border-secondary-light/30 shadow-sm">
+                    {disableReason}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           <div className="w-full flex justify-between items-center">
             <button
               onClick={handleOpenShare}
-              disabled={loading}
+              disabled={loading || quizLoading}
               className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
             >
               결과 공유
@@ -738,10 +778,10 @@ export default function PlayChemiAnalysisPage() {
               onClose={() => setModalOpen(false)}
               url={shareUrl}
             />
-            {!resultData.result.is_quized ? (
+            {!loading && !resultData.result.is_quized ? (
               <button
                 onClick={handleQuiz}
-                disabled={loading}
+                disabled={quizLoading}
                 className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
               >
                 퀴즈 생성
@@ -749,7 +789,7 @@ export default function PlayChemiAnalysisPage() {
             ) : (
               <button
                 onClick={handleGoQuiz}
-                disabled={loading}
+                disabled={quizLoading}
                 className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
               >
                 퀴즈 보기

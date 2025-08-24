@@ -110,6 +110,7 @@ export default function PlayMbtiAnalysisPage() {
   const [chatIds, setChatIds] = useState(() => new Set()); // 채팅 id 집합
   const [hasSourceChat, setHasSourceChat] = useState(null); // true/false/null
   const [loading, setLoading] = useState(true);
+  const [quizLoading, setQuizLoading] = useState(false);
   const [error, setError] = useState(null);
   const [analysisCost, setAnalysisCost] = useState(0);
 
@@ -267,7 +268,8 @@ export default function PlayMbtiAnalysisPage() {
   }, [resultData?.result, form]);
 
   // 비활성화 조건 및 사유
-  const disableAnalyze = loading || hasSourceChat === false || isSameNow;
+  const disableAnalyze =
+    loading || quizLoading || hasSourceChat === false || isSameNow;
 
   const disableReason = useMemo(() => {
     if (loading) return "분석 중입니다...";
@@ -325,6 +327,7 @@ export default function PlayMbtiAnalysisPage() {
   };
 
   const handleQuiz = async () => {
+    setQuizLoading(true);
     try {
       await postQuiz10(3, resultId);
       const uuid = await ensureUuid();
@@ -332,18 +335,14 @@ export default function PlayMbtiAnalysisPage() {
     } catch (err) {
       setError(err.message || "퀴즈 생성에 실패했습니다.");
     } finally {
-      setLoading(false);
+      setQuizLoading(false);
     }
   };
 
   const handleGoQuiz = async () => {
     try {
       const uuid = await ensureUuid();
-      navigate(
-        `${window.location.origin}/play/quiz/${resultId}/${encodeURIComponent(
-          uuid
-        )}`
-      );
+      navigate(`/play/quiz/${resultId}/${encodeURIComponent(uuid)}`);
     } catch (err) {
       setError(err.message || "퀴즈로 이동할 수 없습니다.");
     }
@@ -368,10 +367,6 @@ export default function PlayMbtiAnalysisPage() {
     }
   };
 
-  if (loading) return <p className="mt-44 text-sm">분석 중입니다...</p>;
-  if (error) return <p className="mt-4 text-sm text-red-500">{error}</p>;
-  if (!resultData) return null; // 방어: 혹시 모를 케이스
-
   return (
     <div className="flex flex-col justify-start items-center h-screen text-white bg-primary-dark">
       <Header />
@@ -387,59 +382,64 @@ export default function PlayMbtiAnalysisPage() {
           {/* 결과 출력 */}
           {loading && <p className="mt-44 text-sm">분석 중입니다...</p>}
           {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
-          {/* 상단 통계 */}
 
-          <div className="w-full mb-15 flex flex-col">
-            <div className="text-h6 pb-6.5">
-              <span>MBTI 통계</span>
-            </div>
-            <div className="pl-5 text-body1 text-left">
-              <p>분석된 메시지 수: {resultData.result.num_chat}개</p>
-              <p>
-                분석 대상: {resultData.spec.total_I + resultData.spec.total_E}명
-              </p>
-              <p>
-                분석 기간: {resultData.result.analysis_date_start} ~{" "}
-                {resultData.result.analysis_date_end}
-              </p>
-            </div>
-          </div>
-
-          {/* MBTI 통계(왼쪽 도넛, 오른쪽 페어바) */}
-          <Section title="MBTI 통계">
-            <div className="w-full pl-10 gap-30 flex items-center">
-              <MbtiPieChart data={mbti_stats} size={170} />
-              <div className="space-y-4">
-                {TRAITS.map((t, idx) => (
-                  <PairBar
-                    key={idx}
-                    leftLabel={t.leftLabel}
-                    rightLabel={t.rightLabel}
-                    left={t.leftPct}
-                  />
-                ))}
+          {!loading && !error && (
+            <div className="w-full flex flex-col items-start">
+              {/* 상단 통계 */}
+              <div className="w-full mb-15 flex flex-col">
+                <div className="text-h6 pb-6.5">
+                  <span>MBTI 통계</span>
+                </div>
+                <div className="pl-5 text-body1 text-left">
+                  <p>분석된 메시지 수: {resultData.result.num_chat}개</p>
+                  <p>
+                    분석 대상:{" "}
+                    {resultData.spec.total_I + resultData.spec.total_E}명
+                  </p>
+                  <p>
+                    분석 기간: {resultData.result.analysis_date_start} ~{" "}
+                    {resultData.result.analysis_date_end}
+                  </p>
+                </div>
               </div>
-            </div>
-          </Section>
 
-          {/* 탭 바 */}
-          <div className="mt-[51px] w-full">
-            <TabBar
-              tabs={REPORT_TABS}
-              active={activeTab}
-              onChange={setActiveTab}
-            />
+              {/* MBTI 통계(왼쪽 도넛, 오른쪽 페어바) */}
+              <Section title="MBTI 통계">
+                <div className="w-full pl-10 gap-30 flex items-center">
+                  <MbtiPieChart data={mbti_stats} size={170} />
+                  <div className="space-y-4">
+                    {TRAITS.map((t, idx) => (
+                      <PairBar
+                        key={idx}
+                        leftLabel={t.leftLabel}
+                        rightLabel={t.rightLabel}
+                        left={t.leftPct}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </Section>
 
-            {/* 리포트 카드 */}
-            {activeSpec && (
-              <div className="relative w-full">
-                <MbtiReportCard spec={activeSpec} />
-                {!isRevealed && (
-                  <CreditWall onClick={handleReveal} cost={analysisCost} />
+              {/* 탭 바 */}
+              <div className="mt-[51px] w-full">
+                <TabBar
+                  tabs={REPORT_TABS}
+                  active={activeTab}
+                  onChange={setActiveTab}
+                />
+
+                {/* 리포트 카드 */}
+                {activeSpec && (
+                  <div className="relative w-full">
+                    <MbtiReportCard spec={activeSpec} />
+                    {!isRevealed && (
+                      <CreditWall onClick={handleReveal} cost={analysisCost} />
+                    )}
+                  </div>
                 )}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </main>
 
         {/* 오른쪽 */}
@@ -448,6 +448,7 @@ export default function PlayMbtiAnalysisPage() {
             <DetailForm
               type={3} // 1=chemi, 2=some, 3=mbti
               value={form}
+              loading={quizLoading}
               onChange={updateForm}
               isAnalysis={true}
             />
@@ -480,7 +481,7 @@ export default function PlayMbtiAnalysisPage() {
           <div className="w-full flex justify-between items-center">
             <button
               onClick={handleOpenShare}
-              disabled={loading}
+              disabled={loading || quizLoading}
               className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
             >
               결과 공유
@@ -492,10 +493,10 @@ export default function PlayMbtiAnalysisPage() {
               loading={shareFetching}
               error={shareError}
             />
-            {!resultData.result.is_quized ? (
+            {!loading && !resultData.result.is_quized ? (
               <button
                 onClick={handleQuiz}
-                disabled={loading}
+                disabled={quizLoading}
                 className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
               >
                 퀴즈 생성
@@ -503,7 +504,7 @@ export default function PlayMbtiAnalysisPage() {
             ) : (
               <button
                 onClick={handleGoQuiz}
-                disabled={loading}
+                disabled={quizLoading}
                 className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
               >
                 퀴즈 보기
@@ -511,7 +512,7 @@ export default function PlayMbtiAnalysisPage() {
             )}
             <button
               onClick={() => handleDelete()}
-              disabled={loading}
+              disabled={quizLoading}
               className="w-17 h-8 hover:bg-secondary hover:text-primary-dark cursor-pointer px-0.25 py-1 text-button border-2 border-secondary rounded-lg"
             >
               결과 삭제

@@ -51,8 +51,14 @@ export default function DetailForm({
       <div
         className={`${ui.ww} ${ui.text} flex items-center justify-center gap-2 py-6`}
       >
-        <span className="inline-block w-5 h-5 rounded-full border-2 border-secondary-light border-t-transparent animate-spin" />
-        <span className={ui.text}>분석 중...</span>
+        <span
+          className={`inline-block w-5 h-5 rounded-full border-2 ${
+            isPlay ? "border-secondary-light" : "border-primary"
+          } border-t-transparent animate-spin`}
+        />
+        <span className={ui.text}>
+          {isAnalysis ? "퀴즈 생성 중..." : "분석 중..."}
+        </span>
       </div>
     );
   }
