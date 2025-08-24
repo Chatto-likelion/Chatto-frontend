@@ -42,7 +42,7 @@ export default function BusinessPage() {
             textColor="text-primary-dark"
             border="border border-2 border-primary-dark"
             icon={ChattoBusiness}
-            navigateTo="/business/contr"
+            navigateTo="/more"
           />
           <ServiceCard
             bgColor="bg-primary-dark"
@@ -51,7 +51,7 @@ export default function BusinessPage() {
             title="더 많은 분석"
             description="그 외 다양한 분석을 체험하세요"
             icon={SearchMore}
-            navigateTo="/business/more"
+            navigateTo="/more"
           />
         </div>
       </div>

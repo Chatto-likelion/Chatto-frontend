@@ -13,14 +13,14 @@ const playServices = [
     title: "연인 유형 분석",
     type: "svg",
     Icon: NavLover,
-    route: "/play/lovers",
+    route: "/more",
   },
   { title: "재밌는 통계", type: "svg", Icon: NavStat, route: "/play/stat" },
   {
     title: "더 많은 분석",
     type: "svg",
     Icon: NavMore,
-    route: "/play/more",
+    route: "/more",
     svgClassName: "text-primary-light",
   },
 ];
@@ -39,13 +39,13 @@ const businessServices = [
     type: "img",
     src: ChattoBusiness,
     alt: "Chatto Business",
-    route: "/business/communication",
+    route: "/more",
   },
   {
     title: "더 많은 분석",
     type: "svg",
     Icon: NavMore,
-    route: "/business/more",
+    route: "/more",
     svgClassName: "text-primary-dark",
   },
 ];
