@@ -46,12 +46,16 @@ export default function MbtiReportCard({ spec }) {
   ].map((b) => ({ ...b, items: b.items.filter(Boolean) }));
 
   return (
-    <section className="w-full text-white rounded-lg border border-[#FFF8DE] p-6 sm:p-7">
+    <section className="w-full text-body2 text-white rounded-lg border border-[#FFF8DE] p-6 sm:p-7">
       {/* 상단 제목 */}
-      <h3 className="text-2xl font-semibold tracking-tight mb-5">{S.MBTI}</h3>
+      <h3 className="text-h4 font-semibold text-secondary-light tracking-tight mb-2">
+        {S.MBTI}
+      </h3>
 
       {/* 인트로 본문 */}
-      <div className="leading-7 text-white/90 space-y-2">{S.summary}</div>
+      <div className="leading-7 text-primary-light space-y-2 mb-3">
+        {S.summary}
+      </div>
 
       {/* 대화 특징 */}
       <h4 className="mt-6 inline-block border-t-2 border-[#F6DE8D] pt-1 mb-4 text-xl font-semibold">

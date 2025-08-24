@@ -97,6 +97,7 @@ export default function MbtiPieChart({
   gapAngle = 0.5, // degrees
   showLabels = true,
 }) {
+  console.log(data);
   const wrapRef = useRef(null);
   const [hover, setHover] = useState(null); // { x, y, slice }
 

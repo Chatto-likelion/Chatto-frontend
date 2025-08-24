@@ -8,6 +8,7 @@ import {
   postQuiz10,
   postUUID,
   getUUID,
+  postCreditUsage,
 } from "@/apis/api";
 import {
   Header,
@@ -16,13 +17,14 @@ import {
   SmallServices,
   DetailForm,
   ShareModal,
+  CreditWall,
+  InteractionMatrix,
 } from "@/components";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import { useChat } from "@/contexts/ChatContext";
 import * as Icons from "@/assets/svg/index.js";
-import InteractionMatrix from "../components/InteractionMatrix.jsx";
 
-// chart.js
 import { Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -47,6 +49,7 @@ ChartJS.register(
 
 export default function PlayChemiAnalysisPage() {
   const { resultId } = useParams();
+  const { user } = useAuth();
   const { setSelectedChatId } = useChat();
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
@@ -280,6 +283,25 @@ export default function PlayChemiAnalysisPage() {
     }
   };
 
+  const [isRevealed, setIsRevealed] = useState(false);
+  const handleReveal = () => {
+    if (user.credit >= 1) {
+      postCreditUsage({
+        amount: 1,
+        usage: "Play 케미 분석기",
+        purpose: "분석 결과 보기",
+      })
+        .then(() => {
+          setIsRevealed(true);
+        })
+        .catch((error) => {
+          alert("크레딧 소모에 실패했습니다.");
+        });
+    } else {
+      alert("크레딧이 부족합니다. 크레딧 충전 후 이용해주세요.");
+    }
+  };
+
   // ───────────────── InteractionMatrix용 그래프 데이터 (tablesize + name_i) ─────────────────
   const graphData = useMemo(() => {
     const spec = resultData?.spec;
@@ -455,7 +477,7 @@ export default function PlayChemiAnalysisPage() {
         </div>
 
         {/* 가운데 */}
-        <main className="overflow-y-auto scrollbar-hide pt-28 w-[722px] h-[calc(100vh-72px)] flex flex-col justify-start items-start">
+        <main className="overflow-y-auto scrollbar-hide pt-28 pb-28 w-[722px] h-[calc(100vh-72px)] flex flex-col justify-start items-start">
           {loading && <p className="mt-44 text-sm">불러오는 중입니다...</p>}
           {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
 
@@ -463,11 +485,11 @@ export default function PlayChemiAnalysisPage() {
             <div className="w-full flex flex-col items-start gap-8">
               {/* 종합 케미 점수 */}
               <div className="w-full flex flex-col gap-4 p-2 text-left">
-                <div className="flex justify-between">
+                <div className="flex justify-between items-end">
                   <div className="flex flex-col">
-                    <span className="text-st1">종합 케미 점수</span>
+                    <span className="text-h6 pb-4">종합 케미 점수</span>
                     <p className="text-st1">
-                      <span className="text-h2 text-[#F5F5F5]">
+                      <span className="text-h2 text-secondary">
                         {resultData.spec.score_main}
                       </span>{" "}
                       점
@@ -488,9 +510,12 @@ export default function PlayChemiAnalysisPage() {
               </div>
 
               {/* 상호작용 매트릭스 */}
-              <section className="w-full p-6 border border-secondary rounded-lg">
-                <h3 className="text-h6 font-bold mb-2">상호작용 매트릭스</h3>
-                <p className="text-body2 mb-4">
+              <section className="w-full p-6 pt-8 border border-secondary rounded-lg">
+                <p className="relative inline-block text-h6 mb-2 text-primary-light">
+                  상호작용 매트릭스
+                  <span className="absolute left-0 -top-2 h-0.5 w-full bg-secondary"></span>
+                </p>
+                <p className="text-body2 mb-4 text-primary-light">
                   ※ 진한 선일수록 대화가 활발합니다! 분석 대상은 대화량 상위
                   5명입니다.
                 </p>
@@ -516,12 +541,12 @@ export default function PlayChemiAnalysisPage() {
               </section>
 
               {/* TOP3 */}
-              <section className="w-full p-6 border border-secondary rounded-lg">
+              <section className="w-full p-6 pt-8 border border-secondary rounded-lg">
                 <div>
                   <div className="mb-10 gap-0.5">
-                    <p className="relative inline-block text-h6 text-primary-light mb-3">
+                    <p className="relative inline-block text-h6 text-primary-light mb-2">
                       케미 순위 TOP3
-                      <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary"></span>
+                      <span className="absolute left-0 -top-2 h-0.5 w-full bg-secondary"></span>
                     </p>
 
                     <p className="text-primary-light text-body2">
@@ -585,7 +610,7 @@ export default function PlayChemiAnalysisPage() {
                   <div className="mt-20 mb-3 gap-0.5">
                     <p className="relative inline-block text-h6 text-primary-light mb-3">
                       대화 톤
-                      <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary"></span>
+                      <span className="absolute left-0 -top-2 h-0.5 w-full bg-secondary"></span>
                     </p>
                   </div>
 
@@ -634,7 +659,7 @@ export default function PlayChemiAnalysisPage() {
                   <div className="mt-20 mb-3 gap-0.5">
                     <p className="relative inline-block text-h6 text-primary-light mb-3">
                       응답 패턴
-                      <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary"></span>
+                      <span className="absolute left-0 -top-2 h-0.5 w-full bg-secondary"></span>
                     </p>
                   </div>
                   <div className="ml-10 space-y-4">
@@ -652,16 +677,19 @@ export default function PlayChemiAnalysisPage() {
                 </div>
 
                 {/* 대화 주제 비율 */}
-                <div className="mb-20">
+                <div className="mb-20 ">
                   <div>
                     <div className="mt-20 mb-3 gap-0.5">
                       <p className="relative inline-block text-h6 text-primary-light mb-3">
                         대화 주제 비율
-                        <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary"></span>
+                        <span className="absolute left-0 -top-2 h-0.5 w-full bg-secondary"></span>
                       </p>
                     </div>
                   </div>
-                  <div className="flex justify-row gap-8 pl-8">
+                  <div className="flex justify-row gap-8 relative p-8">
+                    {!isRevealed && (
+                      <CreditWall onClick={handleReveal} cost={1} />
+                    )}
                     <div className="w-48 h-48 mb-2">
                       <Pie
                         data={topicPie}
@@ -697,7 +725,7 @@ export default function PlayChemiAnalysisPage() {
                     <div className="mt-20 mb-3 gap-0.5">
                       <p className="relative inline-block text-h6 text-primary-light mb-3">
                         챗토의 서비스 분석
-                        <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary"></span>
+                        <span className="absolute left-0 -top-2 h-0.5 w-full bg-secondary"></span>
                       </p>
                     </div>
                   </div>
@@ -706,13 +734,13 @@ export default function PlayChemiAnalysisPage() {
                   </div>
                 </div>
 
-                {/* Chatto의 서비스 분석 */}
-                <div className="mb-20">
+                {/* Chatto의 케미 레벨업 가이드 */}
+                <div className="mb-8">
                   <div>
                     <div className="mt-20 mb-3 gap-0.5">
                       <p className="relative inline-block text-h6 text-primary-light mb-3">
                         챗토의 케미 레벨업 가이드
-                        <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary"></span>
+                        <span className="absolute left-0 -top-2 h-0.5 w-full bg-secondary"></span>
                       </p>
                     </div>
                   </div>

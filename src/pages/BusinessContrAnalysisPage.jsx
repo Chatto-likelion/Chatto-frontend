@@ -7,6 +7,7 @@ import {
   deleteContrAnalysis,
   postUUID_Bus,
   getUUID_Bus,
+  postCreditUsage,
 } from "@/apis/api"; // 실제 API 호출 함수
 import {
   Header,
@@ -15,8 +16,10 @@ import {
   SmallServices,
   DetailForm,
   ShareModal,
+  CreditWall,
 } from "@/components";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import { useChat } from "@/contexts/ChatContext";
 import * as Icons from "@/assets/svg/index.js";
 import {
@@ -33,7 +36,8 @@ import {
 } from "recharts";
 
 export default function BusinessContrAnalysisPage() {
-  const { resultId } = useParams(); // URL 파라미터 추출
+  const { resultId } = useParams();
+  const { user } = useAuth();
   const { setSelectedChatId } = useChat();
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
@@ -235,6 +239,25 @@ export default function BusinessContrAnalysisPage() {
     }
   };
 
+  const [isRevealed, setIsRevealed] = useState(false);
+  const handleReveal = () => {
+    if (user.credit >= 2) {
+      postCreditUsage({
+        amount: 2,
+        usage: "Business 업무 참여도 분석",
+        purpose: "분석 결과 보기",
+      })
+        .then(() => {
+          setIsRevealed(true);
+        })
+        .catch((error) => {
+          alert("크레딧 소모에 실패했습니다.");
+        });
+    } else {
+      alert("크레딧이 부족합니다. 크레딧 충전 후 이용해주세요.");
+    }
+  };
+
   // ✅ 툴팁 커스터마이징 (항목 별 보기)
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -247,8 +270,7 @@ export default function BusinessContrAnalysisPage() {
             border: "1px solid #ccc",
           }}
         >
-          <p className="label">{`${label}`}</p>
-          <p className="intro">{`점수: ${payload[0].value}`}</p>
+          <p className="intro">{`${payload[0].value}`}</p>
         </div>
       );
     }
@@ -340,13 +362,6 @@ export default function BusinessContrAnalysisPage() {
     return null; // 그 외의 틱은 숨깁니다.
   };
 
-  // 이 console.log를 통해 데이터가 올바르게 변환되었는지 확인하세요.
-  // console.log('Transformed totalPeriodData:', totalPeriodData);
-
-  if (loading) return <p className="mt-44 text-sm">분석 중입니다...</p>;
-  if (error) return <p className="mt-4 text-sm text-red-500">{error}</p>;
-  if (!resultData) return null;
-
   return (
     <div className="flex flex-col justify-start items-center h-screen bg-white text-primary-dark ">
       <Header />
@@ -358,454 +373,476 @@ export default function BusinessContrAnalysisPage() {
         </div>
 
         {/* 가운데 */}
-        <main className="overflow-y-auto scrollbar-hide pt-28 w-[722px] h-[calc(100vh-72px)] flex flex-col justify-start items-start">
-          {/* 종합 케미 점수 */}
-          <div className="w-full flex flex-col items-start gap-8">
-            <p className="text-h6 text-bold text-primary">업무 분석</p>
+        <main className="overflow-y-auto scrollbar-hide pt-28 pb-28 w-[722px] h-[calc(100vh-72px)] flex flex-col justify-start items-start">
+          {loading && <p className="mt-44 text-sm">분석 중입니다...</p>}
+          {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
 
-            <div className="flex flex-col gap-1.5 mt-1">
-              <div>
-                <p className="text-h9 text-primary pb-2">
-                  "{resultData.result.title}" 참여도 분석
-                </p>
-                <div className="text-body1 text-[#262626] pl-3">
-                  <p>
-                    분석 기간 : {resultData.result.analysis_date_start} ~{" "}
-                    {resultData.result.analysis_date_end}
+          {!loading && !error && (
+            <div className="w-full flex flex-col items-start">
+              {/* 종합 케미 점수 */}
+              <div className="w-full flex flex-col items-start gap-8">
+                <p className="text-h6 text-primary">업무 참여도 분석</p>
+
+                <div className="flex flex-col gap-1.5 mt-1">
+                  <div>
+                    <p className="text-h7 text-primary pb-2">
+                      "{resultData.result.title}" 참여도 분석
+                    </p>
+                    <div className="text-body1 text-[#262626] pl-3">
+                      <p>
+                        분석 기간 : {resultData.result.analysis_date_start} ~{" "}
+                        {resultData.result.analysis_date_end}
+                      </p>
+                      <p>참여자 : {resultData.result.people_num}</p>
+                      <p>분석된 메세지 수 : {resultData.spec.total_talks}</p>
+                      <p>팀장 : {resultData.spec.leader}</p>
+                    </div>
+                  </div>
+                  <p className="text-caption text-[#8C8C8C] pl-3 mt-2">
+                    본 분석은 정보 공유, 문제 해결, 협력 태도, 응답 성실도 등
+                    4가지 지표를 종합하여 산출되었습니다.
                   </p>
-                  <p>참여자 : {resultData.result.people_num}</p>
-                  <p>대화 총량 : {resultData.spec.total_talks}</p>
-                  <p>팀장 : {resultData.spec.leader}</p>
-                  <p>평균 응답 속도 : {resultData.spec.avg_resp}</p>
                 </div>
               </div>
-              <p className="text-caption text-[#8C8C8C] pl-3 mt-2">
-                본 분석은 정보 공유, 문제 해결, 협력 태도, 응답 성실도 등 4가지
-                지표를 종합하여 산출되었습니다.
-              </p>
-            </div>
-          </div>
 
-          <div className="flex justify-between border-secondary-dark w-full mt-10">
-            {["항목별 보기", "개인별 보기", "기간별 보기"].map((tab, idx) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(idx)}
-                style={{ height: "39px" }}
-                className={`w-[128px] h-[39px] text-st1 rounded-t-md border-3 border-primary  
+              <div className="flex justify-between border-secondary-dark w-full mt-10">
+                {["항목별 보기", "개인별 보기", "기간별 보기"].map(
+                  (tab, idx) => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(idx)}
+                      style={{ height: "39px" }}
+                      className={`w-[128px] h-[39px] text-st1 rounded-t-md border-2 border-b-0 border-primary  
                   ${
                     activeTab === idx
                       ? "bg-primary-dark text-[#FFFFFF] border-primary"
                       : "bg-white text-[#BFBFBF]"
                   }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
+                    >
+                      {tab}
+                    </button>
+                  )
+                )}
+              </div>
 
-          {/* 탭별 컨텐츠 */}
-          <div className="w-full mb-20 p-4 gap-5 flex flex-col justify-start items-start border border-t-4 border-primary text-body2 text-black">
-            <div className="w-full mt-6">
-              {/* 항목별 보기 */}
-              {activeTab === 0 && (
-                <section className="w-full bg-white p-4">
-                  {!resultData?.spec_personal ||
-                  resultData.spec_personal.length <= 1 ? (
-                    <div className="w-full flex justify-center items-center h-40">
-                      <p className="text-sm text-gray-500">
-                        분석은 2명 이상의 참여자가 있을 때 제공됩니다.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-20 w-full">
-                      {/* 참여도 */}
-                      <div>
-                        <p className="relative inline-block text-h7 text-primary-dark mb-5">
-                          종합 참여 점수
-                          <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
-                        </p>
-                        <div className="w-full overflow-x-auto border-3 border-primary rounded-lg">
-                          <div
-                            style={{
-                              minWidth: `${
-                                resultData.spec_personal.length * 80
-                              }px`,
-                              height: "240px",
-                            }}
-                          >
-                            <ResponsiveContainer width="100%" height="100%">
-                              <BarChart
-                                data={[...resultData.spec_personal].sort(
-                                  (a, b) => a.rank - b.rank
-                                )}
-                                margin={{
-                                  top: 10,
-                                  right: 10,
-                                  left: 0,
-                                  bottom: 30,
-                                }} // ✅ bottom 여백 추가
-                              >
-                                <CartesianGrid
-                                  vertical={false}
-                                  horizontal={false}
-                                />
-                                <XAxis
-                                  dataKey="name"
-                                  axisLine
-                                  tickLine={false}
-                                />
-                                <YAxis hide />
-                                <Tooltip content={<CustomTooltip />} />
-                                <Bar
-                                  dataKey="participation"
-                                  fill="#4C1E95"
-                                  barSize={70}
-                                />
-                              </BarChart>
-                            </ResponsiveContainer>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* 정보 공유 */}
-                      <div>
-                        <p className="relative inline-block text-h7 text-primary-dark mb-5">
-                          정보 공유
-                          <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
-                        </p>
-                        <div className="w-full overflow-x-auto border-3 border-primary rounded-lg">
-                          <div
-                            style={{
-                              minWidth: `${
-                                resultData.spec_personal.length * 80
-                              }px`,
-                              height: "240px",
-                            }}
-                          >
-                            <ResponsiveContainer width="100%" height="100%">
-                              <BarChart
-                                data={[...resultData.spec_personal].sort(
-                                  (a, b) => a.rank - b.rank
-                                )}
-                                margin={{
-                                  top: 10,
-                                  right: 10,
-                                  left: 0,
-                                  bottom: 30,
-                                }} // ✅ bottom 여백 추가
-                              >
-                                <CartesianGrid
-                                  vertical={false}
-                                  horizontal={false}
-                                />
-                                <XAxis
-                                  dataKey="name"
-                                  axisLine
-                                  tickLine={false}
-                                />
-                                <YAxis hide />
-                                <Tooltip content={<CustomTooltip />} />
-                                <Bar
-                                  dataKey="infoshare"
-                                  fill="#4C1E95"
-                                  barSize={70}
-                                />
-                              </BarChart>
-                            </ResponsiveContainer>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* 문제 해결 */}
-                      <div>
-                        <p className="relative inline-block text-h7 text-primary-dark mb-5">
-                          문제 해결 참여
-                          <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
-                        </p>
-                        <div className="w-full overflow-x-auto border-3 border-primary rounded-lg">
-                          <div
-                            style={{
-                              minWidth: `${
-                                resultData.spec_personal.length * 80
-                              }px`,
-                              height: "240px",
-                            }}
-                          >
-                            <ResponsiveContainer width="100%" height="100%">
-                              <BarChart
-                                data={[...resultData.spec_personal].sort(
-                                  (a, b) => a.rank - b.rank
-                                )}
-                                margin={{
-                                  top: 10,
-                                  right: 10,
-                                  left: 0,
-                                  bottom: 30,
-                                }} // ✅ bottom 여백 추가
-                              >
-                                <CartesianGrid
-                                  vertical={false}
-                                  horizontal={false}
-                                />
-                                <XAxis
-                                  dataKey="name"
-                                  axisLine
-                                  tickLine={false}
-                                />
-                                <YAxis hide />
-                                <Tooltip content={<CustomTooltip />} />
-                                <Bar
-                                  dataKey="probsolve"
-                                  fill="#4C1E95"
-                                  barSize={70}
-                                />
-                              </BarChart>
-                            </ResponsiveContainer>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* 주도적 제안 */}
-                      <div>
-                        <p className="relative inline-block text-h7 text-primary-dark mb-5">
-                          주도적 제안
-                          <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
-                        </p>
-                        <div className="w-full overflow-x-auto border-3 border-primary rounded-lg">
-                          <div
-                            style={{
-                              minWidth: `${
-                                resultData.spec_personal.length * 80
-                              }px`,
-                              height: "240px",
-                            }}
-                          >
-                            <ResponsiveContainer width="100%" height="100%">
-                              <BarChart
-                                data={[...resultData.spec_personal].sort(
-                                  (a, b) => a.rank - b.rank
-                                )}
-                                margin={{
-                                  top: 10,
-                                  right: 10,
-                                  left: 0,
-                                  bottom: 30,
-                                }} // ✅ bottom 여백 추가
-                              >
-                                <CartesianGrid
-                                  vertical={false}
-                                  horizontal={false}
-                                />
-                                <XAxis
-                                  dataKey="name"
-                                  axisLine
-                                  tickLine={false}
-                                />
-                                <YAxis hide />
-                                <Tooltip content={<CustomTooltip />} />
-                                <Bar
-                                  dataKey="proposal"
-                                  fill="#4C1E95"
-                                  barSize={70}
-                                />
-                              </BarChart>
-                            </ResponsiveContainer>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* 응답 속도 */}
-                      <div>
-                        <p className="relative inline-block text-h7 text-primary-dark mb-5">
-                          응답 속도
-                          <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
-                        </p>
-                        <div className="w-full overflow-x-auto border-3 border-primary rounded-lg">
-                          <div
-                            style={{
-                              minWidth: `${
-                                resultData.spec_personal.length * 80
-                              }px`,
-                              height: "240px",
-                            }}
-                          >
-                            <ResponsiveContainer width="100%" height="100%">
-                              <BarChart
-                                data={[...resultData.spec_personal].sort(
-                                  (a, b) => a.rank - b.rank
-                                )}
-                                margin={{
-                                  top: 10,
-                                  right: 10,
-                                  left: 0,
-                                  bottom: 30,
-                                }} // ✅ bottom 여백 추가
-                              >
-                                <CartesianGrid
-                                  vertical={false}
-                                  horizontal={false}
-                                />
-                                <XAxis
-                                  dataKey="name"
-                                  axisLine
-                                  tickLine={false}
-                                />
-                                <YAxis hide />
-                                <Tooltip content={<CustomTooltip />} />
-                                <Bar
-                                  dataKey="resptime"
-                                  fill="#4C1E95"
-                                  barSize={70}
-                                />
-                              </BarChart>
-                            </ResponsiveContainer>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </section>
-              )}
-
-              {activeTab === 1 && (
-                <section>
-                  <div>
-                    <p className="relative inline-block text-h7 text-primary-dark mb-5">
-                      개인별 기여도 프로파일
-                      <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
-                    </p>
-                    {/* `spec_personal` 배열을 map 함수로 순회하여 각 사람의 프로필을 렌더링 */}
-                    {resultData.spec_personal.map((person) => (
-                      <div key={person.specpersonal_id} className="mb-10 p-4 ">
-                        <p className="mb-3">
-                          <span className="text-st1">{person.name}</span>
-                          {person.name === resultData.spec.leader && (
-                            <span className="text-st1 ml-1">(팀장)</span>
-                          )}
-                          <span className="ml-4">
-                            총 기여 점수: {person.participation}점
-                          </span>
-                        </p>
-
-                        <div className="flex justify-between items-start ml-4">
-                          {/* 세부 지표 목록 */}
-                          <div className="flex flex-col gap-2 text-[#595959]">
-                            <p>정보 공유</p>
-                            <p>문제 해결 참여</p>
-                            <p>주도적 제안</p>
-                            <p>응답 속도</p>
-                          </div>
-
-                          {/* 세부 지표 점수 (텍스트) */}
-                          <div className="flex flex-col gap-2 mr-10">
-                            <p className="font-bold text-[#262626]">
-                              {getMetricText(person.infoshare)}
-                            </p>
-                            <p className="font-bold text-[#262626]">
-                              {getMetricText(person.probsolve)}
-                            </p>
-                            <p className="font-bold text-[#262626]">
-                              {getMetricText(person.proposal)}{" "}
-                            </p>
-                            <p className="font-bold text-[#262626]">
-                              {getMetricText(person.resptime)}
-                            </p>
-                          </div>
-
-                          {/* 진행 상태 표시 */}
-                          <div className="text-body2 text-primary">
-                            {person.type}
-                          </div>
-                        </div>
-
-                        {/* AI 분석 */}
-                        <div className="mt-4 pt-4 ml-4">
-                          <p className="text-body2 text-primary">
-                            <span className="font-bold">분석:</span>{" "}
-                            {person.analysis}
+              {/* 탭별 컨텐츠 */}
+              <div className="w-full p-4 gap-5 flex flex-col justify-start items-start border-2 rounded-b-lg border-primary text-body2 text-black">
+                <div className="w-full mt-6">
+                  {/* 항목별 보기 */}
+                  {activeTab === 0 && (
+                    <section className="w-full bg-white p-4">
+                      {!resultData?.spec_personal ||
+                      resultData.spec_personal.length <= 1 ? (
+                        <div className="w-full flex justify-center items-center h-40">
+                          <p className="text-sm text-gray-500">
+                            분석은 2명 이상의 참여자가 있을 때 제공됩니다.
                           </p>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
+                      ) : (
+                        <div className="flex flex-col gap-20 w-full">
+                          {/* 참여도 */}
+                          <div>
+                            <p className="relative inline-block text-h7 text-primary-dark mb-5">
+                              종합 참여 점수
+                              <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
+                            </p>
+                            <div className="w-full overflow-x-auto border-3 border-primary rounded-lg">
+                              <div
+                                style={{
+                                  minWidth: `${
+                                    resultData.spec_personal.length * 80
+                                  }px`,
+                                  height: "240px",
+                                }}
+                              >
+                                <ResponsiveContainer width="100%" height="100%">
+                                  <BarChart
+                                    data={[...resultData.spec_personal].sort(
+                                      (a, b) => a.rank - b.rank
+                                    )}
+                                    margin={{
+                                      top: 30,
+                                      right: 10,
+                                      left: 0,
+                                      bottom: 10,
+                                    }}
+                                  >
+                                    <CartesianGrid
+                                      vertical={false}
+                                      horizontal={false}
+                                    />
+                                    <XAxis
+                                      dataKey="name"
+                                      axisLine
+                                      tickLine={false}
+                                    />
+                                    <YAxis hide />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Bar
+                                      dataKey="participation"
+                                      fill="#4C1E95"
+                                      barSize={40}
+                                    />
+                                  </BarChart>
+                                </ResponsiveContainer>
+                              </div>
+                            </div>
+                          </div>
 
-              {activeTab === 2 && (
-                <section>
-                  <section>
-                    {/* 5개의 항목별 기간 추이 차트를 동적으로 렌더링 */}
-                    {allItemChartsData.map((chart, index) => (
-                      <div key={index} className="w-full  mb-10">
-                        <p className="relative inline-block text-h7 text-primary-dark mb-5">
-                          {chart.title}
-                          <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
-                        </p>
-                        <div className="flex justify-center pr-3 py-5 border-3 border-primary-dark rounded-lg">
-                          <div
-                            style={{
-                              position: "relative",
-                              width: "90%",
-                              height: "280px",
-                            }}
-                          >
-                            <ResponsiveContainer width="90%" height={280}>
-                              <LineChart data={chart.data}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis
-                                  dataKey="name"
-                                  tick={<CustomXAxisTick />}
-                                  axisLine={false}
-                                  tickLine={false}
-                                />
-                                <YAxis
-                                  domain={[0, 100]}
-                                  tick={false}
-                                  axisLine={false}
-                                  tickLine={false}
-                                />
-                                <Tooltip content={<CustomLineTooltip />} />
-                                <Legend />
-                                {/* API에서 가져온 유저 이름으로 Line을 동적으로 생성 */}
-                                {resultData?.spec_personal?.map((p) => (
-                                  <Line
-                                    key={p.name}
-                                    type="monotone" // 부드러운 곡선 차트
-                                    dataKey={p.name}
-                                    stroke={`#${(
-                                      (Math.random() * 0xffffff) <<
-                                      0
-                                    )
-                                      .toString(16)
-                                      .padStart(6, "0")}`}
-                                  />
-                                ))}
-                              </LineChart>
-                            </ResponsiveContainer>
+                          {/* 정보 공유 */}
+                          <div>
+                            <p className="relative inline-block text-h7 text-primary-dark mb-5">
+                              정보 공유
+                              <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
+                            </p>
+                            <div className="w-full overflow-x-auto border-3 border-primary rounded-lg">
+                              <div
+                                style={{
+                                  minWidth: `${
+                                    resultData.spec_personal.length * 80
+                                  }px`,
+                                  height: "240px",
+                                }}
+                              >
+                                <ResponsiveContainer width="100%" height="100%">
+                                  <BarChart
+                                    data={[...resultData.spec_personal].sort(
+                                      (a, b) => a.rank - b.rank
+                                    )}
+                                    margin={{
+                                      top: 30,
+                                      right: 10,
+                                      left: 0,
+                                      bottom: 10,
+                                    }}
+                                  >
+                                    <CartesianGrid
+                                      vertical={false}
+                                      horizontal={false}
+                                    />
+                                    <XAxis
+                                      dataKey="name"
+                                      axisLine
+                                      tickLine={false}
+                                    />
+                                    <YAxis hide />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Bar
+                                      dataKey="infoshare"
+                                      fill="#4C1E95"
+                                      barSize={40}
+                                    />
+                                  </BarChart>
+                                </ResponsiveContainer>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 문제 해결 */}
+                          <div>
+                            <p className="relative inline-block text-h7 text-primary-dark mb-5">
+                              문제 해결 참여
+                              <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
+                            </p>
+                            <div className="w-full overflow-x-auto border-3 border-primary rounded-lg">
+                              <div
+                                style={{
+                                  minWidth: `${
+                                    resultData.spec_personal.length * 80
+                                  }px`,
+                                  height: "240px",
+                                }}
+                              >
+                                <ResponsiveContainer width="100%" height="100%">
+                                  <BarChart
+                                    data={[...resultData.spec_personal].sort(
+                                      (a, b) => a.rank - b.rank
+                                    )}
+                                    margin={{
+                                      top: 30,
+                                      right: 10,
+                                      left: 0,
+                                      bottom: 10,
+                                    }}
+                                  >
+                                    <CartesianGrid
+                                      vertical={false}
+                                      horizontal={false}
+                                    />
+                                    <XAxis
+                                      dataKey="name"
+                                      axisLine
+                                      tickLine={false}
+                                    />
+                                    <YAxis hide />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Bar
+                                      dataKey="probsolve"
+                                      fill="#4C1E95"
+                                      barSize={40}
+                                    />
+                                  </BarChart>
+                                </ResponsiveContainer>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 주도적 제안 */}
+                          <div>
+                            <p className="relative inline-block text-h7 text-primary-dark mb-5">
+                              주도적 제안
+                              <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
+                            </p>
+                            <div className="w-full overflow-x-auto border-3 border-primary rounded-lg">
+                              <div
+                                style={{
+                                  minWidth: `${
+                                    resultData.spec_personal.length * 80
+                                  }px`,
+                                  height: "240px",
+                                }}
+                              >
+                                <ResponsiveContainer width="100%" height="100%">
+                                  <BarChart
+                                    data={[...resultData.spec_personal].sort(
+                                      (a, b) => a.rank - b.rank
+                                    )}
+                                    margin={{
+                                      top: 30,
+                                      right: 10,
+                                      left: 0,
+                                      bottom: 10,
+                                    }}
+                                  >
+                                    <CartesianGrid
+                                      vertical={false}
+                                      horizontal={false}
+                                    />
+                                    <XAxis
+                                      dataKey="name"
+                                      axisLine
+                                      tickLine={false}
+                                    />
+                                    <YAxis hide />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Bar
+                                      dataKey="proposal"
+                                      fill="#4C1E95"
+                                      barSize={40}
+                                    />
+                                  </BarChart>
+                                </ResponsiveContainer>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 응답 속도 */}
+                          <div>
+                            <p className="relative inline-block text-h7 text-primary-dark mb-5">
+                              응답 속도
+                              <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
+                            </p>
+                            <div className="w-full overflow-x-auto border-3 border-primary rounded-lg">
+                              <div
+                                style={{
+                                  minWidth: `${
+                                    resultData.spec_personal.length * 80
+                                  }px`,
+                                  height: "240px",
+                                }}
+                              >
+                                <ResponsiveContainer width="100%" height="100%">
+                                  <BarChart
+                                    data={[...resultData.spec_personal].sort(
+                                      (a, b) => a.rank - b.rank
+                                    )}
+                                    margin={{
+                                      top: 30,
+                                      right: 10,
+                                      left: 0,
+                                      bottom: 10,
+                                    }}
+                                  >
+                                    <CartesianGrid
+                                      vertical={false}
+                                      horizontal={false}
+                                    />
+                                    <XAxis
+                                      dataKey="name"
+                                      axisLine
+                                      tickLine={false}
+                                    />
+                                    <YAxis hide />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Bar
+                                      dataKey="resptime"
+                                      fill="#4C1E95"
+                                      barSize={40}
+                                    />
+                                  </BarChart>
+                                </ResponsiveContainer>
+                              </div>
+                            </div>
                           </div>
                         </div>
+                      )}
+                    </section>
+                  )}
+
+                  {activeTab === 1 && (
+                    <section>
+                      <div className="p-4 ">
+                        <p className="relative inline-block text-h7 text-primary-dark mb-5">
+                          개인별 참여도 프로파일
+                          <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
+                        </p>
+                        {/* `spec_personal` 배열을 map 함수로 순회하여 각 사람의 프로필을 렌더링 */}
+                        {resultData.spec_personal.map((person) => (
+                          <div
+                            key={person.specpersonal_id}
+                            className="mb-10 p-4"
+                          >
+                            <div className="mb-8">
+                              <div className="flex justify-between items-center text-primary">
+                                <div className="text-h7 mb-1">
+                                  {person.name}
+                                  {person.name === resultData.spec.leader && (
+                                    <span className=""> (팀장)</span>
+                                  )}
+                                </div>
+                                <div className="text-body1 text-primary">
+                                  {person.type}
+                                </div>
+                              </div>
+
+                              <p className="text-gray-7 pl-0.25">
+                                총 참여 점수:{" "}
+                                <span className="text-secondary-dark">
+                                  {person.participation}
+                                </span>
+                                점
+                              </p>
+                            </div>
+
+                            <div className="flex items-start">
+                              {/* 세부 지표 목록 */}
+                              <div className="w-40 ml-20 mr-30 flex flex-col gap-2 text-[#595959]">
+                                <p>정보 공유</p>
+                                <p>문제 해결 참여</p>
+                                <p>주도적 제안</p>
+                                <p>응답 속도</p>
+                              </div>
+
+                              {/* 세부 지표 점수 (텍스트) */}
+                              <div className="mr-46 flex flex-col gap-2">
+                                <p className="font-bold text-[#262626]">
+                                  {getMetricText(person.infoshare)}
+                                </p>
+                                <p className="font-bold text-[#262626]">
+                                  {getMetricText(person.probsolve)}
+                                </p>
+                                <p className="font-bold text-[#262626]">
+                                  {getMetricText(person.proposal)}{" "}
+                                </p>
+                                <p className="font-bold text-[#262626]">
+                                  {getMetricText(person.resptime)}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* AI 분석 */}
+                            <div className="mt-4 pt-4 ml-4">
+                              <p className="text-body2 text-primary">
+                                <span className="font-bold">분석:</span>{" "}
+                                {person.analysis}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </section>
-                </section>
-              )}
-              <div className="mb-5 mt-10">
-                <p className="relative inline-block text-h7 text-primary-dark mb-5">
-                  AI 종합 인사이트
-                  <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
-                </p>
-                <p className="mb-20">{resultData.spec.insights}</p>
-              </div>
-              <div className="mb-40">
-                <p className="relative inline-block text-h7 text-primary-dark mb-5">
-                  추천 액션
-                  <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
-                </p>
-                <p>{resultData.spec.recommendation}</p>
+                    </section>
+                  )}
+
+                  {activeTab === 2 && (
+                    <section className="relative">
+                      {!isRevealed && (
+                        <CreditWall onClick={handleReveal} cost={2} />
+                      )}
+                      <section className="mb-20">
+                        {/* 5개의 항목별 기간 추이 차트를 동적으로 렌더링 */}
+                        {allItemChartsData.map((chart, index) => (
+                          <div key={index} className="w-full mb-15">
+                            <p className="relative inline-block text-h7 text-primary-dark mb-5">
+                              {chart.title}
+                              <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
+                            </p>
+                            <div className="flex justify-center pr-3 py-5 border-2 border-primary rounded-lg">
+                              <div className="relative w-full h-">
+                                <ResponsiveContainer width="90%" height={270}>
+                                  <LineChart data={chart.data}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis
+                                      dataKey="name"
+                                      tick={<CustomXAxisTick />}
+                                      axisLine={false}
+                                      tickLine={false}
+                                    />
+                                    <YAxis
+                                      domain={[0, 100]}
+                                      tick={false}
+                                      axisLine={false}
+                                      tickLine={false}
+                                    />
+                                    <Tooltip content={<CustomLineTooltip />} />
+
+                                    <Legend
+                                      verticalAlign="bottom"
+                                      align="center"
+                                      layout="horizontal"
+                                      wrapperStyle={{ marginTop: "1rem" }}
+                                    />
+
+                                    {/* API에서 가져온 유저 이름으로 Line을 동적으로 생성 */}
+                                    {resultData?.spec_personal?.map((p) => (
+                                      <Line
+                                        key={p.name}
+                                        type="monotone" // 부드러운 곡선 차트
+                                        dataKey={p.name}
+                                        stroke={`#${(
+                                          (Math.random() * 0xffffff) <<
+                                          0
+                                        )
+                                          .toString(16)
+                                          .padStart(6, "0")}`}
+                                      />
+                                    ))}
+                                  </LineChart>
+                                </ResponsiveContainer>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </section>
+                    </section>
+                  )}
+                  <div className="mb-5 mt-10 px-4">
+                    <p className="relative inline-block text-h7 text-primary-dark mb-5">
+                      AI 종합 인사이트
+                      <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
+                    </p>
+                    <p className="mb-20">{resultData.spec.insights}</p>
+                  </div>
+                  <div className="mb-10 px-4">
+                    <p className="relative inline-block text-h7 text-primary-dark mb-5">
+                      추천 액션
+                      <span className="absolute left-0 -top-2 h-0.75 w-full bg-secondary-dark"></span>
+                    </p>
+                    <p>{resultData.spec.recommendation}</p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </main>
 
         {/* 오른쪽 */}

@@ -11,25 +11,6 @@ import {
 import { useNavigate } from "react-router-dom";
 import * as Icons from "@/assets/svg/index.js";
 
-const mbti_stats = [
-  { type: "INFJ", value: 12 },
-  { type: "ENFP", value: 9 },
-  { type: "ISTJ", value: 7 },
-  { type: "ISFJ", value: 6 },
-  { type: "INTJ", value: 6 },
-  { type: "INFP", value: 5 },
-  { type: "ENTP", value: 5 },
-  { type: "ENFJ", value: 5 },
-  { type: "ISTP", value: 4 },
-  { type: "ISFP", value: 4 },
-  { type: "INTP", value: 4 },
-  { type: "ESTJ", value: 3 },
-  { type: "ESFJ", value: 3 },
-  { type: "ESTP", value: 3 },
-  { type: "ESFP", value: 2 },
-  { type: "ENTJ", value: 2 },
-];
-
 export default function PlayMbtiSharePage() {
   const { uuid } = useParams(); // URL 파라미터 추출
   const navigate = useNavigate();
@@ -68,7 +49,7 @@ export default function PlayMbtiSharePage() {
           analysis_end: detail.result.analysis_date_end,
         });
 
-        setQuizAvailable(form.is_quized);
+        setQuizAvailable(detail.result.is_quized);
       } catch (err) {
         if (!alive) return;
         setError(err.message || "결과를 불러오지 못했습니다.");
@@ -148,9 +129,32 @@ export default function PlayMbtiSharePage() {
     ];
   }, [resultData?.spec]);
 
-  if (loading) return <p className="mt-44 text-sm">분석 중입니다...</p>;
-  if (error) return <p className="mt-4 text-sm text-red-500">{error}</p>;
-  if (!resultData) return null; // 방어: 혹시 모를 케이스
+  const MBTI_TYPES = [
+    "INFJ",
+    "ENFP",
+    "ISTJ",
+    "ISFJ",
+    "INTJ",
+    "INFP",
+    "ENTP",
+    "ENFJ",
+    "ISTP",
+    "ISFP",
+    "INTP",
+    "ESTJ",
+    "ESFJ",
+    "ESTP",
+    "ESFP",
+    "ENTJ",
+  ];
+
+  const mbti_stats = useMemo(() => {
+    const spec = resultData?.spec || {};
+    return MBTI_TYPES.map((t) => ({
+      type: t,
+      value: Number(spec[`cnt_${t}`]) || 0,
+    }));
+  }, [resultData?.spec]);
 
   const quizDisabled = loading || quizLoading || !quizAvailable;
 
@@ -170,56 +174,65 @@ export default function PlayMbtiSharePage() {
         </div>
 
         {/* 가운데 */}
-        <main className="overflow-y-auto max-h-240 scrollbar-hide pt-28 w-[722px] flex flex-col justify-start items-center">
+        <main className="overflow-y-auto max-h-240 scrollbar-hide pt-28 pb-34 w-[722px] flex flex-col justify-start items-center">
           {/* 결과 출력 */}
           {loading && <p className="mt-44 text-sm">분석 중입니다...</p>}
           {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
-          {/* 상단 통계 */}
 
-          <div className="w-full mb-15 flex flex-col">
-            <div className="text-h6 pb-6.5">
-              <span>MBTI 통계</span>
-            </div>
-            <div className="pl-5 text-body1 text-left">
-              <p>분석된 메시지 수: {resultData.result.num_chat}개</p>
-              <p>
-                분석 대상: {resultData.spec.total_I + resultData.spec.total_E}명
-              </p>
-              <p>
-                분석 기간: {resultData.result.analysis_date_start} ~{" "}
-                {resultData.result.analysis_date_end}
-              </p>
-            </div>
-          </div>
+          {!loading && !error && (
+            <div className="w-full flex flex-col items-start">
+              {/* 상단 통계 */}
+              <div className="w-full mb-8 flex flex-col">
+                <div className="text-h6 pb-6.5">
+                  <span>MBTI 분석 결과</span>
+                </div>
+                <div className="text-st2 text-left">
+                  <p>분석된 메시지 수: {resultData.result.num_chat}개</p>
+                  <p>
+                    분석 대상:{" "}
+                    {resultData.spec.total_I + resultData.spec.total_E}명
+                  </p>
+                  <p>
+                    분석 기간: {resultData.result.analysis_date_start} ~{" "}
+                    {resultData.result.analysis_date_end}
+                  </p>
+                </div>
+              </div>
 
-          {/* MBTI 통계(왼쪽 도넛, 오른쪽 페어바) */}
-          <Section title="MBTI 통계">
-            <div className="w-full pl-10 gap-30 flex items-center">
-              <MbtiPieChart data={mbti_stats} size={170} />
-              <div className="space-y-4">
-                {TRAITS.map((t, idx) => (
-                  <PairBar
-                    key={idx}
-                    leftLabel={t.leftLabel}
-                    rightLabel={t.rightLabel}
-                    left={t.leftPct}
-                  />
-                ))}
+              {/* MBTI 통계(왼쪽 도넛, 오른쪽 페어바) */}
+              <Section title="MBTI 통계">
+                <div className="w-full pl-10 gap-30 flex items-center">
+                  <MbtiPieChart data={mbti_stats} size={170} />
+                  <div className="space-y-4">
+                    {TRAITS.map((t, idx) => (
+                      <PairBar
+                        key={idx}
+                        leftLabel={t.leftLabel}
+                        rightLabel={t.rightLabel}
+                        left={t.leftPct}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </Section>
+
+              {/* 탭 바 */}
+              <div className="mt-[51px] w-full">
+                <TabBar
+                  tabs={REPORT_TABS}
+                  active={activeTab}
+                  onChange={setActiveTab}
+                />
+
+                {/* 리포트 카드 */}
+                {activeSpec && (
+                  <div className="relative w-full">
+                    <MbtiReportCard spec={activeSpec} />
+                  </div>
+                )}
               </div>
             </div>
-          </Section>
-
-          {/* 탭 바 */}
-          <div className="mt-[51px] w-full">
-            <TabBar
-              tabs={REPORT_TABS}
-              active={activeTab}
-              onChange={setActiveTab}
-            />
-
-            {/* 리포트 카드 */}
-            {activeSpec && <MbtiReportCard spec={activeSpec} />}
-          </div>
+          )}
         </main>
 
         {/* 오른쪽 */}
@@ -228,7 +241,7 @@ export default function PlayMbtiSharePage() {
             {/* 퀴즈 버튼 with 비활성화 & 툴팁 */}
             <div className="relative group">
               <button
-                onClick={() => navigate(`/play/quiz/${uuid}`)}
+                onClick={() => navigate(`/play/quiz/solve/${uuid}`)}
                 disabled={quizDisabled}
                 className={[
                   "w-20 h-8 cursor-pointer px-0.25 py-1 text-button border-2 rounded-lg transition-colors",
