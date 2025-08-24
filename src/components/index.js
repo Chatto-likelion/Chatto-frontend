@@ -13,3 +13,4 @@ export { default as ShareModal } from "./ShareModal";
 export { default as MbtiPieChart } from "./MBTIPieChart";
 export { default as MbtiReportCard } from "./MBTIReportCard";
 export { default as CreditWall } from "./CreditWall";
+export { default as InteractionMatrix } from "./InteractionMatrix";

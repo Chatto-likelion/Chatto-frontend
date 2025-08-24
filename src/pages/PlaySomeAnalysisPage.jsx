@@ -294,40 +294,39 @@ export default function PlaySomeAnalysisPage() {
         </div>
 
         {/* 가운데 */}
-        <main className="overflow-y-auto max-h-240 scrollbar-hide pt-28 pb-34 w-[722px] flex flex-col justify-start items-center gap-8">
+        <main className="overflow-y-auto max-h-240 scrollbar-hide pt-28 pb-34 w-[722px] flex flex-col justify-start items-center">
           {/* 결과 출력 */}
           {loading && <p className="mt-44 text-sm">분석 중입니다...</p>}
           {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
 
           {!loading && !error && (
-            <div className="w-full flex flex-col items-start">
+            <div className="w-full flex flex-col items-start gap-8">
               {/* 상단 분석 */}
               <section className="w-full pb-7">
                 <div className="w-full">
                   <div className="flex justify-between items-start">
                     {/* 왼쪽: 타이틀 + 점수 */}
                     <div className="flex-1 pr-6">
-                      <p className="text-xl pb-2">
+                      <p className="text-h6 pb-4">
                         {resultData.spec.name_A}와 {resultData.spec.name_B}의 썸
                         지수
                       </p>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between items-end">
                         <div className="flex items-end gap-2">
-                          <h2 className="text-6xl">
-                            <span className="text-secondary">
+                          <p className="text-st1">
+                            <span className="text-h2 text-secondary">
                               {resultData.spec.score_main}
-                            </span>
+                            </span>{" "}
                             점
-                          </h2>
+                          </p>
                         </div>
-                        <div className="text-right text-[#F5F5F5] text-base pt-1">
+                        <div className="flex flex-col text-st2 gap-0.5 mt-1 pb-1">
                           <p>
                             분석된 메시지 수: {resultData.result.num_chat}개
                           </p>
                           <p>
-                            분석 기간: {resultData.result.analysis_date_start}
-                            부터
-                            {resultData.result.analysis_date_end}까지
+                            분석 기간: {resultData.result.analysis_date_start} ~{" "}
+                            {resultData.result.analysis_date_end}
                           </p>
                         </div>
                       </div>
@@ -345,9 +344,9 @@ export default function PlaySomeAnalysisPage() {
 
               {/* 섹션 1: 호감 지수 분석 */}
               <Section title="호감 지수 분석">
-                <div className="w-full max-w-[700px] mx-auto space-y-6 text-white pl-5 pr-5">
+                <div className="w-full max-w-[700px] mx-auto space-y-6 text-white px-5 pt-4 pb-2">
                   {/* 방향 */}
-                  <div className="flex items-start">
+                  <div className="flex items-center">
                     <p className="w-24 text-body1">방향</p>
                     <p className="flex-1 text-body2">
                       {resultData.spec.name_A} → {resultData.spec.name_B}
@@ -358,18 +357,18 @@ export default function PlaySomeAnalysisPage() {
                   </div>
 
                   {/* 호감점수 */}
-                  <div className="flex items-start">
+                  <div className="flex items-center">
                     <p className="w-24 text-body1">호감점수</p>
-                    <p className="flex-1 text-body2">
+                    <p className="flex-1 text-body2 text-secondary">
                       {resultData.spec.score_A}
                     </p>
-                    <p className="flex-1 text-body2">
+                    <p className="flex-1 text-body2 text-secondary">
                       {resultData.spec.score_B}
                     </p>
                   </div>
 
                   {/* 특징 */}
-                  <div className="flex items-start">
+                  <div className="flex items-center">
                     <p className="w-24 text-body1">특징</p>
                     <div className="flex-1 text-body2">
                       <p className="flex-1 text-body2">
@@ -391,7 +390,7 @@ export default function PlaySomeAnalysisPage() {
                   가장 활발하게 서로 연결된 멤버 조합
                 </p>
 
-                <div className="space-y-10 w-full max-w-[700px] mx-auto">
+                <div className="pt-4 space-y-10 w-full max-w-[700px] mx-auto">
                   <AnalysisGauge
                     title="말투"
                     left="어색"
@@ -426,9 +425,11 @@ export default function PlaySomeAnalysisPage() {
                 {!isRevealed && (
                   <CreditWall onClick={handleReveal} cost={analysisCost} />
                 )}
-                <div className="relative space-y-10 w-full max-w-[700px] mx-auto">
+                <div className="relative pt-4 space-y-10 w-full max-w-[700px] mx-auto">
                   <CompareMetric
                     title="평균 답장 시간"
+                    leftName={resultData.spec.name_A}
+                    rightName={resultData.spec.name_B}
                     leftValue={`${resultData.spec.reply_A}분`}
                     rightValue={`${resultData.spec.reply_B}분`}
                     leftPct={65}
@@ -438,6 +439,8 @@ export default function PlaySomeAnalysisPage() {
 
                   <CompareMetric
                     title="약속 제안 횟수"
+                    leftName={resultData.spec.name_A}
+                    rightName={resultData.spec.name_B}
                     leftValue={`${resultData.spec.rec_A}회`}
                     rightValue={`${resultData.spec.rec_B}회`}
                     leftPct={
@@ -452,6 +455,8 @@ export default function PlaySomeAnalysisPage() {
                   />
                   <CompareMetric
                     title="주제 시작 비율"
+                    leftName={resultData.spec.name_A}
+                    rightName={resultData.spec.name_B}
                     leftValue={`${resultData.spec.atti_A}%`}
                     rightValue={`${resultData.spec.atti_B}%`}
                     leftPct={resultData.spec.atti_A}
@@ -463,6 +468,8 @@ export default function PlaySomeAnalysisPage() {
 
                   <CompareMetric
                     title="평균 메시지 길이"
+                    leftName={resultData.spec.name_A}
+                    rightName={resultData.spec.name_B}
                     leftValue={`${resultData.spec.len_A}자`}
                     rightValue={`${resultData.spec.len_B}자`}
                     leftPct={
@@ -478,24 +485,29 @@ export default function PlaySomeAnalysisPage() {
 
                   <div className="text-sm text-secondary leading-6">
                     <p>분석:</p>
-                    <p>{resultData.spec.pattern_analysis}</p>
+                    {JSON.parse(resultData.spec.pattern_analysis).map(
+                      (sentence, idx) => (
+                        <p key={idx}>{sentence}</p>
+                      )
+                    )}
                   </div>
                 </div>
               </Section>
 
               {/* 섹션 4: 상담 (업데이트) */}
               <Section title="챗토의 연애상담">
-                <div className="w-full max-w-[700px] mx-auto space-y-5">
-                  <p className="text-sm text-white/80 leading-7">
-                    {resultData.spec.chatto_counsel}
+                <div className="w-full pt-4 max-w-[700px] mx-auto space-y-5">
+                  <p className="text-sm text-white leading-7">
+                    {resultData.spec.chatto_counsel.replace(/^\[|\]$/g, "")}
                   </p>
 
-                  <div className="mt-2 space-y-3">
-                    <p className="text-base font-semibold text-secondary">
-                      Tip
-                    </p>
-                    <p className="text-sm text-white/80 leading-7 space-y-2">
-                      {resultData.spec.chatto_counsel_tips}
+                  <div className="mt-2 space-y-3 text-secondary-dark">
+                    <p className="text-base font-semibold">Tip</p>
+                    <p className="text-sm leading-7 space-y-2">
+                      {resultData.spec.chatto_counsel_tips.replace(
+                        /^\[|\]$/g,
+                        ""
+                      )}
                     </p>
                   </div>
                 </div>
@@ -593,7 +605,7 @@ export default function PlaySomeAnalysisPage() {
 function Section({ title, children }) {
   return (
     <section className="relative rounded-lg p-5 sm:p-6 w-full border border-secondary-light">
-      <h2 className="relative mb-6 inline-block text-primary-light text-2xl font-light tracking-wide">
+      <h2 className="relative mb-2 inline-block text-primary-light text-2xl font-light tracking-wide">
         <span className="absolute left-0 -top-1 h-0.5 w-full bg-secondary" />
         {title}
       </h2>
@@ -623,11 +635,11 @@ function AnalysisGauge({ title, left, right, value, desc, example }) {
       <h3 className="text-lg font-semibold text-white/90">{title}</h3>
 
       <div className="flex items-center gap-3">
-        <span className="text-sm text-white/80">{left}</span>
+        <span className="text-sm text-secondary">{left}</span>
         <div className="flex-1">
           <MeterBar value={value} />
         </div>
-        <span className="text-sm text-white/80">{right}</span>
+        <span className="text-sm text-secondary">{right}</span>
       </div>
 
       {desc && (
@@ -637,8 +649,8 @@ function AnalysisGauge({ title, left, right, value, desc, example }) {
       )}
 
       {example && (
-        <div className="text-sm text-white/80 leading-6">
-          <p className="text-white/70">예시 대화 A:</p>
+        <div className="text-sm text-secondary-dark leading-6">
+          <p className="">예시 대화:</p>
           <p className="mt-1">“{example}”</p>
         </div>
       )}
@@ -672,34 +684,34 @@ function CompareMetric({
   rightExample,
 }) {
   return (
-    <div className="space-y-2 w-ful pl-5 pr-5">
+    <div className="space-y-2 w-full pl-5 pr-5">
       <h3 className="text-xl font-normal text-secondary">{title}</h3>
 
       <div className="flex items-center pl-5 pr-5">
-        <span className="text-sm text-white/70">{leftName}</span>
+        <span className="text-sm text-secondary-light">{leftName}</span>
         <div className="flex-1 mx-3">
-          <div className="relative">
+          <div className="relative w-full">
             <DualBar leftPct={leftPct} />
             <div className="absolute inset-0 flex items-center justify-between px-3 pointer-events-none">
-              <span className="text-sm text-secondary">{leftValue}</span>
+              <span className="text-sm text-white">{leftValue}</span>
               <span className="text-sm text-primary-dark">{rightValue}</span>
             </div>
           </div>
         </div>
-        <span className="text-sm text-white/70">{rightName}</span>
+        <span className="text-sm text-secondary-light">{rightName}</span>
       </div>
 
-      <div className="grid grid-cols-2 gap-8 mt-1 pl-15 pr-15">
-        <div className="text-sm text-white/80 leading-6 whitespace-pre-line">
+      <div className="grid grid-cols-2 gap-8 mt-1 px-18">
+        <div className="text-sm text-white leading-6 whitespace-pre-line">
           {leftDesc && <p>{leftDesc}</p>}
           {leftExample && (
-            <p className="mt-1 text-white/70">예시: “{leftExample}”</p>
+            <p className="mt-1 text-secondary-dark">예시: “{leftExample}”</p>
           )}
         </div>
         <div className="text-sm text-right text-white/80 leading-6 whitespace-pre-line">
           {rightDesc && <p>{rightDesc}</p>}
           {rightExample && (
-            <p className="mt-1 text-white/70">예시: “{rightExample}”</p>
+            <p className="mt-1 text-secondary-dark">예시: “{rightExample}”</p>
           )}
         </div>
       </div>

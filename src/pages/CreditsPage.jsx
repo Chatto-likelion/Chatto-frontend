@@ -75,9 +75,9 @@ function UsageTable({ rows }) {
   });
 
   return (
-    <div className="mt-4">
+    <div className="mt-4 pb-30 overflow-y-auto scrollbar-hide h-[630px]">
       <table className="w-full text-left">
-        <thead>
+        <thead className="sticky top-0 bg-primary-dark">
           <tr className="text-[13px] text-white/70">
             <th className="py-3 px-2 font-normal">분석 종류</th>
             <th className="py-3 px-2 font-normal">사용 일시</th>
@@ -118,9 +118,9 @@ function PurchaseTable({ rows }) {
   });
 
   return (
-    <div className="mt-4">
+    <div className="mt-4 pb-30 overflow-y-auto scrollbar-hide h-[630px]">
       <table className="w-full text-left">
-        <thead>
+        <thead className="sticky top-0 bg-primary-dark">
           <tr className="text-[13px] text-white/70">
             <th className="py-3 px-2 font-normal">상품</th>
             <th className="py-3 px-2 font-normal">결제 금액</th>
@@ -227,7 +227,7 @@ export default function CreditPage() {
   }
 
   return (
-    <div className="min-h-screen bg-primary-dark text-white">
+    <div className="flex flex-col justify-start items-center h-screen overflow-hidden text-white bg-primary-dark">
       <Header />
       <div className="mx-auto w-full max-w-[1220px] px-6 pt-[200px] md:pt-[220px] pb-24">
         <div className="flex items-center justify-end">

@@ -386,11 +386,11 @@ export default function PlayMbtiAnalysisPage() {
           {!loading && !error && (
             <div className="w-full flex flex-col items-start">
               {/* 상단 통계 */}
-              <div className="w-full mb-15 flex flex-col">
+              <div className="w-full mb-8 flex flex-col">
                 <div className="text-h6 pb-6.5">
-                  <span>MBTI 통계</span>
+                  <span>MBTI 분석 결과</span>
                 </div>
-                <div className="pl-5 text-body1 text-left">
+                <div className="text-st2 text-left">
                   <p>분석된 메시지 수: {resultData.result.num_chat}개</p>
                   <p>
                     분석 대상:{" "}

@@ -17,13 +17,13 @@ const Tooltip = styled.div`
   line-height: 1.5;
   white-space: nowrap;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transform: "translate(3px, 3px)";
+  transform: translate(3px, 3px);
 `;
 
 const TooltipItem = styled.div`
   &:first-child {
     font-weight: bold;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     font-size: 15px;
   }
 `;
@@ -180,14 +180,19 @@ const InteractionMatrix = ({ nodes, links }) => {
     }
   };
 
-  const onMouseMove = (event) => {
-    setMousePos({ x: event.clientX, y: event.clientY });
+  const onMouseMove = (e) => {
+    const rect = wrapRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setMousePos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
   };
 
   return (
     <div
       ref={wrapRef}
-      style={{ width: "100%", height: 420 }}
+      style={{ width: "100%", height: 420, position: "relative" }}
       onMouseMove={onMouseMove}
     >
       <ForceGraph2D
@@ -250,9 +255,8 @@ const InteractionMatrix = ({ nodes, links }) => {
       {hoveredLinkInfo && (
         <Tooltip
           style={{
-            left: mousePos.x,
-            top: mousePos.y,
-            transform: "translate(3px, 3px)",
+            left: mousePos.x + 8,
+            top: mousePos.y + 8,
           }}
         >
           {hoveredLinkInfo.map((info, index) => (
