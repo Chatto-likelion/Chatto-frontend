@@ -8,6 +8,92 @@ import {
 import { useAuth } from "../contexts/AuthContext";
 import { useKSTDateFormat } from "@/hooks/useKSTDateFormat"; // 훅 import
 
+export default function CreditPage() {
+  const { user } = useAuth();
+  const [active, setActive] = useState("purchase");
+  const [myCredits, setMyCredits] = useState(0);
+  const [purchaseList, setPurchaseList] = useState([]);
+  const [usageList, setUsageList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const [purchaseData, usageData] = await Promise.all([
+          getCreditPurchaseList(),
+          getCreditUsageList(),
+        ]);
+        setPurchaseList(purchaseData);
+        setUsageList(usageData);
+        setMyCredits(user.credit);
+      } catch (error) {
+        console.error("데이터 로딩 실패:", error);
+        alert("데이터를 불러오는 데 실패했습니다. 다시 시도해 주세요.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-primary-dark text-white flex justify-center items-center">
+        <div>데이터를 불러오는 중...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col justify-start items-center h-screen overflow-hidden text-white bg-primary-dark">
+      <Header />
+      <div className="mx-auto w-full max-w-[1220px] px-6 pt-[200px] md:pt-[220px] pb-24">
+        <div className="flex items-center justify-end">
+          <div className="text-sm text-white/80">
+            보유 크레딧 <span className="bold text-white">{myCredits}C</span>
+          </div>
+        </div>
+        <div className="mt-8 grid gap-16 lg:grid-cols-[520px_minmax(0,1fr)]">
+          <div className="w-full max-w-[520px]">
+            <div className="flex flex-col gap-[26px]">
+              <CreditProduct
+                title="크레딧 10C"
+                bonus={0}
+                amount={10}
+                payment={990}
+              />
+              <CreditProduct
+                title="크레딧 50C"
+                bonus={10}
+                amount={50}
+                payment={4900}
+              />
+              <CreditProduct
+                title="크레딧 100C"
+                bonus={30}
+                amount={100}
+                payment={9900}
+              />
+            </div>
+          </div>
+          <div className="w-full">
+            <TabsBar active={active} setActive={setActive} />
+            {active === "purchase" ? (
+              <PurchaseTable rows={purchaseList} />
+            ) : active === "usage" ? (
+              <UsageTable rows={usageList} />
+            ) : (
+              <CreditInfo />
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* 탭 버튼 (pill) */
 function Pill({ active, children, onClick }) {
   const activeCls =
@@ -46,7 +132,7 @@ function CreditProduct({ title, bonus, amount, payment }) {
       <div className="flex items-center justify-between">
         <div className="flex flex-col w-auto leading-none">
           <div className="text-[15px] text-white/90">{title}</div>
-          {bonus && (
+          {bonus > 0 && (
             <div className="mt-[6px] text-[12px] text-secondary">
               + {bonus}개 보너스
             </div>
@@ -183,87 +269,6 @@ function TabsBar({ active, setActive }) {
         >
           크레딧이란?
         </button>
-      </div>
-    </div>
-  );
-}
-
-export default function CreditPage() {
-  const { user } = useAuth();
-  const [active, setActive] = useState("purchase");
-  const [myCredits, setMyCredits] = useState(0);
-  const [purchaseList, setPurchaseList] = useState([]);
-  const [usageList, setUsageList] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const [purchaseData, usageData] = await Promise.all([
-          getCreditPurchaseList(),
-          getCreditUsageList(),
-        ]);
-        setPurchaseList(purchaseData);
-        setUsageList(usageData);
-        setMyCredits(user.credit);
-      } catch (error) {
-        console.error("데이터 로딩 실패:", error);
-        alert("데이터를 불러오는 데 실패했습니다. 다시 시도해 주세요.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-primary-dark text-white flex justify-center items-center">
-        <div>데이터를 불러오는 중...</div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col justify-start items-center h-screen overflow-hidden text-white bg-primary-dark">
-      <Header />
-      <div className="mx-auto w-full max-w-[1220px] px-6 pt-[200px] md:pt-[220px] pb-24">
-        <div className="flex items-center justify-end">
-          <div className="text-sm text-white/80">
-            보유 크레딧 <span className="bold text-white">{myCredits}C</span>
-          </div>
-        </div>
-        <div className="mt-8 grid gap-16 lg:grid-cols-[520px_minmax(0,1fr)]">
-          <div className="w-full max-w-[520px]">
-            <div className="flex flex-col gap-[26px]">
-              <CreditProduct title="크레딧 10C" amount={10} payment={990} />
-              <CreditProduct
-                title="크레딧 50C"
-                bonus={10}
-                amount={50}
-                payment={4900}
-              />
-              <CreditProduct
-                title="크레딧 100C"
-                bonus={30}
-                amount={100}
-                payment={9900}
-              />
-            </div>
-          </div>
-          <div className="w-full">
-            <TabsBar active={active} setActive={setActive} />
-            {active === "purchase" ? (
-              <PurchaseTable rows={purchaseList} />
-            ) : active === "usage" ? (
-              <UsageTable rows={usageList} />
-            ) : (
-              <CreditInfo />
-            )}
-          </div>
-        </div>
       </div>
     </div>
   );
