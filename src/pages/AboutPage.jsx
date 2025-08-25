@@ -3,12 +3,13 @@ import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import * as Icons from "@/assets/svg/index.js";
 import { ChattoBusiness, ChattoPlay } from "../assets/png/LandingIcon";
-
-// TODO: 프로젝트 자산 경로로 교체하세요.
-const playShot1 = "/assets/about/play-setup.png";
-const playShot2 = "/assets/about/play-result.png";
-const bizShot1 = "/assets/about/biz-setup.png";
-const bizShot2 = "/assets/about/biz-result.png";
+import kakaoExtract from "@/assets/png/kakaoExtract.png";
+import fileUpload from "@/assets/png/fileUpload.png";
+import playOption from "@/assets/png/playOption.png";
+import playAnalysis from "@/assets/png/playAnalysis.png";
+import playQuiz from "@/assets/png/playQuiz.png";
+import businessOption from "@/assets/png/businessOption.png";
+import businessAnalysis from "@/assets/png/businessAnalysis.png";
 
 export default function AboutPage() {
   const navigate = useNavigate();
@@ -69,7 +70,7 @@ export default function AboutPage() {
                 className={[
                   "px-6 py-2 text-h7 transition-colors rounded-t-lg border-2 border-b-0",
                   !isPlay
-                    ? "border-primary-dark text-primary-dark"
+                    ? "bg-primary-dark text-white"
                     : "bg-white text-primary-dark/40 hover:bg-primary-light/20  border-primary-light",
                 ].join(" ")}
               >
@@ -82,7 +83,7 @@ export default function AboutPage() {
           {isPlay ? <PlaySection /> : <BusinessSection />}
 
           <p className="mt-30 text-h6 text-center ">
-            자, 이제 직접 사용해보세요!
+            자, 이제 직접 이용해보세요!
           </p>
 
           {/* CTA Card */}
@@ -136,38 +137,118 @@ export default function AboutPage() {
 
 function PlaySection() {
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center gap-12">
       {/* 1행: 좌 이미지 / 우 설명 */}
-      <div className="mt-24 grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
-        <img
-          src={playShot1}
-          alt="Chatto Play 설정 화면"
-          className="w-full rounded-lg shadow-md"
-        />
-        <div className="flex flex-col justify-center">
-          <h4 className="text-h5 font-semibold text-primary-dark">분석 설정</h4>
-          <p className="mt-4 text-body1 text-gray-700 leading-7">
-            대화방을 업로드하고 관계/상황을 선택하면, 채토가 자동으로 적합한
-            지표를 선정하여 분석을 수행합니다. 분석 기간은 최근 대화부터
-            과거까지 자유롭게 지정할 수 있어요.
+      <div className="mt-24 w-full flex justify-between gap-12 items-center">
+        <div className="gap-4 flex items-center">
+          <img
+            src={fileUpload}
+            alt="파일 업로드 이미지"
+            className="w-70 rounded-lg shadow-md"
+          />
+          <img
+            src={kakaoExtract}
+            alt="카카오톡 대화 추출 이미지"
+            className="w-70 rounded-lg shadow-md"
+          />
+        </div>
+
+        <div className="w-100 flex flex-col justify-center">
+          <h4 className="text-h5 mb-4 font-semibold text-primary-dark">
+            카카오톡 대화 업로드하기
+          </h4>
+          <p className="mt-4 text-body1 text-gray-700 leading-5">
+            데스크탑 카카오톡 앱에서 분석하고 싶은 채팅방을 연 후, 우측 상단
+            옵션에서 "대화 내용" -{">"} "대화 내보내기" 를 눌러 txt 파일을
+            저장해주세요.
+          </p>
+          <p className="mt-4 text-body1 text-gray-700 leading-5">
+            {
+              "(현재 윈도우 데스크톱 앱에서 추출한 파일만 분석 및 업로드가 가능합니다.)"
+            }
+          </p>
+          <p className="mt-4 text-body1 text-gray-700 leading-5">
+            추출한 대화 txt 파일을 마우스로 드래그 해 폴더 아이콘에 놓으면, 위쪽
+            '업로드된 채팅' 메뉴에 파일이 나타날 거에요. 직접 파일을 선택하고
+            싶다면, 파일 찾아보기를 눌러 찾으실 수도 있습니다.
+          </p>
+          <p className="mt-4 text-body1 text-gray-700 leading-5">
+            업로드 후 채팅방 이름을 수정하거나, 채팅을 삭제하실 수도 있어요.
           </p>
         </div>
       </div>
 
       {/* 2행: 좌 설명 / 우 이미지 */}
-      <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
-        <div className="order-2 md:order-1 flex flex-col justify-center">
-          <h4 className="text-h5 font-semibold text-primary-dark">분석 결과</h4>
-          <p className="mt-4 text-body1 text-gray-700 leading-7">
-            케미 점수, 응답 패턴, 감정 분포, 유머/긴장 지표 등 재밌고 이해하기
-            쉬운 결과를 제공합니다. 팀/모임 대화에도 적용 가능하며 결과는 공유
-            링크로 간단히 전달할 수 있어요.
+      <div className="mt-16 w-full flex justify-between gap-12 items-center">
+        <div className="w-100 order-2 md:order-1 flex flex-col justify-center">
+          <h4 className="text-h5 mb-4 font-semibold text-primary-dark">
+            분석 옵션 설정하기
+          </h4>
+          <p className="mt-4 text-body1 text-gray-700 leading-5">
+            '업로드된 채팅'에서 분석할 채팅을 선택한 뒤, 화면 중앙에서 분석에
+            사용될 세부 정보를 입력하실 수 있어요.
+          </p>
+          <p className="mt-4 text-body1 text-gray-700 leading-5">
+            물론 입력하지 않으셔도 되지만, 입력해 주시면 AI가 세부 옵션을 보고
+            더 정확한 분석을 제공할 수 있습니다!
           </p>
         </div>
         <img
-          src={playShot2}
+          src={playOption}
           alt="Chatto Play 결과 화면"
-          className="order-1 md:order-2 w-full rounded-lg shadow-md"
+          className="w-140 order-1 md:order-2 rounded-lg shadow-md"
+        />
+      </div>
+
+      {/* 3행: 좌 이미지 / 우 설명 */}
+      <div className="mt-16 w-full flex justify-between gap-12 items-center">
+        <img
+          src={playAnalysis}
+          alt="Chatto Play 설정 화면"
+          className="w-140 rounded-lg shadow-md"
+        />
+        <div className="w-100 flex flex-col justify-center">
+          <h4 className="text-h5 mb-4 font-semibold text-primary-dark">
+            분석 결과
+          </h4>
+          <p className="mt-4 text-body1 text-gray-700 leading-5">
+            잠시만 기다려주시면, 챗토 AI 모델이 채팅 파일을 보고 다양한 분석을
+            제공해 줄 거에요! 가려진 일부 분석 결과는, 크레딧을 소모해서
+            확인하실 수 있어요!
+          </p>
+          <p className="mt-4 text-body1 text-gray-700 leading-5">
+            '결과 공유' 버튼을 누르면 다른 친구들에게 분석 결과를 공유할 수도
+            있어요.
+          </p>
+          <p className="mt-4 text-body1 text-gray-700 leading-5">
+            '퀴즈 생성' 버튼을 누르면 챗토 AI가 분석 결과를 바탕으로 재밌는
+            퀴즈를 만들어 줄 거에요.
+          </p>
+        </div>
+      </div>
+
+      {/* 4행: 좌 설명 / 우 이미지 */}
+      <div className="mt-16 w-full flex justify-between gap-12 items-center">
+        <div className="w-100 rder-2 md:order-1 flex flex-col justify-center">
+          <h4 className="text-h5 mb-4 font-semibold text-primary-dark">
+            퀴즈 생성/공유
+          </h4>
+          <p className="mt-4 text-body1 text-gray-700 leading-5">
+            챗토 AI가 분석 결과를 바탕으로 10개의 퀴즈를 제공해줍니다!
+          </p>
+          <p className="mt-4 text-body1 text-gray-700 leading-5">
+            퀴즈의 내용은 수정하거나, 삭제하실 수도 있어요. 또한 크레딧을 소모해
+            새로운 퀴즈를 생성할 수도 있답니다.
+          </p>
+          <p className="mt-4 text-body1 text-gray-700 leading-5">
+            '퀴즈 공유' 버튼을 눌러 퀴즈 링크를 공유해, 친구들과 퀴즈를 풀어보고
+            결과를 비교해보세요!
+          </p>
+        </div>
+        <img
+          src={playQuiz}
+          alt="Chatto Play 결과 화면"
+          className="w-140 order-1 md:order-2 rounded-lg shadow-md"
         />
       </div>
     </div>
@@ -176,39 +257,90 @@ function PlaySection() {
 
 function BusinessSection() {
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center gap-12">
       {/* 1행: 좌 이미지 / 우 설명 */}
-      <div className="mt-24 grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
-        <img
-          src={bizShot1}
-          alt="Chatto Business 설정 화면"
-          className="w-full rounded-lg shadow-md"
-        />
-        <div className="flex flex-col justify-center">
-          <h4 className="text-h5 font-semibold text-primary-dark">분석 설정</h4>
-          <p className="mt-4 text-body1 text-gray-700 leading-7">
-            업무 채팅을 선택하고 프로젝트/팀 정보를 연결하면, 메시지 흐름과 이슈
-            맥락을 고려한 분석이 준비됩니다. 개인정보와 민감정보는 사전에
-            비식별화합니다.
+      <div className="mt-24 w-full flex justify-between gap-12 items-center">
+        <div className="gap-4 flex items-center">
+          <img
+            src={fileUpload}
+            alt="파일 업로드 이미지"
+            className="w-70 rounded-lg shadow-md"
+          />
+          <img
+            src={kakaoExtract}
+            alt="카카오톡 대화 추출 이미지"
+            className="w-70 rounded-lg shadow-md"
+          />
+        </div>
+
+        <div className="w-100 flex flex-col justify-center">
+          <h4 className="text-h5 mb-4 font-semibold text-primary-dark">
+            카카오톡 대화 업로드하기
+          </h4>
+          <p className="mt-4 text-body1 text-gray-700 leading-5">
+            데스크탑 카카오톡 앱에서 분석하고 싶은 채팅방을 연 후, 우측 상단
+            옵션에서 "대화 내용" -{">"} "대화 내보내기" 를 눌러 txt 파일을
+            저장해주세요.
+          </p>
+          <p className="mt-4 text-body1 text-gray-700 leading-5">
+            {
+              "(현재 윈도우 데스크톱 앱에서 추출한 파일만 분석 및 업로드가 가능합니다.)"
+            }
+          </p>
+          <p className="mt-4 text-body1 text-gray-700 leading-5">
+            추출한 대화 txt 파일을 마우스로 드래그 해 폴더 아이콘에 놓으면, 위쪽
+            '업로드된 채팅' 메뉴에 파일이 나타날 거에요. 직접 파일을 선택하고
+            싶다면, 파일 찾아보기를 눌러 찾으실 수도 있습니다.
+          </p>
+          <p className="mt-4 text-body1 text-gray-700 leading-5">
+            업로드 후 채팅방 이름을 수정하거나, 채팅을 삭제하실 수도 있어요.
           </p>
         </div>
       </div>
 
       {/* 2행: 좌 설명 / 우 이미지 */}
-      <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
-        <div className="order-2 md:order-1 flex flex-col justify-center">
-          <h4 className="text-h5 font-semibold text-primary-dark">분석 결과</h4>
-          <p className="mt-4 text-body1 text-gray-700 leading-7">
-            기여도/담당 영역, 병목 지점, 위험 이슈의 조기 신호를 시각화합니다.
-            반복 회의 요약과 액션 아이템 추적까지 지원하여 팀 생산성 향상에 바로
-            연결되도록 설계했습니다.
+      <div className="mt-16 w-full flex justify-between gap-12 items-center">
+        <div className="w-100 order-2 md:order-1 flex flex-col justify-center">
+          <h4 className="text-h5 mb-4 font-semibold text-primary-dark">
+            분석 옵션 설정하기
+          </h4>
+          <p className="mt-4 text-body1 text-gray-700 leading-5">
+            '업로드된 채팅'에서 분석할 채팅을 선택한 뒤, 화면 중앙에서 분석에
+            사용될 세부 정보를 입력하실 수 있어요.
+          </p>
+          <p className="mt-4 text-body1 text-gray-700 leading-5">
+            물론 입력하지 않으셔도 되지만, 입력해 주시면 AI가 세부 옵션을 보고
+            더 정확한 분석을 제공할 수 있습니다!
           </p>
         </div>
         <img
-          src={bizShot2}
-          alt="Chatto Business 결과 화면"
-          className="order-1 md:order-2 w-full rounded-lg shadow-md"
+          src={businessOption}
+          alt="Chatto Play 결과 화면"
+          className="w-140 order-1 md:order-2 rounded-lg shadow-md"
         />
+      </div>
+
+      {/* 3행: 좌 이미지 / 우 설명 */}
+      <div className="mt-16 w-full flex justify-between gap-12 items-center">
+        <img
+          src={businessAnalysis}
+          alt="Chatto Play 설정 화면"
+          className="w-140 rounded-lg shadow-md"
+        />
+        <div className="w-100 flex flex-col justify-center">
+          <h4 className="text-h5 mb-4 font-semibold text-primary-dark">
+            분석 결과
+          </h4>
+          <p className="mt-4 text-body1 text-gray-700 leading-5">
+            잠시만 기다려주시면, 챗토 AI 모델이 채팅 파일을 보고 다양한 분석을
+            제공해 줄 거에요! 가려진 일부 분석 결과는, 크레딧을 소모해서
+            확인하실 수 있어요!
+          </p>
+          <p className="mt-4 text-body1 text-gray-700 leading-5">
+            '결과 공유' 버튼을 누르면 다른 친구들에게 분석 결과를 공유할 수도
+            있어요.
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -161,7 +161,9 @@ export default function BusinessMyPage() {
 
                       return (
                         <div className={cls}>
-                          <span className="w-36.5">{title}</span>
+                          <span className="w-34 mr-2 whitespace-nowrap overflow-hidden">
+                            {title}
+                          </span>
                           <div className="flex items-center gap-0.5">
                             <Icons.Person className="w-5.25 h-5.25 p-0.75" />
                             <span>{people}</span>
@@ -211,18 +213,15 @@ export default function BusinessMyPage() {
                     </div>
                   )}
 
-                  <div className="w-full flex justify-start items-center gap-4 ">
+                  <div className="w-full flex justify-center items-center gap-4 ">
                     <button
                       onClick={() => {
                         const type = item.type == 1 ? "contr" : "contr";
                         navigate(`/business/${type}/${item.result_id}`);
                       }}
-                      className="ml-13 w-17.5 h-6.5 px-1.5 py-0.75 border border-primary-dark text-primary-dark text-button rounded hover:bg-primary-dark hover:text-white cursor-pointer"
+                      className="w-25 h-6.5 mt-2 px-1.5 py-0.75 border border-primary-dark text-primary-dark text-button rounded hover:bg-primary-dark hover:text-white cursor-pointer"
                     >
                       분석 보기
-                    </button>
-                    <button className="w-17.5 h-6.5 px-1.5 py-0.75 border border-primary-dark text-primary-dark text-button rounded hover:bg-primary-dark hover:text-white cursor-pointer">
-                      퀴즈 보기
                     </button>
                   </div>
                 </div>

@@ -136,6 +136,22 @@ export default function PlayChemiAnalysisPage() {
   const [quizLoading, setQuizLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const sourceChatId = resultData?.result?.chat ?? null;
+  const handleChatDeleted = useCallback(
+    (deletedId) => {
+      setChatIds((prev) => {
+        const next = new Set(prev);
+        next.delete(deletedId);
+        // next를 이용해 hasSourceChat을 정확히 재계산
+        setHasSourceChat(sourceChatId ? next.has(sourceChatId) : null);
+        // 소스 채팅 자체가 지워졌다면 선택도 해제
+        if (deletedId === sourceChatId) setSelectedChatId(null);
+        return next;
+      });
+    },
+    [sourceChatId, setSelectedChatId]
+  );
+
   useEffect(() => {
     let alive = true;
     setLoading(true);
@@ -472,7 +488,7 @@ export default function PlayChemiAnalysisPage() {
       <div className="relative flex-1 w-[1352px] mt-17.5 overflow-hidden flex justify-between items-start">
         {/* 왼쪽 */}
         <div className="gap-5 mt-52.5 w-53.5 flex flex-col items-center justify-center">
-          <ChatList />
+          <ChatList onDeleted={handleChatDeleted} />
           <FileUpload />
         </div>
 
@@ -664,7 +680,7 @@ export default function PlayChemiAnalysisPage() {
                   </div>
                   <div className="ml-10 space-y-4">
                     <div className="space-y-2">
-                      <p>· 평균 응답 시간 : {resultData.spec.resp_time}초</p>
+                      <p>· 평균 응답 시간 : {resultData.spec.resp_time}분</p>
                       <p>· 즉각 응답 비율 : {resultData.spec.resp_ratio}%</p>
                       <p>· '읽씹' 발생률 : {resultData.spec.ignore}%</p>
                     </div>
