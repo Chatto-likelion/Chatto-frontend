@@ -3,15 +3,13 @@ import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import * as Icons from "@/assets/svg/index.js";
 import { ChattoBusiness, ChattoPlay } from "../assets/png/LandingIcon";
-
-// TODO: 프로젝트 자산 경로로 교체하세요.
-const kakaoExtract = "/assets/png/kakaoExtract.png";
-const fileUpload = "/assets/png/fileUpload.png";
-const playOption = "/assets/png/playOption.png";
-const playAnalysis = "/assets/png/playAnalysis.png";
-const playQuiz = "/assets/png/playQuiz.png";
-const businessOption = "/assets/png/businessOption.png";
-const businessAnalysis = "/assets/png/businessAnalysis.png";
+import kakaoExtract from "@/assets/png/kakaoExtract.png";
+import fileUpload from "@/assets/png/fileUpload.png";
+import playOption from "@/assets/png/playOption.png";
+import playAnalysis from "@/assets/png/playAnalysis.png";
+import playQuiz from "@/assets/png/playQuiz.png";
+import businessOption from "@/assets/png/businessOption.png";
+import businessAnalysis from "@/assets/png/businessAnalysis.png";
 
 export default function AboutPage() {
   const navigate = useNavigate();
@@ -141,22 +139,22 @@ function PlaySection() {
   return (
     <div className="flex flex-col items-center gap-12">
       {/* 1행: 좌 이미지 / 우 설명 */}
-      <div className="mt-24 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+      <div className="mt-24 w-full flex justify-between gap-12 items-center">
         <div className="gap-4 flex items-center">
-          <img
-            src={kakaoExtract}
-            alt="카카오톡 대화 추출 이미지"
-            className="w-full rounded-lg shadow-md"
-          />
           <img
             src={fileUpload}
             alt="파일 업로드 이미지"
-            className="w-full rounded-lg shadow-md"
+            className="w-70 rounded-lg shadow-md"
+          />
+          <img
+            src={kakaoExtract}
+            alt="카카오톡 대화 추출 이미지"
+            className="w-70 rounded-lg shadow-md"
           />
         </div>
 
-        <div className="flex flex-col justify-center">
-          <h4 className="text-h5 font-semibold text-primary-dark">
+        <div className="w-100 flex flex-col justify-center">
+          <h4 className="text-h5 mb-4 font-semibold text-primary-dark">
             카카오톡 대화 업로드하기
           </h4>
           <p className="mt-4 text-body1 text-gray-700 leading-5">
@@ -181,9 +179,9 @@ function PlaySection() {
       </div>
 
       {/* 2행: 좌 설명 / 우 이미지 */}
-      <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        <div className="order-2 md:order-1 flex flex-col justify-center">
-          <h4 className="text-h5 font-semibold text-primary-dark">
+      <div className="mt-16 w-full flex justify-between gap-12 items-center">
+        <div className="w-100 order-2 md:order-1 flex flex-col justify-center">
+          <h4 className="text-h5 mb-4 font-semibold text-primary-dark">
             분석 옵션 설정하기
           </h4>
           <p className="mt-4 text-body1 text-gray-700 leading-5">
@@ -198,19 +196,21 @@ function PlaySection() {
         <img
           src={playOption}
           alt="Chatto Play 결과 화면"
-          className="order-1 md:order-2 w-full rounded-lg shadow-md"
+          className="w-140 order-1 md:order-2 rounded-lg shadow-md"
         />
       </div>
 
       {/* 3행: 좌 이미지 / 우 설명 */}
-      <div className="mt-24 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+      <div className="mt-16 w-full flex justify-between gap-12 items-center">
         <img
           src={playAnalysis}
           alt="Chatto Play 설정 화면"
-          className="w-full rounded-lg shadow-md"
+          className="w-140 rounded-lg shadow-md"
         />
-        <div className="flex flex-col justify-center">
-          <h4 className="text-h5 font-semibold text-primary-dark">분석 결과</h4>
+        <div className="w-100 flex flex-col justify-center">
+          <h4 className="text-h5 mb-4 font-semibold text-primary-dark">
+            분석 결과
+          </h4>
           <p className="mt-4 text-body1 text-gray-700 leading-5">
             잠시만 기다려주시면, 챗토 AI 모델이 채팅 파일을 보고 다양한 분석을
             제공해 줄 거에요! 가려진 일부 분석 결과는, 크레딧을 소모해서
@@ -228,9 +228,9 @@ function PlaySection() {
       </div>
 
       {/* 4행: 좌 설명 / 우 이미지 */}
-      <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        <div className="order-2 md:order-1 flex flex-col justify-center">
-          <h4 className="text-h5 font-semibold text-primary-dark">
+      <div className="mt-16 w-full flex justify-between gap-12 items-center">
+        <div className="w-100 rder-2 md:order-1 flex flex-col justify-center">
+          <h4 className="text-h5 mb-4 font-semibold text-primary-dark">
             퀴즈 생성/공유
           </h4>
           <p className="mt-4 text-body1 text-gray-700 leading-5">
@@ -248,7 +248,7 @@ function PlaySection() {
         <img
           src={playQuiz}
           alt="Chatto Play 결과 화면"
-          className="order-1 md:order-2 w-full rounded-lg shadow-md"
+          className="w-140 order-1 md:order-2 rounded-lg shadow-md"
         />
       </div>
     </div>
@@ -259,22 +259,22 @@ function BusinessSection() {
   return (
     <div className="flex flex-col items-center gap-12">
       {/* 1행: 좌 이미지 / 우 설명 */}
-      <div className="mt-24 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+      <div className="mt-24 w-full flex justify-between gap-12 items-center">
         <div className="gap-4 flex items-center">
-          <img
-            src={kakaoExtract}
-            alt="카카오톡 대화 추출 이미지"
-            className="w-full rounded-lg shadow-md"
-          />
           <img
             src={fileUpload}
             alt="파일 업로드 이미지"
-            className="w-full rounded-lg shadow-md"
+            className="w-70 rounded-lg shadow-md"
+          />
+          <img
+            src={kakaoExtract}
+            alt="카카오톡 대화 추출 이미지"
+            className="w-70 rounded-lg shadow-md"
           />
         </div>
 
-        <div className="flex flex-col justify-center">
-          <h4 className="text-h5 font-semibold text-primary-dark">
+        <div className="w-100 flex flex-col justify-center">
+          <h4 className="text-h5 mb-4 font-semibold text-primary-dark">
             카카오톡 대화 업로드하기
           </h4>
           <p className="mt-4 text-body1 text-gray-700 leading-5">
@@ -299,9 +299,9 @@ function BusinessSection() {
       </div>
 
       {/* 2행: 좌 설명 / 우 이미지 */}
-      <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        <div className="order-2 md:order-1 flex flex-col justify-center">
-          <h4 className="text-h5 font-semibold text-primary-dark">
+      <div className="mt-16 w-full flex justify-between gap-12 items-center">
+        <div className="w-100 order-2 md:order-1 flex flex-col justify-center">
+          <h4 className="text-h5 mb-4 font-semibold text-primary-dark">
             분석 옵션 설정하기
           </h4>
           <p className="mt-4 text-body1 text-gray-700 leading-5">
@@ -314,21 +314,23 @@ function BusinessSection() {
           </p>
         </div>
         <img
-          src={playOption}
+          src={businessOption}
           alt="Chatto Play 결과 화면"
-          className="order-1 md:order-2 w-full rounded-lg shadow-md"
+          className="w-140 order-1 md:order-2 rounded-lg shadow-md"
         />
       </div>
 
       {/* 3행: 좌 이미지 / 우 설명 */}
-      <div className="mt-24 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+      <div className="mt-16 w-full flex justify-between gap-12 items-center">
         <img
           src={businessAnalysis}
           alt="Chatto Play 설정 화면"
-          className="w-full rounded-lg shadow-md"
+          className="w-140 rounded-lg shadow-md"
         />
-        <div className="flex flex-col justify-center">
-          <h4 className="text-h5 font-semibold text-primary-dark">분석 결과</h4>
+        <div className="w-100 flex flex-col justify-center">
+          <h4 className="text-h5 mb-4 font-semibold text-primary-dark">
+            분석 결과
+          </h4>
           <p className="mt-4 text-body1 text-gray-700 leading-5">
             잠시만 기다려주시면, 챗토 AI 모델이 채팅 파일을 보고 다양한 분석을
             제공해 줄 거에요! 가려진 일부 분석 결과는, 크레딧을 소모해서
