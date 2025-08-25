@@ -543,7 +543,11 @@ function Section({ title, children }) {
 
 function TabBar({ tabs, active, onChange }) {
   return (
-    <div className="w-full px-4 flex flex-wrap justify-between gap-8 overflow-x-auto scrollbar-hide">
+    <div
+      className="mx-4 flex flex-nowrap justify-between gap-4
+        overflow-x-auto scrollbar-hide
+        snap-x snap-mandatory"
+    >
       {tabs.map((t) => {
         const isActive = t.key === active;
         return (
@@ -551,7 +555,7 @@ function TabBar({ tabs, active, onChange }) {
             key={t.key}
             onClick={() => onChange(t.key)}
             className={[
-              "h-9 px-4 rounded-t-md border text-sm transition-colors duration-150",
+              "shrink-0 h-9 px-4 rounded-t-md border text-sm transition-colors duration-150",
               isActive
                 ? "bg-[#EADFAE] text-primary-dark border-[#EADFAE]"
                 : "bg-transparent text-white/90 border-white/30 hover:bg-white/10",

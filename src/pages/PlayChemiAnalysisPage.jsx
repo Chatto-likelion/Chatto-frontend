@@ -664,7 +664,7 @@ export default function PlayChemiAnalysisPage() {
                   </div>
                   <div className="ml-10 space-y-4">
                     <div className="space-y-2">
-                      <p>· 평균 응답 시간 : {resultData.spec.resp_time}초</p>
+                      <p>· 평균 응답 시간 : {resultData.spec.resp_time}분</p>
                       <p>· 즉각 응답 비율 : {resultData.spec.resp_ratio}%</p>
                       <p>· '읽씹' 발생률 : {resultData.spec.ignore}%</p>
                     </div>
