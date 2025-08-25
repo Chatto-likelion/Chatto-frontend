@@ -8,14 +8,12 @@ export default function BusinessPage() {
   return (
     <div className="w-full flex justify-center min-h-screen bg-white">
       <Header />
-      <div className="w-full max-w-252.75 px-4 py-66">
+      <div className="max-w-252.75 px-4 py-66">
         <div className="flex mb-7 gap-2 text-primary-dark items-end">
           <div className="text-h6">Chatto Business</div>
-          <div className="text-body2">
-            참여도, 업무 기여도 등 다양한 분석 지표 제공
-          </div>
+          <div className="text-body2">업무 참여도 등 다양한 분석 지표 제공</div>
         </div>
-        <div className="grid grid-cols-3 gap-12">
+        <div className="flex justify-center items-center gap-12">
           <ServiceCard
             title="업무 참여도 분석"
             description={
@@ -29,20 +27,6 @@ export default function BusinessPage() {
             border="border border-2 border-primary-dark"
             icon={ChattoBusiness}
             navigateTo="/business/contr"
-          />
-          <ServiceCard
-            title="소통 구조 분석"
-            description={
-              <>
-                메신저 내용을 바탕으로 <br />
-                팀의 소통 구조를 분석합니다.
-              </>
-            }
-            bgColor="bg-white"
-            textColor="text-primary-dark"
-            border="border border-2 border-primary-dark"
-            icon={ChattoBusiness}
-            navigateTo="/more"
           />
           <ServiceCard
             bgColor="bg-primary-dark"

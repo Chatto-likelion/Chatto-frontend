@@ -22,7 +22,7 @@ const slugToType = (slug) =>
 
 export default function useQuizData(resultId, uuid) {
   const [overview, setOverview] = useState(null);
-  const [questionsRaw, setQuestionsRaw] = useState([]); // 원본 questions
+  const [questionsRaw, setQuestionsRaw] = useState([]);
   const [scores, setScores] = useState([]); // [{ QP_id, name, score }]
   const [personalDetails, setPersonalDetails] = useState([]); // [{ response, result, QP, question }]
   const [loading, setLoading] = useState(true);
@@ -87,7 +87,7 @@ export default function useQuizData(resultId, uuid) {
     };
   }, [resultId, typeNum]);
 
-  // QP_id -> { name, score } (문자열 키!)
+  // QP_id -> { name, score } (문자열 키)
   const participantIndex = useMemo(() => {
     const m = new Map();
     for (const s of scores)
@@ -95,7 +95,6 @@ export default function useQuizData(resultId, uuid) {
     return m;
   }, [scores]);
 
-  // 🔽 ADD: 질문별(문항별) "선지 -> 이름 배열" 맵
   // Map<questionId, [string[], string[], string[], string[]]>
   const selectionsByQuestion = useMemo(() => {
     if (!questionsRaw.length || !personalDetails.length) return new Map();
@@ -119,7 +118,7 @@ export default function useQuizData(resultId, uuid) {
     if (!Array.isArray(arr)) return [];
     return arr.map((q) => ({
       questionId: q.question_id,
-      questionIndex: q.question_index, // 수정/삭제 시 path param에 사용
+      questionIndex: q.question_index,
       title: q.question,
       options: [q.choice1, q.choice2, q.choice3, q.choice4],
       answer: q.answer, // 1~4
@@ -160,7 +159,7 @@ export default function useQuizData(resultId, uuid) {
       try {
         const arr = await getQuizResultPersonal(typeNum, resultId, QP_id);
 
-        // ◀︎ 정규화: QP는 문자열, question은 그대로 보존(필요시 여기서도 정규화)
+        // 정규화: QP는 문자열, question은 그대로 보존(필요시 여기서도 정규화)
         const norm = (Array.isArray(arr) ? arr : []).map((d) => ({
           ...d,
           QP: String(d.QP),
@@ -168,7 +167,7 @@ export default function useQuizData(resultId, uuid) {
         const keyOf = (d) => `${d.QP}-${d.question}`;
 
         setPersonalDetails((prev) => {
-          // 이전 것 중 동일 QP는 제거 (▶︎ 문자열로 비교)
+          // 이전 것 중 동일 QP는 제거 (문자열로 비교)
           const filtered = prev.filter((d) => String(d.QP) !== String(QP_id));
 
           // 새로 들어온 것 내부 중복 제거
@@ -228,7 +227,7 @@ export default function useQuizData(resultId, uuid) {
     });
   }, [questionsRaw, personalDetails, scores, selectionsByQuestion]);
 
-  // 🔽 ADD: 헬퍼 - 특정 문항/선지(1~4)를 고른 사람 이름 배열 반환
+  // 헬퍼 - 특정 문항/선지(1~4)를 고른 사람 이름 배열 반환
   const getOptionTakers = useCallback(
     (questionId, optionNum) => {
       const arr = selectionsByQuestion.get(questionId);
@@ -239,7 +238,7 @@ export default function useQuizData(resultId, uuid) {
     [selectionsByQuestion]
   );
 
-  // 🔽 ADD: 헬퍼 - 모든 참가자 개인 상세를 한 번에 로드(옵션)
+  // 헬퍼 - 모든 참가자 개인 상세를 한 번에 로드(옵션)
   const fetchAllPersonal = useCallback(async () => {
     if (!resultId || !typeNum || !scores?.length) return;
     try {

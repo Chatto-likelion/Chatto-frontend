@@ -146,7 +146,7 @@ function CreditProduct({ title, bonus, amount, payment }) {
 
 /* 이용내역 테이블 — 상단 줄만 있는 형태 */
 function UsageTable({ rows }) {
-  const format = useKSTDateFormat(); // 훅 호출
+  const format = useKSTDateFormat();
 
   if (!rows || rows.length === 0) {
     return (
@@ -214,7 +214,6 @@ function PurchaseTable({ rows }) {
           </tr>
         </thead>
         <tbody>
-          {/* 정렬된 배열을 map */}
           {sortedRows.map((r) => (
             <tr key={r.purchase_id} className="text-[13px] text-white/90">
               <td className="py-2.5 px-2">{r.amount}C</td>
@@ -247,7 +246,6 @@ function CreditInfo() {
   );
 }
 
-/* 상단 탭바 (라인 없음) + 우측 '크레딧이란?' */
 function TabsBar({ active, setActive }) {
   return (
     <div className="relative border-b border-[var(--color-primary-light)]">

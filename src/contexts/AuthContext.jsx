@@ -1,7 +1,7 @@
 // src/contexts/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
-import { instanceWithToken } from "@/apis/axios"; // 네 axios 인스턴스 import
-import { getCookie } from "@/utils/cookie"; // access_token 읽을 함수
+import { instanceWithToken } from "@/apis/axios";
+import { getCookie } from "@/utils/cookie";
 
 const AuthContext = createContext();
 

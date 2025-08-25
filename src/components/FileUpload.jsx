@@ -12,10 +12,7 @@ export default function FileUpload() {
   const handleFileUpload = async (file) => {
     const fetchFn = isPlay ? postChat : postChat_Bus;
     try {
-      // console.log("보낼 파일:", file);
-      // console.log("postChat 요청 시작 - userId:", user?.id || 1);
       const result = await fetchFn(file);
-      console.log("파일 업로드 성공:", result);
 
       if (typeof chatListReloadRef?.current === "function") {
         await chatListReloadRef.current();
@@ -35,7 +32,6 @@ export default function FileUpload() {
     multiple: false,
     onDrop: (acceptedFiles) => {
       const file = acceptedFiles[0];
-      console.log("업로드된 파일:", file);
       handleFileUpload(file);
     },
   });

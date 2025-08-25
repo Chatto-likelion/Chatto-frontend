@@ -264,7 +264,7 @@ export default function PlaySomeAnalysisPage() {
   };
 
   const [isRevealed, setIsRevealed] = useState(false);
-  const analysisCost = 1; // 이 분석 결과를 보는 데 필요한 크레딧
+  const analysisCost = 1;
   const handleReveal = () => {
     if (user.credit >= analysisCost) {
       postCreditUsage({

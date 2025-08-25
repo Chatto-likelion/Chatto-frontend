@@ -6,7 +6,7 @@ const CreditWall = ({ onClick, cost }) => {
     <div
       className="absolute inset-0 z-10 p-6 flex items-center justify-center rounded-[10px] backdrop-blur-md"
       style={{
-        backgroundColor: "rgba(22, 17, 43, 0.6)", // Overlay color
+        backgroundColor: "rgba(22, 17, 43, 0.6)",
       }}
     >
       <div className="text-center">

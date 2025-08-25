@@ -17,7 +17,6 @@ export default function SmallServices() {
 
   const ICON_SIZE = "w-9 h-9";
 
-  // SVG만 쓰는 Play
   const playIcons = [
     { type: "svg", Component: NavChemi, path: "/play/chemi" },
     { type: "svg", Component: NavSome, path: "/play/some" },
@@ -32,7 +31,6 @@ export default function SmallServices() {
     },
   ];
 
-  // PNG + SVG 혼용하는 Business
   const businessIcons = [
     {
       type: "img",

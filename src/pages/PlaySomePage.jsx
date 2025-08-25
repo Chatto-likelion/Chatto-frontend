@@ -44,7 +44,6 @@ export default function PlaySomePage() {
     try {
       const analyzeResponse = await postSomeAnalyze(selectedChatId, payload);
       const resultId = analyzeResponse.result_id;
-      // 결과 페이지로 이동
       navigate(`/play/some/${resultId}`);
     } catch (err) {
       setError(err.message || "분석에 실패했습니다.");

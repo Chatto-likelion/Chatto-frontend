@@ -3,7 +3,7 @@ import axios from "axios";
 import { getCookie, deleteCookie } from "../utils/cookie";
 
 function normalizeBaseURL(raw) {
-  const val = (raw || "/api").trim(); // env 없으면 '/api'로 fallback
+  const val = (raw || "/api").trim();
   if (/^https?:\/\//i.test(val)) {
     return val.endsWith("/api") || val.endsWith("/api/")
       ? val
@@ -18,8 +18,8 @@ function normalizeBaseURL(raw) {
 const baseURL = normalizeBaseURL(import.meta.env.VITE_API_URL);
 
 const commonOpts = {
-  baseURL, // ✅ dev: '/api', prod: 'https://domain/api'
-  withCredentials: true, // HttpOnly Cookie(JWT) 쓰면 필수
+  baseURL,
+  withCredentials: true,
 };
 
 export const instance = axios.create(commonOpts);

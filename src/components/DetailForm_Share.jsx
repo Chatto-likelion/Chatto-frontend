@@ -4,7 +4,7 @@ import useCurrentMode from "@/hooks/useCurrentMode";
 import { useKSTDateFormat } from "@/hooks/useKSTDateFormat";
 import * as Icons from "@/assets/svg/index.js";
 
-// 서비스 타입 상수 (원본과 동일)
+// 서비스 타입 상수
 const TYPE = { CHEMI: 1, SOME: 2, MBTI: 3 };
 
 /** 읽기 전용 DetailForm */
@@ -61,8 +61,6 @@ export default function DetailForm_Share({ type, value, isAnalysis = true }) {
 }
 
 /* ---------------- 공용 뷰 유틸 ---------------- */
-
-/** 레이블/우측영역 레이아웃을 원본 Row와 동일하게 */
 function RowView({ label, ui, children, rightWrapClass = "pr-3.25" }) {
   return (
     <div className={`${ui.text} flex flex-col gap-3`}>
@@ -111,7 +109,7 @@ function DisplayText({
   );
 }
 
-/** 날짜 표시(읽기 전용). 원본 DateInline의 표시 방식과 동일하게 포맷 */
+/** 날짜 표시(읽기 전용)*/
 function DateDisplay({ ui, value, placeholder }) {
   const isPlay = !!ui?.isPlay;
   const textColor = isPlay ? "text-white" : "text-primary-dark";
@@ -159,7 +157,7 @@ function DateDisplay({ ui, value, placeholder }) {
   );
 }
 
-/* --- 시작/끝을 각각 다른 줄로(원본 PeriodRows와 동일 레이아웃) --- */
+/* --- 시작/끝을 각각 다른 줄로 --- */
 function PeriodRowsRO({ ui, start, end }) {
   const isPlay = !!ui?.isPlay;
   const textColor = isPlay ? "text-white" : "text-primary-dark";
@@ -196,7 +194,6 @@ function PeriodRowsRO({ ui, start, end }) {
 }
 
 /* ---------------- 타입별 읽기 전용 서브폼 ---------------- */
-
 function ChemiFormRO({ value, ui }) {
   return (
     <div className={`${ui.ww} ${ui.text} flex flex-col gap-3`}>

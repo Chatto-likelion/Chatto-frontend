@@ -196,7 +196,7 @@ function TextInput({
   );
 }
 
-// 🟡 DateInline: YY.MM.DD 포맷 + 수동입력(YY.MM.DD) + 캘린더 버튼 + 바깥클릭 닫기
+// DateInline: YY.MM.DD 포맷 + 수동입력(YY.MM.DD) + 캘린더 버튼 + 바깥클릭 닫기
 function DateInline({ ui, value, onChange, placeholder, quick }) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");

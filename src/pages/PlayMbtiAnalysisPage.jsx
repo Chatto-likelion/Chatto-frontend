@@ -9,7 +9,7 @@ import {
   postUUID,
   getUUID,
   postCreditUsage,
-} from "@/apis/api"; // 실제 API 호출 함수
+} from "@/apis/api";
 import {
   Header,
   ChatList,
@@ -75,9 +75,7 @@ export default function PlayMbtiAnalysisPage() {
       try {
         const uuid = await ensureUuid();
         if (alive) setShareUUID(uuid);
-      } catch {
-        // uuid 확보 실패는 공유/퀴즈 이동에만 영향, 화면은 계속 보여줌
-      }
+      } catch {}
     })();
     return () => {
       alive = false;
@@ -85,7 +83,7 @@ export default function PlayMbtiAnalysisPage() {
   }, [ensureUuid]);
 
   const handleOpenShare = async () => {
-    setModalOpen(true); // 모달 먼저 오픈 (스피너 등 표시용)
+    setModalOpen(true);
     if (shareUrl || shareFetching) return; // 중복호출 방지
 
     try {
@@ -120,9 +118,7 @@ export default function PlayMbtiAnalysisPage() {
       setChatIds((prev) => {
         const next = new Set(prev);
         next.delete(deletedId);
-        // next를 이용해 hasSourceChat을 정확히 재계산
         setHasSourceChat(sourceChatId ? next.has(sourceChatId) : null);
-        // 소스 채팅 자체가 지워졌다면 선택도 해제
         if (deletedId === sourceChatId) setSelectedChatId(null);
         return next;
       });
@@ -175,15 +171,14 @@ export default function PlayMbtiAnalysisPage() {
       : [];
 
     return list.filter(Boolean).map(({ specpersonal_id, name, MBTI }) => ({
-      key: String(specpersonal_id), // TabBar 키로 사용 (문자열 추천)
-      label: name ?? "", // 탭 표시 이름
-      type: (MBTI ?? "").toUpperCase(), // 예: "infj"도 "INFJ"로
+      key: String(specpersonal_id),
+      label: name ?? "",
+      type: (MBTI ?? "").toUpperCase(),
     }));
   }, [resultData?.spec_personal]);
 
   useEffect(() => {
     if (!REPORT_TABS.length) return;
-    // 현재 activeTab이 목록에 없으면 첫 탭으로 세팅
     if (!REPORT_TABS.some((t) => t.key === activeTab)) {
       setActiveTab(REPORT_TABS[0].key);
     }
@@ -195,7 +190,6 @@ export default function PlayMbtiAnalysisPage() {
       : [];
     if (!list.length) return null;
 
-    // activeTab과 specpersonal_id 일치하는 항목 찾기 (문자/숫자 안전 비교)
     return (
       list.find((p) => String(p.specpersonal_id) === String(activeTab)) ||
       list[0]

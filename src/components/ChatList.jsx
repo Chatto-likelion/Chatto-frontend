@@ -31,9 +31,7 @@ export default function ChatList(onDeleted) {
       setError(null);
       const fetchFn = isPlay ? getChatList : getChatList_Bus;
 
-      // NOTE: GET /play/chat/ 은 path param 없음 → 인자 없이 호출
       const data = await fetchFn();
-      console.log("📌 API에서 받은 원본 chats 데이터:", data);
       setChats(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
@@ -43,7 +41,6 @@ export default function ChatList(onDeleted) {
     }
   }, [isPlay]);
 
-  // 최초 및 모드 변경시 로드
   useEffect(() => {
     loadChats();
   }, [loadChats]);
@@ -52,7 +49,6 @@ export default function ChatList(onDeleted) {
     if (chatListReloadRef) {
       chatListReloadRef.current = loadChats;
       return () => {
-        // 언마운트 시 정리
         if (chatListReloadRef.current === loadChats) {
           chatListReloadRef.current = null;
         }
@@ -66,11 +62,10 @@ export default function ChatList(onDeleted) {
     const handleOutside = (e) => {
       const box = editBoxRef.current;
       if (box && !box.contains(e.target)) {
-        cancelEdit(); // 👉 바깥 클릭 시 편집 취소
+        cancelEdit();
       }
     };
 
-    // 캡처 단계에서 먼저 실행되게 true
     document.addEventListener("mousedown", handleOutside, true);
     document.addEventListener("touchstart", handleOutside, true);
     return () => {
@@ -109,8 +104,7 @@ export default function ChatList(onDeleted) {
     setEditingValue("");
   };
   const saveEdit = async (chat, title) => {
-    if (!title) return; // 빈 제목은 무시 (원하면 경고)
-    // 낙관적 업데이트
+    if (!title) return;
     const prev = chats;
     setChats((old) =>
       old.map((c) => (c.chat_id === chat.chat_id ? { ...c, title } : c))
@@ -118,7 +112,6 @@ export default function ChatList(onDeleted) {
     try {
       const fn = isPlay ? putChat : putChat_Bus;
       await fn(chat.chat_id, title);
-      //await loadChats();
       window.location.reload();
     } catch (e) {
       console.error("제목 수정 실패:", e);
@@ -219,14 +212,12 @@ export default function ChatList(onDeleted) {
               const inputRef = useRef(null);
 
               const onKeyDown = (e) => {
-                // IME 조합 중이면 단축키 무시
-                // @ts-ignore
                 if (isComposing || e.nativeEvent?.isComposing) return;
                 if (e.key === "Enter") {
                   e.preventDefault();
                   const title = (inputRef.current?.value || "").trim();
                   if (!title) return;
-                  saveEdit(chat, title); // 아래 참고
+                  saveEdit(chat, title);
                 }
                 if (e.key === "Escape") {
                   e.preventDefault();
@@ -249,7 +240,6 @@ export default function ChatList(onDeleted) {
                         maxLength={10}
                         className="w-30 bg-transparent border-b border-primary-dark focus:outline-none"
                         placeholder="제목 입력"
-                        // value / onChange 없음!  ← 중요
                       />
                     ) : (
                       <span
@@ -351,7 +341,7 @@ export default function ChatList(onDeleted) {
 
             return (
               <>
-                {/* ✅ 선택된 채팅 최상단 */}
+                {/* 선택된 채팅 최상단 */}
                 {selected && <Item chat={selected} isSelected />}
 
                 {/* 섹션: 오늘 / 최근 / 오래전 */}

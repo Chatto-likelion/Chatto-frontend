@@ -83,9 +83,7 @@ export default function BusinessContrAnalysisPage() {
       try {
         const uuid = await ensureUuid();
         if (alive) setShareUUID(uuid);
-      } catch {
-        // uuid 확보 실패는 공유/퀴즈 이동에만 영향, 화면은 계속 보여줌
-      }
+      } catch {}
     })();
     return () => {
       alive = false;
@@ -93,7 +91,7 @@ export default function BusinessContrAnalysisPage() {
   }, [ensureUuid]);
 
   const handleOpenShare = async () => {
-    setModalOpen(true); // 모달 먼저 오픈 (스피너 등 표시용)
+    setModalOpen(true);
     if (shareUrl || shareFetching) return; // 중복호출 방지
 
     try {
@@ -277,7 +275,7 @@ export default function BusinessContrAnalysisPage() {
     return null;
   };
 
-  // ✅ 툴팁 커스터마이징 (기간별 보기)
+  // 툴팁 커스터마이징 (기간별 보기)
   const CustomLineTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
@@ -289,8 +287,6 @@ export default function BusinessContrAnalysisPage() {
             border: "1px solid #ccc",
           }}
         >
-          {/* 이 부분을 제거하거나 주석 처리하여 기간 명을 숨깁니다. */}
-          {/* <p className="label">{`기간: ${label}`}</p> */}
           {payload.map((entry, index) => (
             <p key={index} style={{ color: entry.color }}>
               {`${entry.name}: ${entry.value}`}
@@ -302,7 +298,6 @@ export default function BusinessContrAnalysisPage() {
     return null;
   };
 
-  // ✅ 데이터 가공 훅 수정 (map 후 filter)
   const allItemChartsData = useMemo(() => {
     if (!resultData?.spec_period || resultData.spec_period.length === 0) {
       return [];
@@ -326,7 +321,6 @@ export default function BusinessContrAnalysisPage() {
       analysisMap.get(analysis).push({ name, periodData });
     });
 
-    // 최종 차트 데이터 구조로 변환
     const transformedData = [];
     analysisMap.forEach((peopleData, analysisTitle) => {
       const chartData = periods.map((period) => {
@@ -343,8 +337,6 @@ export default function BusinessContrAnalysisPage() {
   }, [resultData]);
 
   const CustomXAxisTick = ({ x, y, payload }) => {
-    // payload.value는 '기간 1', '기간 2' 같은 값입니다.
-    // 이 값에 따라 원하는 텍스트를 반환합니다.
     if (payload.value === "기간 1") {
       return (
         <text x={x} y={y} dy={16} textAnchor="middle" fill="#666">
@@ -359,7 +351,7 @@ export default function BusinessContrAnalysisPage() {
         </text>
       );
     }
-    return null; // 그 외의 틱은 숨깁니다.
+    return null;
   };
 
   return (
