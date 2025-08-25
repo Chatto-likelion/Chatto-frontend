@@ -451,7 +451,7 @@ export default function PlaySomeAnalysisPage() {
                     leftDesc={resultData.spec.rec_A_desc}
                     rightDesc={resultData.spec.rec_B_desc}
                     leftExample={resultData.spec.rec_A_ex}
-                    rightExample={resultData.spec.rec_A_ex}
+                    rightExample={resultData.spec.rec_B_ex}
                   />
                   <CompareMetric
                     title="주제 시작 비율"
@@ -463,7 +463,7 @@ export default function PlaySomeAnalysisPage() {
                     leftDesc={resultData.spec.atti_A_desc}
                     rightDesc={resultData.spec.atti_B_desc}
                     leftExample={resultData.spec.atti_A_ex}
-                    rightExample={resultData.spec.atti_A_ex}
+                    rightExample={resultData.spec.atti_B_ex}
                   />
 
                   <CompareMetric
@@ -474,13 +474,13 @@ export default function PlaySomeAnalysisPage() {
                     rightValue={`${resultData.spec.len_B}자`}
                     leftPct={
                       (resultData.spec.len_A /
-                        (resultData.spec.len_A + resultData.len_B)) *
+                        (resultData.spec.len_A + resultData.spec.len_B)) *
                       100
                     }
                     leftDesc={resultData.spec.len_A_desc}
                     rightDesc={resultData.spec.len_B_desc}
                     leftExample={resultData.spec.len_A_ex}
-                    rightExample={resultData.spec.len_A_ex}
+                    rightExample={resultData.spec.len_B_ex}
                   />
 
                   <div className="text-sm text-secondary leading-6">
@@ -614,12 +614,13 @@ function MeterBar({ value = 0 }) {
   const v = Math.max(0, Math.min(100, value));
   return (
     <div className="relative h-5 w-full  overflow-hidden border border-secondary">
-      {/* 채워지는 부분 */}
-      <div
-        className="h-full flex items-center justify-center bg-secondary-light"
-        style={{ width: `${v}%` }}
-      >
-        <span className="text-sm text-primary-dark font-medium">{v}%</span>
+      <div className="flex h-full w-full">
+        <div className="h-full" style={{ width: `${100 - v}%` }} />
+        <div className="h-full bg-secondary-light" style={{ width: `${v}%` }} />
+      </div>
+      <div className="absolute inset-0 flex items-center justify-between px-3 pointer-events-none">
+        <span className="text-sm text-white">{100 - v}%</span>
+        <span className="text-sm text-primary-dark">{v}%</span>
       </div>
     </div>
   );
@@ -643,11 +644,16 @@ function AnalysisGauge({ title, left, right, value, desc, example }) {
           {desc}
         </p>
       )}
-
       {example && (
         <div className="text-sm text-secondary-dark leading-6">
-          <p className="">예시 대화:</p>
-          <p className="mt-1">“{example}”</p>
+          <p className="mb-1">예시 대화:</p>
+          {(example.includes('", "') ? example.split('", "') : [example]).map(
+            (str, i) => (
+              <p key={i} className="">
+                "{str}"
+              </p>
+            )
+          )}
         </div>
       )}
     </div>
@@ -698,17 +704,31 @@ function CompareMetric({
       </div>
 
       <div className="grid grid-cols-2 gap-8 mt-1 px-18">
-        <div className="text-sm text-white leading-6 whitespace-pre-line">
-          {leftDesc && <p>{leftDesc}</p>}
-          {leftExample && (
-            <p className="mt-1 text-secondary-dark">예시: “{leftExample}”</p>
-          )}
+        <div className="text-sm text-secondary-dark leading-6 whitespace-pre-line">
+          {leftDesc && <p className="text-white/80">{leftDesc}</p>}
+          {leftExample && <p className="mt-2">예시: </p>}
+          {leftExample &&
+            (leftExample.includes('", "')
+              ? leftExample.split('", "')
+              : [leftExample]
+            ).map((str, i) => (
+              <p key={i} className="">
+                "{str}"
+              </p>
+            ))}
         </div>
-        <div className="text-sm text-right text-white/80 leading-6 whitespace-pre-line">
-          {rightDesc && <p>{rightDesc}</p>}
-          {rightExample && (
-            <p className="mt-1 text-secondary-dark">예시: “{rightExample}”</p>
-          )}
+        <div className="text-sm text-right text-secondary-dark leading-6 whitespace-pre-line">
+          {rightDesc && <p className="text-white/80">{rightDesc}</p>}
+          {rightExample && <p className="mt-2">예시: </p>}
+          {rightExample &&
+            (rightExample.includes('", "')
+              ? rightExample.split('", "')
+              : [rightExample]
+            ).map((str, i) => (
+              <p key={i} className="">
+                "{str}"
+              </p>
+            ))}
         </div>
       </div>
     </div>
