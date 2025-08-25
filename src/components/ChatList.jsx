@@ -235,7 +235,7 @@ export default function ChatList(onDeleted) {
               };
 
               const CommonInner = (
-                <>
+                <div className="flex justify-center">
                   <div className="flex items-center gap-0.75">
                     {isEditingThis ? (
                       <input
@@ -253,16 +253,16 @@ export default function ChatList(onDeleted) {
                       />
                     ) : (
                       <span
-                        className={
-                          isPlay ? "cursor-text" : "text-gray-7 cursor-text"
-                        }
+                        className={`w-28 mr-2 text-start whitespace-nowrap overflow-hidden
+                          ${isPlay ? "cursor-text" : "text-gray-7 cursor-text"}
+                        `}
                         onClick={(e) => {
                           e.stopPropagation();
                           startEdit(chat);
                         }}
                         title={chat.title || "제목 없음"}
                       >
-                        {(chat.title ?? "제목 없음").slice(0, 10)}
+                        {chat.title || "제목 없음"}
                       </span>
                     )}
                   </div>
@@ -279,7 +279,7 @@ export default function ChatList(onDeleted) {
                     />
                     <span>{chat.people_num}</span>
                   </div>
-                </>
+                </div>
               );
 
               return (
