@@ -6,7 +6,6 @@ export default function ShareModal({ open, onClose, url, loading, error }) {
   const mode = useCurrentMode();
   const isPlay = mode === "play";
 
-  // 테마: play / business
   const theme = isPlay
     ? {
         panelBg: "bg-primary-dark",

@@ -23,7 +23,6 @@ export default function QuizPersonalAnswerPage() {
     resultLoading,
     error,
 
-    // 메서드
     fetchMyPersonalResult, // (qpId?: string|number) => Promise<void>
   } = useQuizGuest(uuid);
 

@@ -9,12 +9,11 @@ export default function MbtiReportCard({ spec }) {
   const L3 = mbti[2] === "T" ? "T" : "F"; // F/T
   const L4 = mbti[3] === "P" ? "P" : "J"; // J/P
 
-  // 유틸: 문자열이 유효하면 아이템 객체로
   const mkItem = (text, kind) => {
     if (typeof text !== "string") return null;
     const t = text.trim();
     if (!t) return null;
-    return { text: t, kind }; // kind: 'ex' | 'desc'
+    return { text: t, kind };
   };
 
   const momentBlocks = [

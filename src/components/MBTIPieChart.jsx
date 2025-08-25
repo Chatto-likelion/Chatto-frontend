@@ -20,69 +20,6 @@ const MBTI_COLORS = {
   ENTJ: "#A1C2F1",
 };
 
-/** 부모가 data를 안 주면 이 더미로 렌더링(이름까지 포함) */
-const DUMMY_DATA = [
-  {
-    type: "INFJ",
-    value: 12,
-    names: [
-      "지민",
-      "서연",
-      "도윤",
-      "민서",
-      "하준",
-      "수아",
-      "예준",
-      "하린",
-      "윤서",
-      "시우",
-      "지우",
-      "서연2",
-    ],
-  },
-  {
-    type: "ENFP",
-    value: 9,
-    names: [
-      "민준",
-      "서윤",
-      "유준",
-      "가은",
-      "연우",
-      "아라",
-      "현우",
-      "예나",
-      "하율",
-    ],
-  },
-  {
-    type: "ISTJ",
-    value: 7,
-    names: ["지호", "민지", "준우", "유나", "하준2", "나윤", "유진"],
-  },
-  {
-    type: "ISFJ",
-    value: 6,
-    names: ["은우", "지안", "채원", "하은", "윤아", "은호"],
-  },
-  {
-    type: "INTJ",
-    value: 6,
-    names: ["주원", "나연", "도현", "보민", "하린2", "시윤"],
-  },
-  { type: "INFP", value: 5, names: ["수빈", "현서", "윤후", "다인", "하빈"] },
-  { type: "ENTP", value: 5, names: ["태윤", "서현", "유나2", "이안", "예림"] },
-  { type: "ENFJ", value: 5, names: ["준호", "수민", "가현", "지후", "라온"] },
-  { type: "ISTP", value: 4, names: ["유찬", "윤슬", "지안2", "민혁"] },
-  { type: "ISFP", value: 4, names: ["한별", "예준2", "다현", "수현"] },
-  { type: "INTP", value: 4, names: ["윤호", "소윤", "하람", "주아"] },
-  { type: "ESTJ", value: 3, names: ["도윤2", "다온", "수호"] },
-  { type: "ESFJ", value: 3, names: ["유리", "예서", "하윤"] },
-  { type: "ESTP", value: 3, names: ["지온", "서후", "윤지"] },
-  { type: "ESFP", value: 2, names: ["유정", "나린"] },
-  { type: "ENTJ", value: 2, names: ["연재", "선우"] },
-];
-
 /**
  * 꽉 찬 파이차트 (라벨 + 커스텀 호버 툴팁)
  * props:
@@ -92,12 +29,11 @@ const DUMMY_DATA = [
  *  - showLabels: 조각 가운데 타입 라벨 표시 여부
  */
 export default function MbtiPieChart({
-  data = DUMMY_DATA,
+  data,
   size = 220,
   gapAngle = 0.5, // degrees
   showLabels = true,
 }) {
-  console.log(data);
   const wrapRef = useRef(null);
   const [hover, setHover] = useState(null); // { x, y, slice }
 
@@ -152,7 +88,7 @@ export default function MbtiPieChart({
           style={{
             left: clampPx(hover.x + 10, 8, size - 8),
             top: clampPx(hover.y + 10, 8, size - 8),
-            maxWidth: size + 160, // 이름이 길어도 줄바꿈
+            maxWidth: size + 160,
             color: "white",
           }}
         >
@@ -173,7 +109,7 @@ export default function MbtiPieChart({
 function usePie(raw, size, gapDeg) {
   const cx = size / 2;
   const cy = size / 2;
-  const R = size / 2; // 꽉 찬 파이
+  const R = size / 2;
 
   return useMemo(() => {
     const total = Math.max(
@@ -207,7 +143,6 @@ function usePie(raw, size, gapDeg) {
         "Z",
       ].join(" ");
 
-      // 라벨 위치(중앙 60%)
       const mid = (start + end) / 2;
       const L = polarToCartesian(cx, cy, R * 0.6, mid);
 

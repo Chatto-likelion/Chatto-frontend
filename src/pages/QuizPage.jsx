@@ -36,7 +36,7 @@ export default function QuizPage() {
   // 퀴즈 삭제 진행 상태
   const [deleting, setDeleting] = useState(false);
 
-  // 공유 URL (필요 시 사용)
+  // 공유 URL
   const shareUrl = useMemo(() => {
     const base = window.location.origin;
     return uuid
@@ -68,17 +68,14 @@ export default function QuizPage() {
   useEffect(() => {
     const increased = questions.length > prevLenRef.current;
     if (increased && shouldScrollAfterAddRef.current) {
-      // 렌더 완료 보장용 rAF x2
       requestAnimationFrame(() => {
         requestAnimationFrame(scrollMainToBottom);
       });
-      // 한 번 스크롤하고 플래그 리셋
       shouldScrollAfterAddRef.current = false;
     }
     prevLenRef.current = questions.length;
   }, [questions.length]);
 
-  // 완료(수정 저장)용 확인 모달
   const [updateConfirmOpen, setUpdateConfirmOpen] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [pendingUpdate, setPendingUpdate] = useState(null); // { qIndex, payload }
@@ -90,7 +87,6 @@ export default function QuizPage() {
   }, [questions]);
 
   const handleToggleEdit = async (qIndex) => {
-    // 편집 종료(완료) 버튼을 눌렀을 때: 모달 먼저 띄우고, 확인 시 저장
     if (editingIndex === qIndex) {
       const base = questionByIndex.get(qIndex);
       const draft = drafts[qIndex] ?? {
@@ -101,7 +97,6 @@ export default function QuizPage() {
       const sel = correctAnswers[qIndex];
       const answer = Number.isInteger(sel) ? sel + 1 : draft.answer;
 
-      // 저장 페이로드를 보류 상태로 담고 모달 오픈
       setPendingUpdate({
         qIndex,
         payload: { title: draft.title, options: draft.options, answer },
@@ -110,7 +105,6 @@ export default function QuizPage() {
       return;
     }
 
-    // 편집 시작
     const q = questionByIndex.get(qIndex);
     if (!q) return;
     setDrafts((prev) => ({
@@ -176,7 +170,6 @@ export default function QuizPage() {
     }
   };
 
-  // 실제 추가 함수는 모달 확인 시 호출
   const handleAddQuestion = async () => {
     try {
       setAdding(true);
@@ -192,13 +185,12 @@ export default function QuizPage() {
     }
   };
 
-  // 수정 저장(완료) 확인 모달에서 "확인" 시 호출
   const handleConfirmUpdate = async () => {
     if (!pendingUpdate) return;
     try {
       setUpdating(true);
       await updateOne(pendingUpdate.qIndex, pendingUpdate.payload);
-      setEditingIndex(null); // 저장 완료 후 편집 종료
+      setEditingIndex(null);
     } catch (err) {
       console.error("퀴즈 업데이트 실패:", err);
       alert("저장에 실패했습니다. 다시 시도해주세요.");

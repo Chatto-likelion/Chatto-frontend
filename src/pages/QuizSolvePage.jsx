@@ -18,16 +18,15 @@ export default function QuizSolvePage() {
     qpId,
     started,
     startLoading,
-    startGuest, // startGuest(name)
+    startGuest,
     submitting,
-    submitGuest, // submitGuest(answersMap)
+    submitGuest,
   } = useQuizGuest(uuid);
 
   const [answers, setAnswers] = useState({});
   const [guestName, setGuestName] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 첫 클릭에서 이름 등록 후, 재렌더가 끝난 다음 자동 제출하기 위한 플래그/버퍼
   const [pendingAutoSubmit, setPendingAutoSubmit] = useState(false);
   const pendingAnswersRef = useRef(null);
 
@@ -44,25 +43,19 @@ export default function QuizSolvePage() {
 
   const handleSubmit = async () => {
     try {
-      // 아직 시작 전이면: 이름 등록만 하고, 제출은 re-render 이후 effect에서 자동 수행
       if (!started) {
         const name = guestName.trim();
-        if (!name) return; // 이름 없으면 아무 것도 하지 않음 (버튼 disabled에도 걸려있음)
-        pendingAnswersRef.current = answers; // 현재 답변 저장
-        setPendingAutoSubmit(true); // 자동 제출 예약
+        if (!name) return;
+        pendingAnswersRef.current = answers;
+        setPendingAutoSubmit(true);
         await startGuest(name); // qpId 설정 → re-render 유도
-        return; // 여기선 submitGuest 호출하지 않음!
+        return;
       }
-
-      // 이미 시작된 상태면 바로 제출
       await submitGuest(answers);
       setIsModalOpen(true);
-    } catch {
-      // 훅에서 error 상태 관리하므로 별도 처리 생략
-    }
+    } catch {}
   };
 
-  // 이름 등록이 끝나 qpId/started가 세팅되면 자동으로 제출 수행
   useEffect(() => {
     if (!pendingAutoSubmit) return;
     if (!started || !qpId) return;
@@ -82,14 +75,13 @@ export default function QuizSolvePage() {
 
   const resultLink = useMemo(() => {
     return qpId ? `/play/quiz/answer/${uuid}/${qpId}` : "#";
-    // 모달은 제출 성공 후에만 열리므로, 열릴 땐 qpId가 존재
   }, [qpId, uuid]);
 
   const disableSubmit =
     startLoading ||
     submitting ||
     pendingAutoSubmit ||
-    (!started && guestName.trim().length === 0); // 처음엔 이름 필수
+    (!started && guestName.trim().length === 0);
 
   if (loading) {
     return (

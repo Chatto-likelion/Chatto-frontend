@@ -199,7 +199,6 @@ export default function Header() {
           </button>
         ) : (
           <button
-            // onClick={handleTempSignIn}
             onClick={handleSignIn}
             className="w-20 text-start text-h7 cursor-pointer"
           >

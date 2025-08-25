@@ -92,7 +92,7 @@ export default function useQuizGuest(uuid) {
     };
   }, [uuid, type]);
 
-  // ── 문제 정규화 (아주 단순하게: 화면 순서 = 1..N, id는 idx+1)
+  // ── 문제 정규화 화면 순서 = 1..N, id는 idx+1
   const normalizeQuestions = useCallback((payload) => {
     const arr = Array.isArray(payload)
       ? payload
@@ -108,7 +108,6 @@ export default function useQuizGuest(uuid) {
         q?.choice3 ?? "",
         q?.choice4 ?? "",
       ],
-      // 디버깅용으로 서버가 주는 index/identifier를 보존(매칭 안 써도 되지만 로그에 도움)
       __serverIndex: q?.question_index, // 0-based일 가능성
       __serverId: q?.question_id, // 있으면 참고용
     }));
@@ -152,7 +151,7 @@ export default function useQuizGuest(uuid) {
     (async () => {
       await refetchQuestions();
     })();
-  }, [uuid]); // refetchQuestions 의존성 제외(무한루프 방지)
+  }, [uuid]);
 
   // ── 게스트 이름 등록
   const startGuest = useCallback(

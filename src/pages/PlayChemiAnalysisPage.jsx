@@ -96,9 +96,7 @@ export default function PlayChemiAnalysisPage() {
       try {
         const uuid = await ensureUuid();
         if (alive) setShareUUID(uuid);
-      } catch {
-        // uuid 확보 실패는 공유/퀴즈 이동에만 영향, 화면은 계속 보여줌
-      }
+      } catch {}
     })();
     return () => {
       alive = false;
@@ -106,7 +104,7 @@ export default function PlayChemiAnalysisPage() {
   }, [ensureUuid]);
 
   const handleOpenShare = async () => {
-    setModalOpen(true); // 모달 먼저 오픈 (스피너 등 표시용)
+    setModalOpen(true);
     if (shareUrl || shareFetching) return; // 중복호출 방지
 
     try {
@@ -142,9 +140,7 @@ export default function PlayChemiAnalysisPage() {
       setChatIds((prev) => {
         const next = new Set(prev);
         next.delete(deletedId);
-        // next를 이용해 hasSourceChat을 정확히 재계산
         setHasSourceChat(sourceChatId ? next.has(sourceChatId) : null);
-        // 소스 채팅 자체가 지워졌다면 선택도 해제
         if (deletedId === sourceChatId) setSelectedChatId(null);
         return next;
       });
@@ -368,20 +364,18 @@ export default function PlayChemiAnalysisPage() {
   }, [resultData]);
 
   // ───────────────── Pie 차트 데이터 (이미지 스타일 그대로) ─────────────────
-  // 공통 옵션: 범례 숨김 + 반응형
   const pieOpts = {
     plugins: { legend: { display: false } },
     responsive: true,
     maintainAspectRatio: false,
   };
 
-  // 조각 오프셋(퍼센트가 작은 조각만 살짝 띄움)
   const makeOffset = (vals) => {
     const total = vals.reduce((a, b) => a + b, 0) || 1;
     return (ctx) => {
       const v = Number(ctx.raw || 0);
       const p = (v / total) * 100;
-      return p < 12 ? 20 : 8; // 작은 조각 20px, 나머지 8px
+      return p < 12 ? 20 : 8;
     };
   };
 
@@ -402,7 +396,6 @@ export default function PlayChemiAnalysisPage() {
     push("긍정", s.tone_pos);
     push("농담/유머", s.tone_humer);
     push("비판", s.tone_crit);
-    // 필요 시 기타도 추가: push("기타", s.tone_else);
 
     return {
       labels,
@@ -411,14 +404,13 @@ export default function PlayChemiAnalysisPage() {
           data: values,
           backgroundColor: "#FFF8DE",
           borderColor: "#462C71",
-          borderWidth: 8, // 두꺼운 갭
+          borderWidth: 8,
           offset: 0,
         },
       ],
     };
   }, [resultData]);
 
-  // 톤 한줄 요약(예: "긍정적 표현: 63%  농담/유머: 18%  비판적 의견: 7%")
   const toneLines = useMemo(() => {
     const ds = tonePie.datasets?.[0];
     if (!ds || !ds.data?.length) return [];
@@ -436,7 +428,6 @@ export default function PlayChemiAnalysisPage() {
     });
   }, [tonePie]);
 
-  // ── 대화 주제
   const topicPie = useMemo(() => {
     const s = resultData?.spec || {};
     const slices = [];
@@ -472,14 +463,13 @@ export default function PlayChemiAnalysisPage() {
   const formatToneExample = (text) => {
     if (!text) return null;
     const match = text.match(/^(.*)\((.*)\)$/);
-    // 예: "ㅋㅋㅋㅋ 조심히 출근하십쇼 (권혁준)" → ["ㅋㅋㅋㅋ 조심히 출근하십쇼 (권혁준)", "ㅋㅋㅋㅋ 조심히 출근하십쇼 ", "권혁준"]
 
     if (match) {
       const sentence = match[1].trim();
       const speaker = match[2].trim();
       return `"${sentence}" - ${speaker}`;
     }
-    return text; // 혹시 패턴이 다르면 그대로 출력
+    return text;
   };
 
   return (

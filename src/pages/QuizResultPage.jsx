@@ -52,22 +52,18 @@ export default function QuizResultPage() {
 
   /* ===================== 개인 보기용 데이터 로딩/가공 ===================== */
 
-  // 선택된 참가자 이름
   const me = useMemo(
     () => scores?.find((s) => String(s.QP_id) === String(qpId)),
     [scores, qpId]
   );
   const ownerName = me?.name ?? "-";
 
-  // 페이지 진입/qpId 변경 시: 해당 참가자 개인 상세 로드
   useEffect(() => {
     if (!qpId) return;
     fetchPersonal?.(qpId);
   }, [qpId, fetchPersonal]);
 
-  // 모든 참여자 개인 응답을 미리 로드(툴팁용)
   useEffect(() => {
-    // scores가 바뀌면 전체를 갱신해두면, 각 선지 hover시 즉시 이름을 보여줄 수 있음
     fetchAllPersonal?.().catch(() => {});
   }, [scores, fetchAllPersonal]);
 
@@ -89,7 +85,6 @@ export default function QuizResultPage() {
   // 정답/선지 퍼센트 바 호버(툴팁)
   const [hover, setHover] = useState({ qid: null, opt: null, show: false });
 
-  // 통계 카드
   const stats = useMemo(() => {
     const participantCount = Array.isArray(scores) ? scores.length : 0;
     const questionCount = Array.isArray(questions) ? questions.length : 0;
@@ -220,7 +215,7 @@ export default function QuizResultPage() {
                       const isCorrect = Number(q.answer ?? 0) === optionNum;
                       const isMine = myPick === optionNum;
 
-                      // 툴팁용 이름 목록 (훅의 헬퍼 사용)
+                      // 툴팁용 이름 목록
                       const takers =
                         typeof getOptionTakers === "function"
                           ? getOptionTakers(q.questionId, optionNum) // string[]
@@ -232,7 +227,6 @@ export default function QuizResultPage() {
                           className={`relative flex justify-between items-center p-3 rounded-md ${
                             isCorrect ? "bg-green-500/10" : ""
                           }`}
-                          // 행 전체에 hover 핸들러(툴팁 on/off)
                           onMouseEnter={() =>
                             setHover({
                               qid: q.questionId,
@@ -243,7 +237,7 @@ export default function QuizResultPage() {
                           onMouseLeave={() =>
                             setHover({ qid: null, opt: null, show: false })
                           }
-                          style={{ overflow: "visible" }} // 툴팁 잘리지 않게
+                          style={{ overflow: "visible" }}
                         >
                           {/* 퍼센트 바 (뒤 배경) */}
                           <div

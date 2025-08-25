@@ -12,15 +12,13 @@ function throwMapped(error, map = {}) {
     if (isFinal401(error)) {
       throw new Error(map[401] ?? "로그인이 필요합니다. (401)");
     }
-    // 최종 401이 아니면 인터셉터가 처리/재시도 중이었거나 이미 처리됨
-    // 여기선 굳이 메시지/로그를 남기지 않고 원본 에러를 그대로 전달
     throw error;
   }
 
   if (status && map[status]) throw new Error(map[status]);
   throw error;
 }
-
+//회원가입
 export const signup = async (data) => {
   try {
     const response = await instance.post("/account/signup/", {
@@ -79,6 +77,7 @@ export const getMe = async () => {
   }
 };
 
+//사용자 정보 수정
 export const putProfile = async (data) => {
   try {
     const res = await instanceWithToken.put(`/account/profile/`, data);
@@ -97,7 +96,7 @@ export const putProfile = async (data) => {
 /**
  * ✅ 파일 업로드 및 관리
  */
-
+//채팅 파일 업로드
 export const postChat = async (file) => {
   const formData = new FormData();
   formData.append("file", file);
@@ -106,7 +105,6 @@ export const postChat = async (file) => {
     const response = await instanceWithToken.post("/play/chat/", formData);
 
     if (response.status === 201) {
-      console.log("파일 업로드 성공:", response.data);
       return response.data; // { chat_id_play_chem: integer }
     } else {
       throw new Error("알 수 없는 응답 상태입니다.");
@@ -119,12 +117,12 @@ export const postChat = async (file) => {
   }
 };
 
+//채팅 파일 삭제
 export const deleteChat = async (chatId) => {
   try {
     const response = await instanceWithToken.delete(`/play/chat/${chatId}/`);
 
     if (response.status === 204) {
-      console.log("채팅 삭제 성공");
       return;
     } else {
       throw new Error("알 수 없는 응답 상태입니다.");
@@ -138,6 +136,7 @@ export const deleteChat = async (chatId) => {
   }
 };
 
+//채팅 파일 제목 수정
 export const putChat = async (chatId, title) => {
   try {
     const res = await instanceWithToken.put(`/play/chat/${chatId}/`, { title });
@@ -155,6 +154,7 @@ export const putChat = async (chatId, title) => {
   }
 };
 
+//업로드한 채팅 파일 목록 가져오기
 export const getChatList = async () => {
   try {
     const response = await instanceWithToken.get(`/play/chat/`);
@@ -172,16 +172,15 @@ export const getChatList = async () => {
 /**
  * ✅ 채팅 분석
  */
+//케미 분석
 export const postChemiAnalyze = async (chatId, payload) => {
   try {
-    console.log(payload);
     const response = await instanceWithToken.post(
       `/play/chat/${chatId}/analyze/chem/`,
       payload
     );
 
     if (response.status === 201) {
-      console.log("분석 성공:", response.data);
       return response.data; // { result_id: number }
     } else {
       throw new Error("알 수 없는 응답 상태입니다.");
@@ -196,6 +195,7 @@ export const postChemiAnalyze = async (chatId, payload) => {
   }
 };
 
+//썸 분석
 export const postSomeAnalyze = async (chatId, payload) => {
   try {
     const response = await instanceWithToken.post(
@@ -204,7 +204,6 @@ export const postSomeAnalyze = async (chatId, payload) => {
     );
 
     if (response.status === 201) {
-      console.log("분석 성공:", response.data);
       return response.data; // { result_id: number }
     } else {
       throw new Error("알 수 없는 응답 상태입니다.");
@@ -219,6 +218,7 @@ export const postSomeAnalyze = async (chatId, payload) => {
   }
 };
 
+//MBTI 분석
 export const postMbtiAnalyze = async (chatId, payload) => {
   try {
     const response = await instanceWithToken.post(
@@ -227,7 +227,6 @@ export const postMbtiAnalyze = async (chatId, payload) => {
     );
 
     if (response.status === 201) {
-      console.log("분석 성공:", response.data);
       return response.data; // { result_id: number }
     } else {
       throw new Error("알 수 없는 응답 상태입니다.");
@@ -245,7 +244,7 @@ export const postMbtiAnalyze = async (chatId, payload) => {
 /**
  * ✅ 분석 결과
  */
-
+//분석 목록 확인
 export const getAnalysisList = async () => {
   try {
     const response = await instanceWithToken.get(`/play/analysis/all/`);
@@ -261,6 +260,7 @@ export const getAnalysisList = async () => {
   }
 };
 
+//케미 분석 결과 확인
 export const getChemiAnalysisDetail = async (resultId) => {
   try {
     const response = await instanceWithToken.get(
@@ -276,6 +276,7 @@ export const getChemiAnalysisDetail = async (resultId) => {
   }
 };
 
+//썸 분석 결과 확인
 export const getSomeAnalysisDetail = async (resultId) => {
   try {
     const response = await instanceWithToken.get(
@@ -291,6 +292,7 @@ export const getSomeAnalysisDetail = async (resultId) => {
   }
 };
 
+//MBTI 분석 결과 확인
 export const getMbtiAnalysisDetail = async (resultId) => {
   try {
     const response = await instanceWithToken.get(
@@ -306,6 +308,7 @@ export const getMbtiAnalysisDetail = async (resultId) => {
   }
 };
 
+//케미 분석 결과 삭제
 export const deleteChemiAnalysis = async (resultId) => {
   try {
     const response = await instanceWithToken.delete(
@@ -313,7 +316,6 @@ export const deleteChemiAnalysis = async (resultId) => {
     );
 
     if (response.status === 204) {
-      console.log("분석 결과 삭제 성공");
       return;
     } else {
       throw new Error("알 수 없는 응답 상태");
@@ -327,6 +329,7 @@ export const deleteChemiAnalysis = async (resultId) => {
   }
 };
 
+//썸 분석 결과 삭제
 export const deleteSomeAnalysis = async (resultId) => {
   try {
     const response = await instanceWithToken.delete(
@@ -334,7 +337,6 @@ export const deleteSomeAnalysis = async (resultId) => {
     );
 
     if (response.status === 204) {
-      console.log("분석 결과 삭제 성공");
       return;
     } else {
       throw new Error("알 수 없는 응답 상태");
@@ -348,6 +350,7 @@ export const deleteSomeAnalysis = async (resultId) => {
   }
 };
 
+//MBTI 분석 결과 삭제
 export const deleteMbtiAnalysis = async (resultId) => {
   try {
     const response = await instanceWithToken.delete(
@@ -355,7 +358,6 @@ export const deleteMbtiAnalysis = async (resultId) => {
     );
 
     if (response.status === 204) {
-      console.log("분석 결과 삭제 성공");
       return;
     } else {
       throw new Error("알 수 없는 응답 상태");
@@ -372,7 +374,7 @@ export const deleteMbtiAnalysis = async (resultId) => {
 /**
  * ✅ 분석 결과 공유
  */
-//uuid 생성
+//uuid 생성 (play)
 export const postUUID = async (type, result_id) => {
   try {
     const formData = new FormData();
@@ -384,7 +386,6 @@ export const postUUID = async (type, result_id) => {
     );
 
     if (response.status === 201) {
-      console.log("분석 성공:", response.data);
       return response.data.uuid; // { uuid: string }
     } else {
       throw new Error("알 수 없는 응답 상태입니다.");
@@ -393,12 +394,13 @@ export const postUUID = async (type, result_id) => {
     throwMapped(error, {
       400: "입력값이 잘못되었습니다. (400)",
       401: "로그인이 필요합니다. (401)",
-      403: "분석 결과를 공유할 권한이 없습니다. (403)",
+      403: "uuid를 생성할 권한이 없습니다. (403)",
       404: "분석 결과를 찾을 수 없습니다. (404)",
     });
   }
 };
 
+//uuid 반환
 export const getUUID = async (type, result_id) => {
   try {
     const response = await instanceWithToken.get(
@@ -406,7 +408,6 @@ export const getUUID = async (type, result_id) => {
     );
 
     if (response.status === 200) {
-      console.log("분석 성공:", response.data);
       return response.data.uuid; // { uuid: string }
     } else {
       throw new Error("알 수 없는 응답 상태입니다.");
@@ -428,7 +429,6 @@ export const getUUIDType = async (uuid) => {
     );
 
     if (response.status === 200) {
-      console.log("분석 성공:", response.data);
       return response.data.type; //type: string
     } else {
       throw new Error("알 수 없는 응답 상태입니다.");
@@ -440,6 +440,7 @@ export const getUUIDType = async (uuid) => {
   }
 };
 
+//uuid 생성 (business)
 export const postUUID_Bus = async (result_id) => {
   try {
     const response = await instanceWithToken.post(
@@ -448,7 +449,6 @@ export const postUUID_Bus = async (result_id) => {
     );
 
     if (response.status === 201) {
-      console.log("분석 성공:", response.data);
       return response.data.uuid; // { uuid: string }
     } else {
       throw new Error("알 수 없는 응답 상태입니다.");
@@ -457,12 +457,13 @@ export const postUUID_Bus = async (result_id) => {
     throwMapped(error, {
       400: "입력값이 잘못되었습니다. (400)",
       401: "로그인이 필요합니다. (401)",
-      403: "분석 결과를 공유할 권한이 없습니다. (403)",
+      403: "uuid를 생성할 권한이 없습니다. (403)",
       404: "분석 결과를 찾을 수 없습니다. (404)",
     });
   }
 };
 
+//uuid 반환 (business)
 export const getUUID_Bus = async (result_id) => {
   try {
     const response = await instanceWithToken.get(
@@ -470,7 +471,6 @@ export const getUUID_Bus = async (result_id) => {
     );
 
     if (response.status === 200) {
-      console.log("분석 성공:", response.data);
       return response.data.uuid; // { uuid: string }
     } else {
       throw new Error("알 수 없는 응답 상태입니다.");
@@ -484,7 +484,7 @@ export const getUUID_Bus = async (result_id) => {
   }
 };
 
-//guest 결과 보기
+//guest 케미 분석 결과 보기
 export const getChemiGuestDetail = async (uuid) => {
   try {
     const response = await instance.get(
@@ -492,20 +492,19 @@ export const getChemiGuestDetail = async (uuid) => {
     );
 
     if (response.status === 200) {
-      console.log("분석 성공:", response.data);
       return response.data;
     } else {
       throw new Error("알 수 없는 응답 상태입니다.");
     }
   } catch (error) {
     throwMapped(error, {
-      401: "로그인이 필요합니다. (401)",
-      403: "해당 채팅을 분석할 권한이 없습니다. (403)",
-      404: "채팅 파일을 찾을 수 없습니다. (404)",
+      403: "해당 분석을 확인할 권한이 없습니다. (403)",
+      404: "분석 결과를 찾을 수 없습니다. (404)",
     });
   }
 };
 
+//guest 썸 분석 결과 보기
 export const getSomeGuestDetail = async (uuid) => {
   try {
     const response = await instance.get(
@@ -513,20 +512,19 @@ export const getSomeGuestDetail = async (uuid) => {
     );
 
     if (response.status === 200) {
-      console.log("분석 성공:", response.data);
       return response.data;
     } else {
       throw new Error("알 수 없는 응답 상태입니다.");
     }
   } catch (error) {
     throwMapped(error, {
-      401: "로그인이 필요합니다. (401)",
-      403: "해당 채팅을 분석할 권한이 없습니다. (403)",
-      404: "채팅 파일을 찾을 수 없습니다. (404)",
+      403: "해당 분석을 확인할 권한이 없습니다. (403)",
+      404: "분석 결과를 찾을 수 없습니다. (404)",
     });
   }
 };
 
+//guest MBTI 분석 결과 보기
 export const getMbtiGuestDetail = async (uuid) => {
   try {
     const response = await instance.get(
@@ -534,35 +532,32 @@ export const getMbtiGuestDetail = async (uuid) => {
     );
 
     if (response.status === 200) {
-      console.log("분석 성공:", response.data);
       return response.data;
     } else {
       throw new Error("알 수 없는 응답 상태입니다.");
     }
   } catch (error) {
     throwMapped(error, {
-      401: "로그인이 필요합니다. (401)",
-      403: "해당 채팅을 분석할 권한이 없습니다. (403)",
-      404: "채팅 파일을 찾을 수 없습니다. (404)",
+      403: "해당 분석을 확인할 권한이 없습니다. (403)",
+      404: "분석 결과를 찾을 수 없습니다. (404)",
     });
   }
 };
 
+//guest 업무 참여도 분석 결과 보기
 export const getContrGuestDetail = async (uuid) => {
   try {
     const response = await instance.get(`/business/analysis/${uuid}/detail/`);
 
     if (response.status === 200) {
-      console.log("분석 성공:", response.data);
       return response.data;
     } else {
       throw new Error("알 수 없는 응답 상태입니다.");
     }
   } catch (error) {
     throwMapped(error, {
-      401: "로그인이 필요합니다. (401)",
-      403: "해당 채팅을 분석할 권한이 없습니다. (403)",
-      404: "채팅 파일을 찾을 수 없습니다. (404)",
+      403: "해당 분석을 확인할 권한이 없습니다. (403)",
+      404: "분석 결과를 찾을 수 없습니다. (404)",
     });
   }
 };
@@ -570,7 +565,7 @@ export const getContrGuestDetail = async (uuid) => {
 /**
  * ✅ 파일 업로드 및 관리
  */
-// 파일 업로드
+// 채팅 파일 업로드 (business)
 export const postChat_Bus = async (file) => {
   const formData = new FormData();
   formData.append("file", file);
@@ -579,7 +574,6 @@ export const postChat_Bus = async (file) => {
     const response = await instanceWithToken.post("/business/chat/", formData);
 
     if (response.status === 201) {
-      console.log("파일 업로드 성공:", response.data);
       return response.data; // { chat_id_play_chem: integer }
     } else {
       throw new Error("알 수 없는 응답 상태입니다.");
@@ -592,7 +586,7 @@ export const postChat_Bus = async (file) => {
   }
 };
 
-// 채팅 삭제
+// 채팅 삭제 (business)
 export const deleteChat_Bus = async (chatId) => {
   try {
     const response = await instanceWithToken.delete(
@@ -600,7 +594,6 @@ export const deleteChat_Bus = async (chatId) => {
     );
 
     if (response.status === 204) {
-      console.log("채팅 삭제 성공");
       return;
     } else {
       throw new Error("알 수 없는 응답 상태입니다.");
@@ -614,6 +607,7 @@ export const deleteChat_Bus = async (chatId) => {
   }
 };
 
+//채팅 제목 수정 (business)
 export const putChat_Bus = async (chatId, title) => {
   try {
     const res = await instanceWithToken.put(`/business/chat/${chatId}/`, {
@@ -633,7 +627,7 @@ export const putChat_Bus = async (chatId, title) => {
   }
 };
 
-// 채팅 목록 조회
+// 채팅 목록 조회 (business)
 export const getChatList_Bus = async () => {
   try {
     const response = await instanceWithToken.get(`/business/chat/`);
@@ -650,7 +644,7 @@ export const getChatList_Bus = async () => {
   }
 };
 
-// 분석 요청
+//업무 참여도 분석
 export const postContrAnalyze = async (chatId, payload) => {
   try {
     const response = await instanceWithToken.post(
@@ -659,7 +653,6 @@ export const postContrAnalyze = async (chatId, payload) => {
     );
 
     if (response.status === 201) {
-      console.log("분석 성공:", response.data);
       return response.data;
     } else {
       throw new Error("분석 실패");
@@ -673,7 +666,7 @@ export const postContrAnalyze = async (chatId, payload) => {
   }
 };
 
-// 분석 목록 조회
+//분석 목록 조회 (business)
 export const getAnalysisList_Bus = async () => {
   try {
     const response = await instanceWithToken.get(`/business/analysis/all/`);
@@ -689,7 +682,7 @@ export const getAnalysisList_Bus = async () => {
   }
 };
 
-// 분석 상세 조회
+//업무 참여도 분석 결과 보기
 export const getContrAnalysisDetail = async (resultId) => {
   try {
     const response = await instanceWithToken.get(
@@ -710,7 +703,7 @@ export const getContrAnalysisDetail = async (resultId) => {
   }
 };
 
-// 분석 결과 삭제
+//업무 참여도 분석 결과 삭제
 export const deleteContrAnalysis = async (resultId) => {
   try {
     const response = await instanceWithToken.delete(
@@ -718,7 +711,6 @@ export const deleteContrAnalysis = async (resultId) => {
     );
 
     if (response.status === 204) {
-      console.log("분석 결과 삭제 성공");
       return;
     } else {
       throw new Error("알 수 없는 응답 상태");
@@ -747,7 +739,6 @@ export const postQuiz10 = async (type, resultId) => {
       `/play/quiz/${typeToSlug(type)}/${resultId}/`
     );
     if (response.status === 201) {
-      console.log("퀴즈 생성 성공");
       return response.data; //quiz_id
     } else {
       throw new Error("알 수 없는 응답 상태");
@@ -769,7 +760,6 @@ export const postQuiz1 = async (type, resultId) => {
       `/play/quiz/${typeToSlug(type)}/${resultId}/add/`
     );
     if (response.status === 200) {
-      console.log("퀴즈 생성 성공");
       return;
     } else {
       throw new Error("알 수 없는 응답 상태");
@@ -792,7 +782,6 @@ export const putQuiz = async (type, resultId, questionId, payload) => {
       payload
     );
     if (response.status === 200) {
-      console.log("퀴즈 생성 성공");
       return;
     } else {
       throw new Error("알 수 없는 응답 상태");
@@ -814,7 +803,6 @@ export const deleteQuiz1 = async (type, resultId, questionId) => {
       `/play/quiz/${typeToSlug(type)}/${resultId}/modify/${questionId}`
     );
     if (response.status === 200) {
-      console.log("퀴즈 생성 성공");
       return;
     } else {
       throw new Error("알 수 없는 응답 상태");
@@ -835,7 +823,6 @@ export const deleteQuiz10 = async (type, resultId) => {
       `/play/quiz/${typeToSlug(type)}/${resultId}/`
     );
     if (response.status === 204) {
-      console.log("퀴즈 삭제 성공");
       return;
     } else {
       throw new Error("알 수 없는 응답 상태");
@@ -856,7 +843,6 @@ export const getQuiz = async (type, resultId) => {
       `/play/quiz/${typeToSlug(type)}/${resultId}/`
     );
     if (response.status === 200) {
-      console.log("퀴즈: ", response.data);
       return response.data;
     } else {
       throw new Error("알 수 없는 응답 상태");
@@ -876,7 +862,6 @@ export const getQuizDetail = async (type, resultId) => {
       `/play/quiz/${typeToSlug(type)}/${resultId}/questions/detail/`
     );
     if (response.status === 200) {
-      console.log("퀴즈: ", response.data);
       return response.data;
     } else {
       throw new Error("알 수 없는 응답 상태");
@@ -896,7 +881,6 @@ export const getQuizResult = async (type, resultId) => {
       `/play/quiz/${typeToSlug(type)}/${resultId}/result/`
     );
     if (response.status === 200) {
-      console.log("퀴즈 점수: ", response.data);
       return response.data;
     } else {
       throw new Error("알 수 없는 응답 상태");
@@ -916,7 +900,6 @@ export const getQuizResultPersonal = async (type, resultId, QP_id) => {
       `/play/quiz/${typeToSlug(type)}/${resultId}/personal/${QP_id}/`
     );
     if (response.status === 200) {
-      console.log("퀴즈 점수: ", response.data);
       return response.data;
     } else {
       throw new Error("알 수 없는 응답 상태");
@@ -937,7 +920,6 @@ export const deleteQuizResultPersonal = async (type, resultId, QP_id) => {
       `/play/quiz/${typeToSlug(type)}/${resultId}/personal/${QP_id}`
     );
     if (response.status === 204) {
-      console.log("퀴즈 점수: ", response.data);
       return;
     } else {
       throw new Error("알 수 없는 응답 상태");
@@ -958,7 +940,6 @@ export const getQuizGuest = async (type, uuid) => {
       `/play/quiz/${typeToSlug(type)}/${uuid}/questions/`
     );
     if (response.status === 200) {
-      console.log("퀴즈: ", response.data);
       return response.data;
     } else {
       throw new Error("알 수 없는 응답 상태");
@@ -978,7 +959,6 @@ export const postQuizGuestName = async (type, uuid, name) => {
       { name }
     );
     if (response.status === 201) {
-      console.log("퀴즈: ", response.data);
       return response.data;
     } else {
       throw new Error("알 수 없는 응답 상태");
@@ -1000,7 +980,6 @@ export const postQuizGuestSubmit = async (type, uuid, QP_id, data) => {
       data
     );
     if (response.status === 200) {
-      console.log("퀴즈: ", response.data);
       return;
     } else {
       throw new Error("알 수 없는 응답 상태");
@@ -1020,7 +999,6 @@ export const getQuizGuestSubmit = async (type, uuid, QP_id) => {
       `/play/quiz/${typeToSlug(type)}/${uuid}/personal/guest/${QP_id}/`
     );
     if (response.status === 200) {
-      console.log("퀴즈: ", response.data);
       return response.data;
     } else {
       throw new Error("알 수 없는 응답 상태");
@@ -1045,7 +1023,6 @@ export const postCreditPurchase = async (data) => {
     });
 
     if (response.status === 201) {
-      console.log("크레딧 충전 성공:", response.data);
       return response.data; // { chat_id_play_chem: integer }
     } else {
       throw new Error("알 수 없는 응답 상태입니다.");
@@ -1064,7 +1041,6 @@ export const getCreditPurchaseList = async () => {
     const response = await instanceWithToken.get("/account/credit/purchase/");
 
     if (response.status === 200) {
-      console.log("크레딧 충전 내역:", response.data);
       return response.data;
     } else {
       throw new Error("알 수 없는 응답 상태입니다.");
@@ -1086,7 +1062,6 @@ export const postCreditUsage = async (data) => {
     });
 
     if (response.status === 201) {
-      console.log("크레딧 사용 성공:", response.data);
       return response.data;
     } else {
       throw new Error("알 수 없는 응답 상태입니다.");
@@ -1105,7 +1080,6 @@ export const getCreditUsageList = async () => {
     const response = await instanceWithToken.get("/account/credit/usage/");
 
     if (response.status === 200) {
-      console.log("크레딧 사용 내역:", response.data);
       return response.data;
     } else {
       throw new Error("알 수 없는 응답 상태입니다.");
