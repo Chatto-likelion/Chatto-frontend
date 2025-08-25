@@ -16,7 +16,6 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // 핸들러 함수
   const handleChangeName = (e) => setName(e.target.value);
   const handleChangePhone = (e) => setPhone(e.target.value);
   const handleChangeEmail = (e) => setEmail(e.target.value);
@@ -27,14 +26,10 @@ export default function SignUpPage() {
 
   const handleSendCode = () => {
     alert("인증번호 전송 완료");
-    console.log("인증번호 전송:", email);
-    // TODO: API 호출
   };
 
   const handleVerifyCode = () => {
     alert("인증번호 확인");
-    console.log("인증번호 확인:", verificationCode);
-    // TODO: API 호출
   };
 
   const handleSubmit = async (e) => {
@@ -44,15 +39,6 @@ export default function SignUpPage() {
       alert("비밀번호가 일치하지 않습니다.");
       return;
     }
-
-    console.log({
-      username: name,
-      phone,
-      email,
-      verf_num: parseInt(verificationCode, 10),
-      password,
-      password_confirm: confirmPassword,
-    });
 
     try {
       const res = await signup({

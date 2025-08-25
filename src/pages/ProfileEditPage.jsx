@@ -47,18 +47,13 @@ export default function ProfileEditPage() {
       v?.trim()
         ? /^0\d{1,2}-?\d{3,4}-?\d{4}$/.test(v) || "유효한 전화번호가 아닙니다."
         : "연락처를 입력해 주세요.",
-    // password: (v) =>
-    //   v
-    //     ? v.length >= 8 || "비밀번호는 8자 이상이어야 합니다."
-    //     : "비밀번호를 입력해 주세요.",
     password2: (v, all) =>
-      all.password // 새 비번을 입력했을 때만 확인란 강제
+      all.password
         ? v === all.password || "비밀번호 확인이 일치하지 않습니다."
         : true,
   };
 
   const validateAll = () => {
-    // username도 PUT 필수면 여기도 추가
     const checks = [
       ["email", form.email],
       ["phone", form.phone],
@@ -82,7 +77,7 @@ export default function ProfileEditPage() {
     setErr(null);
     try {
       await verifyPassword(currentPw.trim());
-      setStep(2); // 인증 성공 → 폼 단계
+      setStep(2);
     } catch (e) {
       setErr(
         e?.response?.data
@@ -110,7 +105,6 @@ export default function ProfileEditPage() {
       password: effectivePassword,
     };
 
-    // 어떤 필드라도 비면 서버에서 400/500 날 수 있으니 프리체크
     for (const [k, v] of Object.entries(body)) {
       if (!v) {
         setErr(`${k} 값을 입력해 주세요.`);
@@ -122,7 +116,6 @@ export default function ProfileEditPage() {
       setLoading(true);
       setErr(null);
       const updated = await putProfile(body);
-      // 응답으로 받은 값으로 컨텍스트 갱신
       login({
         ...user,
         user: {
@@ -154,12 +147,6 @@ export default function ProfileEditPage() {
         <div className="w-[920px] max-w-[92vw] mt-16 p-8 rounded-lg border border-primary flex flex-col items-center">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-h6">정보 수정</h1>
-            {/* <button
-              className="px-3 py-1.5 text-button text-primary border border-primary rounded hover:bg-primary hover:text-white"
-              onClick={() => navigate(-1)}
-            >
-              돌아가기
-            </button> */}
           </div>
 
           <div className="mb-4 h-5 text-sm text-red-400">{err}</div>

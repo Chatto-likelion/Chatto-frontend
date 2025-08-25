@@ -5,7 +5,6 @@ import { ChattoBusiness } from "../assets/png/LandingIcon";
 
 const ICON_SIZE = "w-13 h-13";
 
-// Play: 모두 SVG
 const playServices = [
   { title: "썸 판독기", type: "svg", Icon: NavSome, route: "/play/some" },
   { title: "MBTI 분석", type: "svg", Icon: NavMBTI, route: "/play/MBTI" },
@@ -25,7 +24,6 @@ const playServices = [
   },
 ];
 
-// Business: PNG + SVG 혼용 (NavMore는 진한 색)
 const businessServices = [
   {
     title: "업무 참여도 분석",
@@ -88,7 +86,6 @@ export default function BigServices() {
                 ) : (
                   <item.Icon
                     className={`${ICON_SIZE} cursor-pointer ${
-                      // svgClassName가 있으면 그 색을, 아니면 컨텍스트 색을
                       item.svgClassName ?? textColor
                     }`}
                   />

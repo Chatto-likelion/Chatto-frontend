@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 import styled from "styled-components";
 
-// 툴팁 스타일을 위한 styled-components
 const Tooltip = styled.div`
   position: absolute;
   top: 0;
@@ -28,7 +27,6 @@ const TooltipItem = styled.div`
   }
 `;
 
-// 라운드 박스 유틸
 const roundRect = (ctx, x, y, w, h, r) => {
   const rr = Math.min(r, w / 2, h / 2);
   ctx.beginPath();

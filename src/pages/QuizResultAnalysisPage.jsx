@@ -59,7 +59,6 @@ export default function QuizResultAnalysisPage() {
     return { averageScore, questionCount, participantCount };
   }, [scores, questions]);
 
-  // ── 섹션 구성
   const sections = useMemo(() => {
     const normalized = (questions ?? []).map((q) => {
       const total =

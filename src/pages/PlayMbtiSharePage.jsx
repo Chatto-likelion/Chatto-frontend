@@ -72,15 +72,14 @@ export default function PlayMbtiSharePage() {
       : [];
 
     return list.filter(Boolean).map(({ specpersonal_id, name, MBTI }) => ({
-      key: String(specpersonal_id), // TabBar 키로 사용 (문자열 추천)
-      label: name ?? "", // 탭 표시 이름
-      type: (MBTI ?? "").toUpperCase(), // 예: "infj"도 "INFJ"로
+      key: String(specpersonal_id),
+      label: name ?? "",
+      type: (MBTI ?? "").toUpperCase(),
     }));
   }, [resultData?.spec_personal]);
 
   useEffect(() => {
     if (!REPORT_TABS.length) return;
-    // 현재 activeTab이 목록에 없으면 첫 탭으로 세팅
     if (!REPORT_TABS.some((t) => t.key === activeTab)) {
       setActiveTab(REPORT_TABS[0].key);
     }
@@ -92,7 +91,6 @@ export default function PlayMbtiSharePage() {
       : [];
     if (!list.length) return null;
 
-    // activeTab과 specpersonal_id 일치하는 항목 찾기 (문자/숫자 안전 비교)
     return (
       list.find((p) => String(p.specpersonal_id) === String(activeTab)) ||
       list[0]
