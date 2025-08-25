@@ -19,7 +19,7 @@ export default function ServiceCard({
 
   return (
     <div
-      className={`flex flex-col justify-center py-9 px-4 rounded-xl w-full h-full ${bgColor} ${textColor} ${border}`}
+      className={`flex flex-col justify-center py-9 px-4 rounded-xl w-[308px] h-[308px] ${bgColor} ${textColor} ${border}`}
       onClick={handleClick}
     >
       <div className="flex flex-col w-full items-center gap-6">
